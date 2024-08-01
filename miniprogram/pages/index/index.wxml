@@ -1,0 +1,47 @@
+<!--index.wxml-->
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view wx:if="{{loginFlag===1}}" class="container">
+    <view class="userinfo">
+      <block>
+        <view class="container">
+          <view class="title">欢迎来到斗牛游戏！</view>
+          <view class="description">点击开始游戏，体验刺激的斗牛乐趣！</view>
+          <view class="buttons">
+            <button class="mode-btn" bindtap="selectMode">选择模式</button>
+            <button class="quick-start-btn" bindtap="quickStart">快速开始</button>
+            <button class="join-btn" bindtap="showModal">加入游戏</button>
+            <button class="rules-btn" bindtap="showRules">游戏规则</button>
+            <button class="contact-btn" bindtap="contactUs">联系我们</button>
+          </view>
+        </view>
+      </block>
+    </view>
+    <modal wx:if="{{modalShow}}" title="房间号" show="{{modalShow}}" bind:close="onCloseModal" bind:confirm="onConfirm" bind:cancel="onCancel">
+      <view class="modal-content">
+        <input type="text" placeholder="请输入房间号" bindinput="dialogInputChange" />
+      </view>
+      <button bindtap="createGame">创建房间</button>
+    </modal>
+  </view>
+  <view wx:if="{{loginFlag===2}}" class="container">
+    <view class="userinfo">
+      <block wx:if="{{canIUseNicknameComp && !hasUserInfo}}">
+        <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+          <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
+        </button>
+        <view class="nickname-wrapper">
+          <text class="nickname-label">昵称</text>
+          <input type="nickname" class="nickname-input" bindtap="getUserProfile" placeholder="请输入昵称" bind:change="onInputChange" />
+        </view>
+      </block>
+      <block wx:elif="{{!hasUserInfo}}">
+        <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile"> 获取头像昵称 </button>
+        <view wx:else> 请使用2.10.4及以上版本基础库 </view>
+      </block>
+      <block wx:else>
+        <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+        <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+      </block>
+    </view>
+  </view>
+</scroll-view>

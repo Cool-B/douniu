@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "properties": {},
+  "events": {
+    "myevent": {
+      "bind": "handleMyEvent"
+    }
+  }
+}

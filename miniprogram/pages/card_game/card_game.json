@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "my-dialog": "../../components/dialog/dialog"
+  },
+  "enablePullDownRefresh": false,
+  "navigationStyle": "custom"
+}

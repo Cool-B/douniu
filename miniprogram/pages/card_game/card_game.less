@@ -1,0 +1,252 @@
+.room-container {
+  height: 100vh;
+}
+
+.draggable {
+  width: 100px;
+  height: 100px;
+  background-color: #f00;
+  position: absolute;
+  // transform: translate({{translationX}}px, {{translationY}}px);
+}
+
+.desk-img {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  transform: rotateZ(90deg);
+}
+
+.player-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+}
+
+.players {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+
+  .banker,
+  .center_blank,
+  .player {
+    width: 33%;
+    word-break: keep-all;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .banker {
+    .ready-tip {
+      background-color: transparent;
+    }
+  }
+
+  .banker-tip {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    font-size: 30rpx;
+    text-align: center;
+  }
+
+  .text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 10rpx;
+    width: 100%;
+    color: #fff;
+  }
+
+  .handle-poke {
+    width: 60%;
+    height: 100%;
+    transform: rotateZ(90deg);
+  }
+
+  .show-poke {
+    border: 1rpx solid #ccc;
+
+    image {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .ready-tip {
+    // position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .center_blank {
+    position: relative;
+
+    view {
+      height: 100%;
+
+      .center_blank-img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+
+        &:nth-of-type(1) {
+          transform-origin: bottom center;
+          transform: rotateZ(25deg);
+
+        }
+
+        &:nth-of-type(2) {
+          transform-origin: bottom center;
+          transform: rotateZ(-25deg);
+
+        }
+      }
+    }
+  }
+
+  .player-pokes {
+    display: flex;
+    position: relative;
+    height: 150rpx;
+    width: 100%;
+
+    .player-poke {
+      position: absolute;
+      // width: 50%;
+      // height: 100%;
+      width: 120rpx;
+      height: 150rpx;
+    }
+  }
+
+  .player-poke {
+    &:nth-of-type(1) {
+      transform: translateX(20rpx);
+    }
+
+    &:nth-of-type(2) {
+      transform: translateX(40rpx);
+    }
+
+    &:nth-of-type(3) {
+      transform: translateX(60rpx);
+    }
+
+    &:nth-of-type(4) {
+      transform: translateX(80rpx);
+    }
+
+    &:nth-of-type(5) {
+      transform: translateX(100rpx);
+    }
+  }
+
+  .player0,
+  .player1,
+  .player2 {
+    .banker-tip {
+      bottom: 0rpx;
+    }
+  }
+  .player6,
+  .player7,
+  .player8{
+    .banker-tip {
+      top: -10rpx;
+    }
+  }
+
+  .player3,
+  .player5,
+  .player6,
+  .player7,
+  .player8 {
+    flex-direction: column-reverse;
+  }
+
+  .cancel_ready {
+    background-color: red;
+  }
+
+  .ready {
+    background-color: transparent;
+  }
+}
+
+.btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  width: auto !important;
+  background-color: green;
+  color: #fff;
+  padding: 6px 12px;
+}
+
+.deal-cards {
+  top: 45%;
+}
+.start-game{
+  top: 50%;
+}
+.settlement-game {
+  top: 40%;
+}
+
+.show-cards {
+  top: 49%;
+}
+
+.countdown {
+  top: 60%;
+  background-color: transparent;
+}
+
+.bet-select {
+  top: 55%;
+  background-color: transparent;
+}
+
+.ready-btn {
+  top: 45%;
+}
+
+.shuffle-poke {
+  top: 55%;
+}
+
+// 
+.start-dealing {
+  margin-top: 20px;
+  background-color: #1aad19;
+  color: white;
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.dealing {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  width: 80%;
+}
+
+.card {
+  width: 50px;
+  height: 70px;
+  margin: 5px;
+}
