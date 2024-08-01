@@ -3,6 +3,7 @@
   <view class="players">
     <block wx:for="{{players}}" wx:key="index">
       <view class="player{{index}} {{item.userType===1?'banker':'player'}}">
+      <view wx:if="{{}}"></view>
         <block wx:if="{{item.userId}}">
           <block wx:if="{{item.name}}">
             <image class="player-avatar" src="{{item.userType===1?'../../assets/poke/banker.png':item.avatar}}" mode="cover"></image>
