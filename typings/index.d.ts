@@ -14,7 +14,6 @@ interface IAppOption {
     userInfo?: WechatMiniprogram.UserInfo,
     roomId: number,
     roomNumber: number,
-    userInfoResList: userInfoRes[],
   }
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback,
 }

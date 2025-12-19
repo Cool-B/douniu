@@ -7,7 +7,6 @@ App<IAppOption>({
   globalData: {
     roomId: 0,
     roomNumber: 0,
-    userInfoResList: [],
   },
   onLaunch() {
   },

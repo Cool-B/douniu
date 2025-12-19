@@ -1,0 +1,122 @@
+<view class="rules-modal" wx:if="{{visible}}" catchtouchmove="preventTouchMove">
+  <view class="modal-mask" bindtap="onClose"></view>
+  <view class="modal-container">
+    <view class="modal-header">
+      <text class="header-icon">📖</text>
+      <text class="header-title">游戏规则</text>
+      <view class="close-btn" bindtap="onClose">
+        <text class="close-icon">✕</text>
+      </view>
+    </view>
+    
+    <scroll-view class="modal-content" scroll-y="true">
+      <view class="rule-section">
+        <view class="section-title">
+          <text class="title-icon">🎴</text>
+          <text class="title-text">基础玩法</text>
+        </view>
+        <view class="rule-item">
+          <text class="item-number">1</text>
+          <text class="item-text">游戏每人使用5张扑克牌，任意三张组成十或十的倍数，剩下两张相加的点数取个位数。</text>
+        </view>
+        <view class="rule-item">
+          <text class="item-number">2</text>
+          <text class="item-text">玩家与庄家比牌，点数大的玩家获胜。</text>
+        </view>
+      </view>
+
+      <view class="rule-section">
+        <view class="section-title">
+          <text class="title-icon">🏆</text>
+          <text class="title-text">牌型等级</text>
+        </view>
+        <view class="card-type-list">
+          <view class="card-type-item special">
+            <text class="type-name">五小牛</text>
+            <text class="type-desc">5张牌点数之和≤10</text>
+            <text class="type-multiple">×7</text>
+          </view>
+          <view class="card-type-item special">
+            <text class="type-name">五花牛</text>
+            <text class="type-desc">5张牌均为J、Q、K</text>
+            <text class="type-multiple">×6</text>
+          </view>
+          <view class="card-type-item high">
+            <text class="type-name">牛牛</text>
+            <text class="type-desc">剩余2张之和为10的倍数</text>
+            <text class="type-multiple">×5</text>
+          </view>
+          <view class="card-type-item high">
+            <text class="type-name">牛九</text>
+            <text class="type-desc">剩余2张之和个位数为9</text>
+            <text class="type-multiple">×4</text>
+          </view>
+          <view class="card-type-item medium">
+            <text class="type-name">牛八</text>
+            <text class="type-desc">剩余2张之和个位数为8</text>
+            <text class="type-multiple">×3</text>
+          </view>
+          <view class="card-type-item medium">
+            <text class="type-name">牛七/牛六</text>
+            <text class="type-desc">剩余2张之和个位数为7或6</text>
+            <text class="type-multiple">×2</text>
+          </view>
+          <view class="card-type-item normal">
+            <text class="type-name">牛五至牛一</text>
+            <text class="type-desc">剩余2张之和个位数为5-1</text>
+            <text class="type-multiple">×1</text>
+          </view>
+          <view class="card-type-item low">
+            <text class="type-name">无牛</text>
+            <text class="type-desc">无法凑出3张牌为10的倍数</text>
+            <text class="type-multiple">×1</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="rule-section">
+        <view class="section-title">
+          <text class="title-icon">💰</text>
+          <text class="title-text">积分规则</text>
+        </view>
+        <view class="rule-item">
+          <text class="item-number">•</text>
+          <text class="item-text">基础积分为10分，根据牌型倍数计算最终得分</text>
+        </view>
+        <view class="rule-item">
+          <text class="item-number">•</text>
+          <text class="item-text">庄家与闲家比牌，牌型等级高者获胜</text>
+        </view>
+        <view class="rule-item">
+          <text class="item-number">•</text>
+          <text class="item-text">牌型相同时，比较最大单张牌点数</text>
+        </view>
+      </view>
+
+      <view class="rule-section">
+        <view class="section-title">
+          <text class="title-icon">🎯</text>
+          <text class="title-text">游戏技巧</text>
+        </view>
+        <view class="tip-item">
+          <text class="tip-label">观察牌面</text>
+          <text class="tip-text">注意花牌（J、Q、K）的数量，可能组成五花牛</text>
+        </view>
+        <view class="tip-item">
+          <text class="tip-label">计算概率</text>
+          <text class="tip-text">小牌多时，留意是否能组成五小牛</text>
+        </view>
+        <view class="tip-item">
+          <text class="tip-label">策略选择</text>
+          <text class="tip-text">当庄家时更有优势，平局时庄家获胜</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer">
+      <button class="confirm-btn" bindtap="onClose">
+        <text class="btn-text">我知道了</text>
+      </button>
+    </view>
+  </view>
+</view>

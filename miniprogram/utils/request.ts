@@ -11,7 +11,7 @@ interface defaultConfig {
 interface ResponseResult<T> {
   code: number;
   data: T;
-  message: string;
+  msg: string;
 }
 const request = async (options: RequestOptions & defaultConfig): Promise<ResponseResult<any>> => {
   // 默认配置
@@ -31,7 +31,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
         resolve({
           code: res.statusCode,
           data: res.data,
-          message: res.errMsg,
+          msg: res.errMsg,
         });
       },
       fail(error) {

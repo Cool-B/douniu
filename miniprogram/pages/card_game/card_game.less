@@ -1,6 +1,15 @@
 .room-container {
   height: 100vh;
 }
+.room-num{
+  position: absolute;
+  z-index: 999;
+  left: 50%;
+  top: 40%;
+  color: #fff;
+  font-size: 25rpx;
+  transform: translateX(-50%);
+}
 
 .draggable {
   width: 100px;
@@ -53,7 +62,7 @@
     }
   }
 
-  .banker-tip {
+  .banker-tip,.player-score {
     position: absolute;
     left: 0;
     width: 100%;
@@ -160,6 +169,11 @@
     .banker-tip {
       bottom: 0rpx;
     }
+    .player-score{
+      bottom: 80rpx;
+      font-size: larger;
+      font-weight: 700;
+    }
   }
 
   .player6,
@@ -198,7 +212,7 @@
 }
 
 .deal-cards {
-  top: 45%;
+  top: 50%;
 }
 
 .start-game {
@@ -206,15 +220,15 @@
 }
 
 .settlement-game {
-  top: 40%;
+  top: 50%;
 }
 
 .show-cards {
-  top: 49%;
+  top: 60%;
 }
 
 .countdown {
-  top: 60%;
+  top: 70%;
   background-color: transparent;
 }
 
@@ -228,7 +242,7 @@
 }
 
 .shuffle-poke {
-  top: 55%;
+  top: 60%;
 }
 
 // 

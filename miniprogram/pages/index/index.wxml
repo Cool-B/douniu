@@ -1,27 +1,34 @@
 <!--index.wxml-->
 <scroll-view class="scrollarea" scroll-y type="list">
   <view wx:if="{{loginFlag===1}}" class="container">
-    <view class="userinfo">
-      <block>
-        <view class="container">
-          <view class="title">欢迎来到斗牛游戏！</view>
-          <view class="description">点击开始游戏，体验刺激的斗牛乐趣！</view>
-          <view class="buttons">
-            <button class="mode-btn" bindtap="selectMode">选择模式</button>
-            <button class="quick-start-btn" bindtap="quickStart">快速开始</button>
-            <button class="join-btn" bindtap="showModal">加入游戏</button>
-            <button class="rules-btn" bindtap="showRules">游戏规则</button>
-            <button class="contact-btn" bindtap="contactUs">联系我们</button>
-          </view>
-        </view>
-      </block>
+    <view class="home-container">
+      <image class="bg-image" src="/assets/cow.png" mode="aspectFill"></image>
+
+      <!-- 三个功能卡片容器 -->
+      <view class="card-container">
+        <button class="quick-start-btn" bindtap="quickStart">
+          <view class="btn-icon">👑</view>快速开始
+        </button>
+        <button class="join-btn" bindtap="showModal">
+          <view class="btn-icon">🚪</view>
+          加入游戏
+        </button>
+        <button class="rules-btn" bindtap="showRules">
+          <view class="btn-icon">📖</view>
+          游戏规则
+        </button>
+      </view>
+      <!-- pages/index/index.wxml -->
+      <!-- <view class="btn-icon">🚪</view> -->
+      <!-- <view class="btn-icon">👑</view> -->
+      <!-- <view class="btn-icon">📖</view> -->
     </view>
-    <modal wx:if="{{modalShow}}" title="房间号" show="{{modalShow}}" bind:close="onCloseModal" bind:confirm="onConfirm" bind:cancel="onCancel">
+    <!-- <modal wx:if="{{modalShow}}" title="房间号" show="{{modalShow}}" bind:close="onCloseModal" bind:confirm="onConfirm" bind:cancel="onCancel">
       <view class="modal-content">
         <input type="text" placeholder="请输入房间号" bindinput="dialogInputChange" />
       </view>
-      <button bindtap="createGame">创建房间</button>
-    </modal>
+      <button bindtap="quickStart">创建房间</button>
+    </modal> -->
   </view>
   <view wx:if="{{loginFlag===2}}" class="container">
     <view class="userinfo">
@@ -44,4 +51,8 @@
       </block>
     </view>
   </view>
+  <!-- 规则弹窗组件 -->
+  <rules-modal visible="{{showRulesModal}}" bind:close="onCloseRules"></rules-modal>
+  <!-- 房间号弹窗组件 -->
+  <room-modal visible="{{modalShow}}" title="房间号" showQuickStart="{{true}}" bind:close="onCloseModal" bind:cancel="onCancel" bind:confirm="onConfirm" bind:quickstart="onQuickStartRoom"></room-modal>
 </scroll-view>

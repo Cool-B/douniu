@@ -2,7 +2,7 @@
 // 获取应用实例
 
 import { IAppOption } from "../../../typings/index";
-import { createRoom, login } from "../../api/index";
+import { createRoom, login, joinRoom } from "../../api/index";
 import { getUserInfo, setUserInfo, userInfo } from "../../utils/localStorage";
 
 const app = getApp<IAppOption>()
@@ -21,6 +21,7 @@ Component({
     canIUseGetUserProfile: wx.canIUse('getUserProfile'),
     canIUseNicknameComp: wx.canIUse('input.type.nickname'),
     loginFlag: 0,//1是登录2是没登录
+    showRulesModal: false,
   },
   methods: {
     onLoad() {
@@ -104,60 +105,50 @@ Component({
       const { id } = getUserInfo() as userInfo
       createRoom({ userId: id, roomType: 2 }).then(res => {
         wx.hideLoading()
-        console.log(res.data.data);
-        
         if (res.data.data) {
           // 设置全局变量的 sharedData
+
           app.globalData = {
             roomId: res.data.data.id,
             roomNumber: res.data.data.roomNumber,
-            userInfoResList: res.data.data.userInfoResList
           };
           wx.redirectTo({
             url: '../card_game/card_game', // 跳转到游戏页面
           });
         }
       })
-      // wx.connectSocket({
-      //   url: 'ws://f3emfi.natappfree.cc/ws/asset', // 你的 WebSocket 服务器地址
-      // });
-      // // 监听 WebSocket 连接打开事件
-      // wx.onSocketOpen(function (res) {
-      //   console.log('WebSocket 已连接:', res);
-      // });
-
-      // // 监听 WebSocket 接收到服务器的消息事件
-      // wx.onSocketMessage(function (res) {
-      //   console.log('收到服务器内容:', res);
-      // });
-
-      // // 监听 WebSocket 错误事件
-      // wx.onSocketError(function (res) {
-      //   console.error('WebSocket 错误:', res);
-      // });
-
-      // // 监听 WebSocket 连接关闭事件
-      // wx.onSocketClose(function (res) {
-      //   console.log('WebSocket 已关闭:', res);
-      // });
-
     },
-    // 显示规则
+    /**
+ * 显示游戏规则弹窗
+ */
     showRules() {
-      wx.showModal({
-        title: '基础玩法',
-        content: '1. 游戏每人使用5张扑克牌，任意三张组成十或十的倍数，剩下两张相加的点数取个位数。\n2. 玩家与庄家比牌，点数大的玩家获胜。',
-        showCancel: false, // 是否显示取消按钮，默认为true
-        confirmText: '确定', // 自定义确认按钮的文字，默认为'确定'
-        success(res) {
-          if (res.confirm) {
-            console.log('用户点击了确定')
-          } else if (res.cancel) {
-            console.log('用户点击了取消')
-          }
-        }
-      })
+      this.setData({
+        showRulesModal: true
+      });
     },
+    /**
+     * 关闭游戏规则弹窗
+     */
+    onCloseRules() {
+      this.setData({
+        showRulesModal: false
+      });
+    },
+    // showRules() {
+    //   wx.showModal({
+    //     title: '基础玩法',
+    //     content: '1. 游戏每人使用5张扑克牌，任意三张组成十或十的倍数，剩下两张相加的点数取个位数。\n2. 玩家与庄家比牌，点数大的玩家获胜。',
+    //     showCancel: false, // 是否显示取消按钮，默认为true
+    //     confirmText: '确定', // 自定义确认按钮的文字，默认为'确定'
+    //     success(res) {
+    //       if (res.confirm) {
+    //         console.log('用户点击了确定')
+    //       } else if (res.cancel) {
+    //         console.log('用户点击了取消')
+    //       }
+    //     }
+    //   })
+    // },
     contactUs() {
       wx.navigateTo({
         url: '../contact/contact', // 跳转到联系我们页面
@@ -182,25 +173,33 @@ Component({
       });
     },
     onConfirm() {
-      if (this.data.inputValue === '123') {
-        wx.navigateTo({
-          url: '../card_game/card_game',
-        })
-        wx.showToast({
-          title: '加入房间成功',
-          icon: 'none',
-          duration: 2000, // 持续时间，单位毫秒
-        });
-      } else {
-        wx.showToast({
-          title: '未找到房间，请输入正确的房号',
-          icon: 'none',
-          duration: 2000, // 持续时间，单位毫秒
-        });
+      if (this.data.inputValue.trim() === '') {
+        return
       }
-      this.setData({
-        modalShow: false
-      });
+      wx.showLoading({
+        title: '正在加入房间', // 必填，显示的文本内容
+        mask: true, // 可选，是否显示透明蒙层，防止触摸穿透，默认为false
+      })
+      const { id } = getUserInfo() as userInfo
+      joinRoom({ userId: id, roomNumber: this.data.inputValue.trim() }).then(res => {
+        if (res.data.data) {
+          // 设置全局变量的 sharedData
+          app.globalData = {
+            roomId: res.data.data.roomId,
+            roomNumber: Number(this.data.inputValue),
+          };
+          wx.redirectTo({
+            url: '../card_game/card_game', // 跳转到游戏页面
+          });
+          return
+        }
+        wx.hideLoading()
+        wx.showToast({
+          title: res.msg,
+          icon: 'none',
+          duration: 2000, // 持续时间，单位毫秒
+        });
+      })
     },
     onCancel() {
       this.setData({

@@ -1,4 +1,5 @@
 import { IAppOption, userInfoRes } from "../../../typings/index"
+import { baseUrl } from "../../api/index"
 import { getUserInfo, userInfo } from "../../utils/localStorage"
 import { uniqueObjectArray } from "../../utils/util"
 const app = getApp<IAppOption>()
@@ -16,7 +17,7 @@ interface data {
 
   wb: [],
   dealing: boolean,
-  pokes?: poke[],
+  pokers?: poke[],
   range: number[],
   playerNumber: playerNumber[],
   selectedValue: number,
@@ -33,8 +34,10 @@ interface playerNumber { has: boolean, number: number, id: number, maxCard?: { n
 interface player {
   name: string
   bet?: number,
-  show?: boolean
-  pokes?: poke[],
+  lookHand?: boolean
+  showOther?: boolean
+  pokers?: string[],
+  // 积分
   score: number,
   // 1.正常2.退出房间/被踢出房间3.离线   
   state: number,
@@ -46,7 +49,8 @@ interface player {
 }
 interface poke {
   suit: string,
-  number: number
+  number: number,
+  url?: string
 }
 //     方块     梅花        红桃     黑桃 
 const suit = ['Spade', 'Heart', 'Club', 'Diamond',]
@@ -74,7 +78,7 @@ Page<data, Record<string, any>>({
     modalData: '',// 要传递的数据
     wb: [],
     playerNumber: [],
-    pokes: [],
+    pokers: [],
     range: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     selectedValue: 0,
     isReady: false,
@@ -91,22 +95,19 @@ Page<data, Record<string, any>>({
   onLoad() {
     // 显示全屏loading
     this.showLoading()
-    const { roomId, roomNumber, userInfoResList } = app.globalData
-    console.log(userInfoResList);
-
+    const { roomId, roomNumber } = app.globalData
     this.setData({
       roomId,
       roomNumber,
-      userInfoResList,
       currentUserInfo: getUserInfo() as userInfo
     }, () => {
-      this.updateUserInfoResList()
+      // this.updateUserInfoResList()
     })
     wx.connectSocket({
-      url: 'ws://xpymak.natappfree.cc/ws/asset', // 你的 WebSocket 服务器地址
+      url: 'ws://' + baseUrl + '/ws/asset', // 你的 WebSocket 服务器地址
     });
     // 监听 WebSocket 连接打开事件
-    wx.onSocketOpen(function (res) {
+    wx.onSocketOpen((res) => {
       console.log('WebSocket 已连接:', res);
     });
     // 监听 WebSocket 接收到服务器的消息事件
@@ -117,27 +118,44 @@ Page<data, Record<string, any>>({
           const data = JSON.parse(res.data as string)
           // 存储用户信息
           if (data.type === 1) {
-            console.log('我储存了用户信息');
+            this.updateUserInfoResList(data.userInfoResList)
+            return
           }
           // 修改用户信息
           if (data.type === 2) {
-            console.log('我更改了用户信息');
+            this.updateUserInfoResList(data.userInfoResList)
+            return
           }
           // 开始游戏
           if (data.type === 3) {
             this.setData({
               isStart: true
             })
+            return
           }
           // 洗牌
           if (data.type === 4) {
             console.log('洗牌');
+            return
           }
           // 发牌
           if (data.type === 5) {
-            console.log('发牌');
+            // this.updateUserInfoResList(data.userInfoResList)
+            this.data.players.map(item => {
+              if (item.userId === data.userId) {
+                item.pokers = data.pokers
+                return item
+              }
+              item.pokers = ['../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png']
+              return item
+            })
+            this.setData({
+              isGaming: true,
+              players: this.data.players
+            })
+            this.startCountdown()
+            return
           }
-          return
         }
         this.setData({
           session: res.data as string
@@ -145,55 +163,35 @@ Page<data, Record<string, any>>({
         const params = {
           type: 1,
           uid: this.data.currentUserInfo.id,
-          sessionId: this.data.session
+          sessionId: this.data.session,
+          roomId: this.data.roomId
         }
         this.sendMseeage(params)
       }
     });
-    // // 监听 WebSocket 错误事件
-    // wx.onSocketError(function (res) {
-    //   console.error('WebSocket 错误:', res);
-    // });
-    // // 监听 WebSocket 连接关闭事件
-    // wx.onSocketClose(function (res) {
-    //   console.log('WebSocket 已关闭:', res);
-    // });
     this.initPlayers()
   },
   /**
    * 更新玩家列表信息
    */
-  updateUserInfoResList() {
-    this.data.userInfoResList.map((item, index) => {
-      this.data.players.splice(index, 1, item)
+  updateUserInfoResList(userInfoResList: player[]) {
+    userInfoResList.map((item: player, index: number) => {
+      this.data.players[index] = item
       if (item.userId === this.data.currentUserInfo.id) {
         this.setData({
-          currentUser: item.userType === 1 ? 'banker' : 'player'
+          currentUser: item.userType === 1 ? 'banker' : 'player',
+          isReady: item.status === 1 ? false : true
         })
       }
-      if (item.state === 2 && item.userType === 2) {
-
-      }
-      // if (item.userType === 1) {
-      //   flag = true
-      //   console.log(1111);
-      //   this.data.players.splice(7, 1, item)
-
-      // }
-      // if (item.userType === 2) {
-      //   if (flag) {
-      //     this.data.players.splice(index - 1, 1, item)
-      //   } else {
-      //     this.data.players.splice(index, 1, item)
-      //   }
-
-      // }
     })
+    console.log(this.data.players);
+
     this.setData({
       players: this.data.players
     })
   },
   sendMseeage<T>(params: T) {
+    this.showLoading()
     wx.sendSocketMessage({
       data: JSON.stringify(params), // 要发送的数据
       success: (res) => {
@@ -206,18 +204,17 @@ Page<data, Record<string, any>>({
   },
   initPlayers() {
     const players = [
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
       { avatar: defaultAvatarUrl, name: '', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 0, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
     ]
-    const pokes = this.getPokes()
-    this.setData({ players, pokes })
+    this.setData({ players })
   },
   startGame() {
     this.showLoading('正在准备中')
@@ -251,9 +248,9 @@ Page<data, Record<string, any>>({
     let flag: boolean = false
     const players = this.data.players.map((item, idx) => {
       if (index === idx) {
-        item.show = true
+        item.lookHand = true
       }
-      if (!item.show && item.show !== undefined) {
+      if (!item.lookHand && item.lookHand !== undefined) {
         flag = true
         return item
       }
@@ -270,8 +267,8 @@ Page<data, Record<string, any>>({
       isGaming: false,
       isAllShow: false,
       players: this.data.players.map(item => {
-        if (item.show !== undefined) {
-          item.show = true
+        if (item.lookHand !== undefined) {
+          item.lookHand = true
         }
         return item
       })
@@ -286,22 +283,8 @@ Page<data, Record<string, any>>({
       isAllShow: false
     })
   },
-  // 获取所有的扑克牌
-  getPokes() {
-    // if (this.data.isGaming) return
-    let pokes: poke[] = []
-    for (let index = 0; index < suit.length; index++) {
-      for (let idx = 0; idx < 10; idx++) {
-        pokes.push({
-          suit: suit[index],
-          number: idx + 1
-        })
-      }
-    }
-    return pokes
-  },
   // 倒计时
-  startCountdown: function () {
+  startCountdown() {
     let endTime = Date.now() + 2 * 60 * 1000; // 设置倒计时结束时间为当前时间后2分钟
     this.countdownInterval = setInterval(() => {
       let remainingTime = endTime - Date.now();
@@ -320,19 +303,25 @@ Page<data, Record<string, any>>({
   },
   changeReady() {
     if (this.data.isGaming) return
-    this.setData({
-      isReady: !this.data.isReady
+    const { roomId, status, state } = this.data.players.find(item => item.userId === this.data.currentUserInfo.id) as player
+    this.sendMseeage({
+      type: 2,
+      roomId,
+      bet: this.data.selectedValue,
+      status: status === 1 ? 2 : 1,
+      state,
+      uid: this.data.currentUserInfo.id
     })
   },
-  onPickerChange: function (e: { detail: { value: number } }) {
+  onPickerChange(e: { detail: { value: number } }) {
     this.setData({
       selectedValue: this.data.range[e.detail.value],
     });
   },
   async clearPokes() {
     this.data.players = this.data.players.map(item => {
-      if (item.pokes) {
-        item.pokes = []
+      if (item.pokers) {
+        item.pokers = []
       }
       return item
     })
@@ -349,45 +338,6 @@ Page<data, Record<string, any>>({
       uid: this.data.currentUserInfo.id,
     }
     this.sendMseeage(params)
-    // this.clearPokes()
-    // // if (this.data.isGaming) return
-    // const realPlayers = this.data.players.filter(item => item.state === 2)
-    // realPlayers.map((item, index) => {
-    //   item.show = false
-    //   for (let idx = 0; idx < 5; idx++) {
-    //     if (this.data.pokes) {
-    //       item.pokes && item.pokes.push(this.data.pokes[index + idx * realPlayers.length])
-    //     }
-    //   }
-    //   if (item.pokes) {
-    //     this.sortCards(item.pokes)
-    //   }
-    // })
-    // let playerNumber: playerNumber[] = []
-    // this.setData({ playerNumber: [] })
-    // this.data.players.map(item => {
-    //   if (item.pokes) {
-    //     // console.log(this.isBoom(item.pokes));
-    //     const flag = this.isSumMultipleOfTen(item.pokes, 2)
-    //     let point: { number: number, suit: string } | number
-    //     let maxCard: { number: number, suit: string }
-    //     point = this.getPointNumber(flag, item.pokes)
-    //     if (flag) {
-    //       maxCard = this.getMaxCard(item.pokes)
-    //       playerNumber.push({
-    //         // 有牛，获取到最大值（牛几） 然后再获取到组成几点的最大的那张牌
-    //         has: flag, number: point as number, id: item.userId, maxCard: maxCard as { number: number, suit: string, }, isBoth: this.isBothTen(item.pokes), isBoom: this.isBoom(item.pokes)
-    //       })
-    //     } else {
-    //       playerNumber.push({
-    //         // 没牛，获取到最大的那张牌
-    //         has: flag, number: (point as { number: number, suit: string }).number, id: item.userId, maxCard: point as { number: number, suit: string }, isBoom: this.isBoom(item.pokes)
-    //       })
-    //     }
-    //   }
-    // })
-    // this.setData({ players: this.data.players, playerNumber, isGaming: true })
-    // this.startCountdown()
   },
   // 是不是炸弹
   isBoom(cards: poke[]) {
@@ -493,8 +443,8 @@ Page<data, Record<string, any>>({
     //     duration: 2000, // 持续时间，单位毫秒
     //   });
     // }
-    // const pokes = this.shuffleArray(this.data.pokes)
-    // this.setData({ pokes })
+    // const pokers = this.shuffleArray(this.data.pokers)
+    // this.setData({ pokers })
   },
   shuffleArray<T>(array: T[]) {
     for (let i = array.length - 1; i > 0; i--) {

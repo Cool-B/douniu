@@ -1,0 +1,39 @@
+<view class="room-modal" wx:if="{{visible}}" catchtouchmove="preventTouchMove">
+  <view class="modal-mask" bindtap="onClose"></view>
+  <view class="modal-container">
+    <view class="modal-header">
+      <text class="header-icon">🏠</text>
+      <text class="header-title">{{title}}</text>
+      <view class="close-btn" bindtap="onClose">
+        <text class="close-icon">✕</text>
+      </view>
+    </view>
+
+    <view class="modal-content">
+      <view class="input-wrapper">
+        <view class="input-label">
+          <text class="label-icon">🎮</text>
+          <text class="label-text">房间号</text>
+        </view>
+        <input class="custom-input" type="text" placeholder="请输入房间号" value="{{inputValue}}" bindinput="onInput" placeholder-class="input-placeholder" maxlength="20" />
+        <view class="input-border"></view>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="modal-btn cancel-btn" bindtap="onCancel">
+        <text class="btn-text">取消</text>
+      </button>
+      <button class="modal-btn confirm-btn" bindtap="onConfirm">
+        <text class="btn-text">确定</text>
+      </button>
+    </view>
+
+    <view class="quick-action" wx:if="{{showQuickStart}}">
+      <button class="quick-start-btn" bindtap="onQuickStart">
+        <text class="quick-icon">⚡</text>
+        <text class="quick-text">快速创建房间</text>
+      </button>
+    </view>
+  </view>
+</view>
