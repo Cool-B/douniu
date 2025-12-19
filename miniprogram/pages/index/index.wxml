@@ -7,7 +7,7 @@
       <!-- 三个功能卡片容器 -->
       <view class="card-container">
         <button class="quick-start-btn" bindtap="quickStart">
-          <view class="btn-icon">👑</view>快速开始
+          <view class="btn-icon">⚡</view>快速开始
         </button>
         <button class="join-btn" bindtap="showModal">
           <view class="btn-icon">🚪</view>
