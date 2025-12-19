@@ -13,6 +13,8 @@ interface ResponseResult<T> {
   data: T;
   msg: string;
 }
+export const baseUrl = 'https://cow.lyjiubei.cn'
+
 const request = async (options: RequestOptions & defaultConfig): Promise<ResponseResult<any>> => {
   // 默认配置
   const defaultConfig: defaultConfig = {
@@ -27,6 +29,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
   return new Promise((resolve, reject) => {
     wx.request({
       ...config,
+      url: baseUrl + config.url,
       success(res) {
         resolve({
           code: res.statusCode,
