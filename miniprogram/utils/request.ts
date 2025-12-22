@@ -1,47 +1,110 @@
+import mockApi from "./mockData";
+
 interface RequestOptions {
   url: string;
   data?: any;
   dataType?: "json" | undefined;
   responseType?: "text" | "arraybuffer" | undefined;
 }
+
 interface defaultConfig {
   method?: "GET" | "OPTIONS" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "CONNECT" | undefined;
   header?: { [key: string]: string };
 }
+
 interface ResponseResult<T> {
   code: number;
   data: T;
   msg: string;
 }
-export const baseUrl = 'https://cow.lyjiubei.cn'
+
+// 模拟网络延迟
+function simulateDelay(min: number = 200, max: number = 800): Promise<void> {
+  const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
 
 const request = async (options: RequestOptions & defaultConfig): Promise<ResponseResult<any>> => {
-  // 默认配置
-  const defaultConfig: defaultConfig = {
-    method: 'GET',
-    header: {
-      'content-type': 'application/json',
-    },
-  };
-  // 合并默认配置和自定义配置
-  const config = { ...defaultConfig, ...options };
-
-  return new Promise((resolve, reject) => {
-    wx.request({
-      ...config,
-      url: baseUrl + config.url,
-      success(res) {
-        resolve({
-          code: res.statusCode,
-          data: res.data,
-          msg: res.errMsg,
-        });
-      },
-      fail(error) {
-        reject(error);
-      },
-    });
-  });
+  const { url, data, method = 'POST' } = options;
+  
+  // 模拟网络延迟
+  await simulateDelay();
+  
+  try {
+    // 根据URL路由到对应的Mock API
+    switch (url) {
+      case '/api/wx/user/login':
+        const loginResult = await mockApi.login(data);
+        return {
+          code: loginResult.code,
+          data: loginResult.data,
+          msg: loginResult.message
+        };
+        
+      case '/poker/createRoom':
+        const createRoomResult = await mockApi.createRoom(data);
+        return {
+          code: createRoomResult.code,
+          data: createRoomResult.data,
+          msg: createRoomResult.message
+        };
+        
+      case '/poker/joinRoom':
+        const joinRoomResult = await mockApi.joinRoom(data);
+        return {
+          code: joinRoomResult.code,
+          data: joinRoomResult.data,
+          msg: joinRoomResult.message
+        };
+        
+      case '/poker/getRoomInfo':
+        const getRoomInfoResult = await mockApi.getRoomInfo(data);
+        return {
+          code: getRoomInfoResult.code,
+          data: getRoomInfoResult.data,
+          msg: getRoomInfoResult.message
+        };
+        
+      case '/poker/startGame':
+        const startGameResult = await mockApi.startGame(data);
+        return {
+          code: startGameResult.code,
+          data: startGameResult.data,
+          msg: startGameResult.message
+        };
+        
+      case '/poker/gameAction':
+        const gameActionResult = await mockApi.gameAction(data);
+        return {
+          code: gameActionResult.code,
+          data: gameActionResult.data,
+          msg: gameActionResult.message
+        };
+        
+      case '/poker/exitRoom':
+        const exitRoomResult = await mockApi.exitRoom(data);
+        return {
+          code: exitRoomResult.code,
+          data: exitRoomResult.data,
+          msg: exitRoomResult.message
+        };
+        
+      default:
+        // 默认返回成功响应
+        return {
+          code: 200,
+          data: null,
+          msg: '操作成功'
+        };
+    }
+  } catch (error) {
+    console.error('Mock API调用失败:', error);
+    return {
+      code: 500,
+      data: null,
+      msg: '服务器内部错误'
+    };
+  }
 };
 
 export default request;

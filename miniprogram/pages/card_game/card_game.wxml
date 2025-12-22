@@ -1,5 +1,4 @@
 <view class="room-container">
-  <image src="../../assets/poke/desk-bgc.png" mode="aspectFill" style="width: 100%; height: 100%; position: fixed; z-index: -1;"></image>
   <view class="players">
     <block wx:for="{{players}}" wx:key="index">
       <view class="player{{index}} {{item.userType===1?'banker':'player'}}">

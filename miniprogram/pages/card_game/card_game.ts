@@ -1,7 +1,7 @@
-import { IAppOption, userInfoRes } from "../../../typings/index"
-import { baseUrl } from "../../api/index"
+import { IAppOption, userInfoRes } from "../../typings/index"
 import { getUserInfo, userInfo } from "../../utils/localStorage"
 import { uniqueObjectArray } from "../../utils/util"
+import request from "../../utils/request"
 const app = getApp<IAppOption>()
 const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
 interface data {
@@ -101,75 +101,33 @@ Page<data, Record<string, any>>({
       roomNumber,
       currentUserInfo: getUserInfo() as userInfo
     }, () => {
+      console.log(this.data.currentUserInfo);
       // this.updateUserInfoResList()
     })
-    wx.connectSocket({
-      url: 'ws://' + baseUrl + '/ws/asset', // 你的 WebSocket 服务器地址
-    });
-    // 监听 WebSocket 连接打开事件
-    wx.onSocketOpen((res) => {
-      console.log('WebSocket 已连接:', res);
-    });
-    // 监听 WebSocket 接收到服务器的消息事件
-    wx.onSocketMessage((res) => {
-      wx.hideLoading()
-      if (res.data) {
-        if ((res.data as string).includes('type')) {
-          const data = JSON.parse(res.data as string)
-          // 存储用户信息
-          if (data.type === 1) {
-            this.updateUserInfoResList(data.userInfoResList)
-            return
-          }
-          // 修改用户信息
-          if (data.type === 2) {
-            this.updateUserInfoResList(data.userInfoResList)
-            return
-          }
-          // 开始游戏
-          if (data.type === 3) {
-            this.setData({
-              isStart: true
-            })
-            return
-          }
-          // 洗牌
-          if (data.type === 4) {
-            console.log('洗牌');
-            return
-          }
-          // 发牌
-          if (data.type === 5) {
-            // this.updateUserInfoResList(data.userInfoResList)
-            this.data.players.map(item => {
-              if (item.userId === data.userId) {
-                item.pokers = data.pokers
-                return item
-              }
-              item.pokers = ['../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png']
-              return item
-            })
-            this.setData({
-              isGaming: true,
-              players: this.data.players
-            })
-            this.startCountdown()
-            return
-          }
-        }
-        this.setData({
-          session: res.data as string
-        })
-        const params = {
-          type: 1,
-          uid: this.data.currentUserInfo.id,
-          sessionId: this.data.session,
-          roomId: this.data.roomId
-        }
-        this.sendMseeage(params)
-      }
-    });
+
+    // 先初始化玩家座位，然后获取房间信息
     this.initPlayers()
+
+    // 模拟获取房间信息
+    this.mockGetRoomInfo()
+  },
+  // Mock获取房间信息
+  async mockGetRoomInfo() {
+    try {
+      const result = await request({
+        url: '/poker/getRoomInfo',
+        data: { roomId: this.data.roomId }
+      });
+      if (result.code === 200) {
+        this.updateUserInfoResList(result.data.roomInfo.players);
+      } else {
+      }
+    } catch (error) {
+      console.error('获取房间信息失败:', error);
+    } finally {
+      // 确保在所有情况下都隐藏loading
+      wx.hideLoading();
+    }
   },
   /**
    * 更新玩家列表信息
@@ -184,23 +142,91 @@ Page<data, Record<string, any>>({
         })
       }
     })
-    console.log(this.data.players);
-
     this.setData({
       players: this.data.players
     })
   },
-  sendMseeage<T>(params: T) {
+  // 模拟发送游戏操作消息
+  async sendMseeage<T>(params: T) {
     this.showLoading()
-    wx.sendSocketMessage({
-      data: JSON.stringify(params), // 要发送的数据
-      success: (res) => {
-        console.log('消息发送成功:', res);
-      },
-      fail: (res) => {
-        console.error('消息发送失败:', res);
+
+    try {
+      // 根据参数类型模拟不同的游戏操作
+      const paramData = params as any;
+
+      switch (paramData.type) {
+        case 1: // 加入房间
+          const joinResult = await request({
+            url: '/poker/joinRoom',
+            data: { userId: paramData.uid, roomNumber: this.data.roomNumber }
+          });
+          if (joinResult.code === 200) {
+            this.updateUserInfoResList(joinResult.data.roomInfo.players);
+          }
+          break;
+
+        case 2: // 准备/取消准备
+          const player = this.data.players.find(p => p.userId === paramData.uid);
+          if (player) {
+            player.status = paramData.status;
+            this.setData({ players: this.data.players });
+          }
+          break;
+
+        case 3: // 开始游戏
+          const startResult = await request({
+            url: '/poker/startGame',
+            data: { roomId: paramData.roomId, userId: paramData.uid }
+          });
+          if (startResult.code === 200) {
+            this.setData({ isStart: true });
+            this.mockDealCards();
+          }
+          break;
+
+        case 4: // 洗牌
+          const shuffleResult = await request({
+            url: '/poker/gameAction',
+            data: { gameId: 'mock_game_id', userId: paramData.uid, action: 'shuffle' }
+          });
+          if (shuffleResult.code === 200) {
+            console.log('洗牌成功');
+            this.clearPokes();
+          }
+          break;
+
+        case 5: // 发牌
+          const dealResult = await request({
+            url: '/poker/gameAction',
+            data: { gameId: 'mock_game_id', userId: paramData.uid, action: 'dealCards' }
+          });
+          if (dealResult.code === 200) {
+            this.mockDealCards();
+          }
+          break;
       }
+
+      console.log('操作执行成功');
+    } catch (error) {
+      console.error('操作执行失败:', error);
+    }
+  },
+
+  // 模拟发牌
+  mockDealCards() {
+    const cardBackUrl = '../../assets/poke/Poker/Background.png';
+    const players = this.data.players.map(player => ({
+      ...player,
+      pokers: player.userId === this.data.currentUserInfo.id ?
+        ['../../assets/poke/Spade/1.png', '../../assets/poke/Heart/10.png', '../../assets/poke/Club/5.png', '../../assets/poke/Diamond/8.png', '../../assets/poke/Spade/3.png'] :
+        [cardBackUrl, cardBackUrl, cardBackUrl, cardBackUrl, cardBackUrl]
+    }));
+
+    this.setData({
+      isGaming: true,
+      players: players
     });
+    this.startCountdown();
   },
   initPlayers() {
     const players = [
