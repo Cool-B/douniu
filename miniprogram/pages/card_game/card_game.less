@@ -1,22 +1,16 @@
 .room-container {
   height: 100vh;
-}
-.room-num{
-  position: absolute;
-  z-index: 999;
-  left: 50%;
-  top: 40%;
-  color: #fff;
-  font-size: 25rpx;
-  transform: translateX(-50%);
+  background-color: red;
 }
 
-.draggable {
-  width: 100px;
-  height: 100px;
-  background-color: #f00;
+.room-num {
   position: absolute;
-  // transform: translate({{translationX}}px, {{translationY}}px);
+  z-index: -1;
+  left: 60rpx;
+  top: 10rpx;
+  color: #fff;
+  font-size: 10rpx;
+  transform: translateX(-50%);
 }
 
 .desk-img {
@@ -30,12 +24,6 @@
   transform: rotateZ(90deg);
 }
 
-.player-avatar {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 50%;
-}
-
 .players {
   height: 100%;
   width: 100%;
@@ -44,39 +32,59 @@
   flex-wrap: wrap;
 
   .banker,
-  .center_blank,
   .player {
     width: 33%;
-    word-break: keep-all;
+    height: 33%;
     position: relative;
+    word-break: keep-all;
     display: flex;
     flex-direction: column;
     text-align: center;
     justify-content: center;
     align-items: center;
+    border-radius: 10rpx;
+    box-shadow: 0 0 10rpx rgba(0, 0, 0, 0.1);
+
+    .player-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 90%;
+      .player-avatar {
+        width: 40rpx;
+        height: 40rpx;
+        border-radius: 50%;
+      }
+      .player-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #fff;
+        flex: 2;
+      }
+      .player-bet{
+        flex: 2;
+      }
+      .player-score{
+        flex: 2;
+        font-size: 15rpx;
+      }
+    }
   }
 
   .banker {
+    .banker-tip {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: -24px;
+    }
+
     .ready-tip {
       background-color: transparent;
     }
   }
 
-  .banker-tip,.player-score {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    font-size: 30rpx;
-    text-align: center;
-  }
 
-  .text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 10rpx;
-    width: 100%;
-    color: #fff;
-  }
 
   .handle-poke {
     width: 60%;
@@ -94,36 +102,9 @@
   }
 
   .ready-tip {
-    // position: absolute;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-  }
-
-  .center_blank {
-    position: relative;
-
-    view {
-      height: 100%;
-
-      .center_blank-img {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-
-        &:nth-of-type(1) {
-          transform-origin: bottom center;
-          transform: rotateZ(25deg);
-
-        }
-
-        &:nth-of-type(2) {
-          transform-origin: bottom center;
-          transform: rotateZ(-25deg);
-
-        }
-      }
-    }
   }
 
   .player-pokes {
@@ -134,62 +115,9 @@
 
     .player-poke {
       position: absolute;
-      // width: 50%;
-      // height: 100%;
       width: 120rpx;
       height: 150rpx;
     }
-  }
-
-  .player-poke {
-    &:nth-of-type(1) {
-      transform: translateX(20rpx);
-    }
-
-    &:nth-of-type(2) {
-      transform: translateX(40rpx);
-    }
-
-    &:nth-of-type(3) {
-      transform: translateX(60rpx);
-    }
-
-    &:nth-of-type(4) {
-      transform: translateX(80rpx);
-    }
-
-    &:nth-of-type(5) {
-      transform: translateX(100rpx);
-    }
-  }
-
-  .player0,
-  .player1,
-  .player2 {
-    .banker-tip {
-      bottom: 0rpx;
-    }
-    .player-score{
-      bottom: 80rpx;
-      font-size: larger;
-      font-weight: 700;
-    }
-  }
-
-  .player6,
-  .player7,
-  .player8 {
-    .banker-tip {
-      top: -10rpx;
-    }
-  }
-
-  .player3,
-  .player5,
-  .player6,
-  .player7,
-  .player8 {
-    flex-direction: column-reverse;
   }
 
   .cancel_ready {

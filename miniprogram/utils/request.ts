@@ -13,7 +13,7 @@ interface ResponseResult<T> {
   data: T;
   msg: string;
 }
-export const baseUrl = 'https://cow.lyjiubei.cn'
+export const baseUrl = 'http://b89669be.natappfree.cc'
 
 const request = async (options: RequestOptions & defaultConfig): Promise<ResponseResult<any>> => {
   // 默认配置

@@ -1,39 +1,34 @@
 <view class="room-container">
-  <image src="../../assets/poke/desk-bgc.png" mode="aspectFill" style="width: 100%; height: 100%; position: fixed; z-index: -1;"></image>
+  <!-- <image src="../../assets/poke/desk-bgc.png" mode="aspectFill"
+    style="width: 100%; height: 100%; position: fixed; z-index: -1; transform: scale(1.6);"></image> -->
   <view class="players">
     <block wx:for="{{players}}" wx:key="index">
       <view class="player{{index}} {{item.userType===1?'banker':'player'}}">
         <view wx:if="{{}}"></view>
         <block wx:if="{{item.userId}}">
+          <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
           <block wx:if="{{item.name}}">
-            <image class="player-avatar" src="{{item.userType===1?'../../assets/poke/banker.png':item.avatar}}" mode="cover"></image>
-            <view class="text">{{item.name}}</view>
-            <!-- 本局输赢积分情况 -->
-            <!-- <view class="bet">{{item.bet}}</view> -->
-            <view class="bet">{{item.bet}}</view>
-            <view wx:if="{{!isGaming&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip" data-index="{{index}}"></view>
-            <block>
-              <view class="player-pokes" bindtap="checkPokes" data-index="{{index}}">
-                <view wx:if="{{item.show}}">
-                  <image wx:for="{{item.pokes}}" wx:key="index" class="player-poke" src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
-                </view>
-                <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item}}" mode="" />
-                <!-- <view wx:if="{{!item.show}}">
-                  <image wx:for="{{item.pokes}}" bindtap="showModal" wx:key="index" class="player-poke" src="{{'../../assets/poke/Poker/Background.png'}}" mode="" />
-                </view> -->
+            <view class="player-pokes" bindtap="checkPokes" data-index="{{index}}">
+              <view wx:if="{{item.show}}">
+                <image wx:for="{{item.pokes}}" wx:key="index" class="player-poke"
+                  src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
               </view>
-            </block>
-            <view class="player-score">{{item.score}}</view>
-            <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
+              <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item}}" mode="" />
+            </view>
+            <view class="player-info">
+              <image class="player-avatar" src="{{item.avatar}}" mode="cover"></image>
+              <view class="player-text">{{item.name}}</view>
+              <view class="player-bet">{{item.bet}}</view>
+              <view class="player-score">{{item.score}}</view>
+              <view wx:if="{{!isGaming&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip"
+                data-index="{{index}}"></view>
+            </view>
           </block>
           <view wx:if="{{item.name===''}}">
-            <!-- <image class="center_blank-img" src="../../assets/poke/Poker/Background.png" mode="" />
-          <image class="center_blank-img" src="../../assets/poke/Poker/Background.png" mode="" />
-          <image class="center_blank-img" src="../../assets/poke/Poker/Background.png" mode="" /> -->
           </view>
         </block>
         <block wx:if="{{!item.userId&&index!==4}}">
-          空
+        
         </block>
       </view>
     </block>
@@ -50,7 +45,8 @@
       <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
     </block>
     <block wx:if="{{isGaming&&isStart}}">
-      <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" disabled='{{!isAllShow}}' bindtap="settlementCurrent">结算</button>
+      <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" disabled='{{!isAllShow}}'
+        bindtap="settlementCurrent">结算</button>
       <button class="show-cards btn" bindtap="showCards">亮牌</button>
     </block>
     <block wx:if="{{!isStart}}">
@@ -68,7 +64,8 @@
       </view>
     </picker>
   </block>
-  <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal" bindconfirm="confirmModal">
+  <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal"
+    bindconfirm="confirmModal">
     <view>弹窗内容：{{modalData}}1111111</view>
   </modal>
   <view class="room-num">

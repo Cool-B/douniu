@@ -1,5 +1,5 @@
 import { IAppOption, userInfoRes } from "../../../typings/index"
-import { baseUrl } from "../../api/index"
+import { baseUrl } from "../../utils/request"
 import { getUserInfo, userInfo } from "../../utils/localStorage"
 import { uniqueObjectArray } from "../../utils/util"
 const app = getApp<IAppOption>()
@@ -104,7 +104,7 @@ Page<data, Record<string, any>>({
       // this.updateUserInfoResList()
     })
     wx.connectSocket({
-      url: 'ws://' + baseUrl + '/ws/asset', // 你的 WebSocket 服务器地址
+      url: 'ws://' + 'b89669be.natappfree.cc' + '/ws/asset', // 你的 WebSocket 服务器地址
     });
     // 监听 WebSocket 连接打开事件
     wx.onSocketOpen((res) => {
@@ -113,6 +113,8 @@ Page<data, Record<string, any>>({
     // 监听 WebSocket 接收到服务器的消息事件
     wx.onSocketMessage((res) => {
       wx.hideLoading()
+      console.log(1111111);
+      
       if (res.data) {
         if ((res.data as string).includes('type')) {
           const data = JSON.parse(res.data as string)
@@ -175,8 +177,8 @@ Page<data, Record<string, any>>({
    * 更新玩家列表信息
    */
   updateUserInfoResList(userInfoResList: player[]) {
-    userInfoResList.map((item: player, index: number) => {
-      this.data.players[index] = item
+    userInfoResList.map((item: player, ) => {
+      this.data.players[7] = item
       if (item.userId === this.data.currentUserInfo.id) {
         this.setData({
           currentUser: item.userType === 1 ? 'banker' : 'player',
@@ -211,7 +213,7 @@ Page<data, Record<string, any>>({
       { avatar: defaultAvatarUrl, name: '', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 0, },
       { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
       { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 1, },
       { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
     ]
     this.setData({ players })
