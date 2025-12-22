@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>动画组件测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+        .animation-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            transition: all 0.3s ease;
+        }
+        .floating-card {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+        }
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-rank {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .card-suit {
+            font-size: 24px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="animation-container" id="animationContainer"></div>
+    
+    <script>
+        // 模拟微信小程序动画逻辑
+        class AnimationComponent {
+            constructor() {
+                this.particles = [];
+                this.cards = [];
+                this.isAnimating = false;
+                this.animationTimer = null;
+                this.container = document.getElementById('animationContainer');
+                this.initAnimation();
+            }
+
+            initAnimation() {
+                this.generateParticles();
+                this.generateCards();
+                this.startAnimation();
+            }
+
+            generateParticles() {
+                const particleCount = 25;
+                for (let i = 0; i < particleCount; i++) {
+                    this.particles.push({
+                        id: i,
+                        x: Math.random() * 100,
+                        y: Math.random() * 100,
+                        size: Math.random() * 4 + 2,
+                        opacity: 0
+                    });
+                }
+                this.renderParticles();
+            }
+
+            generateCards() {
+                const suits = ['♠', '♥', '♦', '♣'];
+                const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+                const cardCount = 8;
+                for (let i = 0; i < cardCount; i++) {
+                    this.cards.push({
+                        id: i,
+                        suit: suits[Math.floor(Math.random() * suits.length)],
+                        rank: ranks[Math.floor(Math.random() * ranks.length)],
+                        x: Math.random() * 100,
+                        rotation: Math.random() * 360 - 180,
+                        opacity: 0
+                    });
+                }
+                this.renderCards();
+            }
+
+            renderParticles() {
+                const particleSystem = document.createElement('div');
+                particleSystem.className = 'particle-system';
+                
+                this.particles.forEach(particle => {
+                    const element = document.createElement('div');
+                    element.className = 'particle';
+                    element.style.left = particle.x + '%';
+                    element.style.top = particle.y + '%';
+                    element.style.width = particle.size + 'px';
+                    element.style.height = particle.size + 'px';
+                    element.style.opacity = particle.opacity;
+                    particleSystem.appendChild(element);
+                });
+                
+                this.container.appendChild(particleSystem);
+            }
+
+            renderCards() {
+                const cardSystem = document.createElement('div');
+                cardSystem.className = 'card-system';
+                
+                this.cards.forEach(card => {
+                    const element = document.createElement('div');
+                    element.className = 'floating-card';
+                    element.style.left = card.x + '%';
+                    element.style.transform = `rotate(${card.rotation}deg)`;
+                    element.style.opacity = card.opacity;
+                    
+                    const content = document.createElement('div');
+                    content.className = 'card-content';
+                    
+                    const rank = document.createElement('div');
+                    rank.className = 'card-rank';
+                    rank.textContent = card.rank;
+                    
+                    const suit = document.createElement('div');
+                    suit.className = 'card-suit';
+                    suit.textContent = card.suit;
+                    suit.style.color = card.suit === '♥' || card.suit === '♦' ? '#e74c3c' : '#2c3e50';
+                    
+                    content.appendChild(rank);
+                    content.appendChild(suit);
+                    element.appendChild(content);
+                    cardSystem.appendChild(element);
+                });
+                
+                this.container.appendChild(cardSystem);
+            }
+
+            startAnimation() {
+                if (this.isAnimating) return;
+                this.isAnimating = true;
+                this.animate();
+            }
+
+            animate() {
+                if (!this.isAnimating) return;
+
+                // 更新粒子状态
+                this.particles = this.particles.map(particle => ({
+                    ...particle,
+                    x: (particle.x + (Math.random() - 0.5) * 0.5) % 100,
+                    y: (particle.y + (Math.random() - 0.5) * 0.5) % 100,
+                    opacity: Math.sin(Date.now() / 1000 + particle.id) * 0.5 + 0.5
+                }));
+
+                // 更新卡片状态
+                this.cards = this.cards.map(card => ({
+                    ...card,
+                    x: (card.x + (Math.random() - 0.5) * 0.3) % 100,
+                    rotation: card.rotation + (Math.random() - 0.5) * 2,
+                    opacity: Math.sin(Date.now() / 1000 + card.id) * 0.3 + 0.7
+                }));
+
+                this.updateDisplay();
+
+                this.animationTimer = setTimeout(() => {
+                    this.animate();
+                }, 1000 / 30);
+            }
+
+            updateDisplay() {
+                const particles = document.querySelectorAll('.particle');
+                particles.forEach((particle, index) => {
+                    const p = this.particles[index];
+                    particle.style.left = p.x + '%';
+                    particle.style.top = p.y + '%';
+                    particle.style.opacity = p.opacity;
+                });
+
+                const cards = document.querySelectorAll('.floating-card');
+                cards.forEach((card, index) => {
+                    const c = this.cards[index];
+                    card.style.left = c.x + '%';
+                    card.style.transform = `rotate(${c.rotation}deg)`;
+                    card.style.opacity = c.opacity;
+                });
+            }
+        }
+
+        // 启动动画
+        new AnimationComponent();
+    </script>
+</body>
+</html>

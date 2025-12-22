@@ -1,0 +1,20 @@
+<!-- 动画组件模板 -->
+<view class="animation-container" wx:if="{{enableAnimation}}">
+  <!-- 粒子效果 -->
+  <view wx:if="{{particles.length > 0}}" class="particle-system">
+    <view wx:for="{{particles}}" wx:key="id" class="particle" 
+          style="left: {{item.x}}%; top: {{item.y}}%; width: {{item.size}}px; height: {{item.size}}px; opacity: {{item.opacity}}">
+    </view>
+  </view>
+
+  <!-- 浮动卡片效果 -->
+  <view wx:if="{{cards.length > 0}}" class="card-system">
+    <view wx:for="{{cards}}" wx:key="id" class="floating-card" 
+          style="left: {{item.x}}%; transform: rotate({{item.rotation}}deg); opacity: {{item.opacity}}">
+      <view class="card-content">
+        <text class="card-rank">{{item.rank}}</text>
+        <text class="card-suit">{{item.suit}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -24,7 +24,8 @@ Component({
     showRulesModal: false,
     loading: false,
     errorMsg: '',
-    currentUser: null as userInfo | null
+    
+    // 动画数据由animation-component组件处理
   },
   methods: {
     onLoad() {
@@ -50,6 +51,8 @@ Component({
         currentUser: userInfo === '' ? null : userInfo
       })
     },
+
+
 
     // 选择头像
     onChooseAvatar(e: any) {
