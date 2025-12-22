@@ -17,12 +17,7 @@ interface ResponseResult<T> {
   data: T;
   msg: string;
 }
-
-// 模拟网络延迟
-function simulateDelay(min: number = 200, max: number = 800): Promise<void> {
-  const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-  return new Promise(resolve => setTimeout(resolve, delay));
-}
+export const baseUrl = 'http://b89669be.natappfree.cc'
 
 const request = async (options: RequestOptions & defaultConfig): Promise<ResponseResult<any>> => {
   const { url, data, method = 'POST' } = options;

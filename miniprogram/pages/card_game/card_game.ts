@@ -1,4 +1,5 @@
-import { IAppOption, userInfoRes } from "../../typings/index"
+import { IAppOption, userInfoRes } from "../../../typings/index"
+import { baseUrl } from "../../utils/request"
 import { getUserInfo, userInfo } from "../../utils/localStorage"
 import { uniqueObjectArray } from "../../utils/util"
 import request from "../../utils/request"
@@ -104,8 +105,74 @@ Page<data, Record<string, any>>({
       console.log(this.data.currentUserInfo);
       // this.updateUserInfoResList()
     })
-
-    // 先初始化玩家座位，然后获取房间信息
+    wx.connectSocket({
+      url: 'ws://' + 'b89669be.natappfree.cc' + '/ws/asset', // 你的 WebSocket 服务器地址
+    });
+    // 监听 WebSocket 连接打开事件
+    wx.onSocketOpen((res) => {
+      console.log('WebSocket 已连接:', res);
+    });
+    // 监听 WebSocket 接收到服务器的消息事件
+    wx.onSocketMessage((res) => {
+      wx.hideLoading()
+      console.log(1111111);
+      
+      if (res.data) {
+        if ((res.data as string).includes('type')) {
+          const data = JSON.parse(res.data as string)
+          // 存储用户信息
+          if (data.type === 1) {
+            this.updateUserInfoResList(data.userInfoResList)
+            return
+          }
+          // 修改用户信息
+          if (data.type === 2) {
+            this.updateUserInfoResList(data.userInfoResList)
+            return
+          }
+          // 开始游戏
+          if (data.type === 3) {
+            this.setData({
+              isStart: true
+            })
+            return
+          }
+          // 洗牌
+          if (data.type === 4) {
+            console.log('洗牌');
+            return
+          }
+          // 发牌
+          if (data.type === 5) {
+            // this.updateUserInfoResList(data.userInfoResList)
+            this.data.players.map(item => {
+              if (item.userId === data.userId) {
+                item.pokers = data.pokers
+                return item
+              }
+              item.pokers = ['../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png', '../../assets/poke/Poker/Background.png']
+              return item
+            })
+            this.setData({
+              isGaming: true,
+              players: this.data.players
+            })
+            this.startCountdown()
+            return
+          }
+        }
+        this.setData({
+          session: res.data as string
+        })
+        const params = {
+          type: 1,
+          uid: this.data.currentUserInfo.id,
+          sessionId: this.data.session,
+          roomId: this.data.roomId
+        }
+        this.sendMseeage(params)
+      }
+    });
     this.initPlayers()
 
     // 模拟获取房间信息
@@ -133,8 +200,8 @@ Page<data, Record<string, any>>({
    * 更新玩家列表信息
    */
   updateUserInfoResList(userInfoResList: player[]) {
-    userInfoResList.map((item: player, index: number) => {
-      this.data.players[index] = item
+    userInfoResList.map((item: player, ) => {
+      this.data.players[7] = item
       if (item.userId === this.data.currentUserInfo.id) {
         this.setData({
           currentUser: item.userType === 1 ? 'banker' : 'player',
@@ -237,7 +304,7 @@ Page<data, Record<string, any>>({
       { avatar: defaultAvatarUrl, name: '', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 0, },
       { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
       { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
+      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 1, },
       { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
     ]
     this.setData({ players })
