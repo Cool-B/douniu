@@ -15,7 +15,6 @@ page {
   height: 100%;
   pointer-events: none;
   overflow: hidden;
-  z-index: 10;
 }
 
 .index-container {
@@ -33,6 +32,84 @@ page {
   flex-direction: column;
 }
 
+/* 游戏名称样式 */
+.play-name {
+  position: absolute;
+  top: 20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 56rpx;
+  font-weight: 900;
+  background: linear-gradient(135deg, 
+    #ff3333 0%, 
+    #ff6b35 15%, 
+    #ffd700 30%, 
+    #ff8c00 45%, 
+    #ff4444 60%, 
+    #ffaa00 75%, 
+    #ff2222 100%);
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 
+    0 0 15px rgba(255, 68, 68, 0.3),
+    0 0 30px rgba(255, 140, 0, 0.25),
+    0 0 45px rgba(255, 215, 0, 0.2);
+  letter-spacing: 12rpx;
+  z-index: 100;
+  animation: fireflyFloat 4s ease-in-out infinite, textGlow 2.5s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+  white-space: nowrap;
+  filter: brightness(1.1);
+  -webkit-text-stroke: 1rpx rgba(255, 100, 0, 0.2);
+}
+
+.play-name::before {
+  top: -35rpx;
+  left: -25rpx;
+  animation-delay: 0s;
+}
+
+.play-name::after {
+  top: 35rpx;
+  right: -25rpx;
+  animation-delay: 0.9s;
+}
+
+/* 周围萤火虫光点 */
+.play-name .firefly {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.95) 0%, rgba(255, 140, 0, 0.6) 40%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(0.5rpx) brightness(1.8);
+  box-shadow: 0 0 15rpx rgba(255, 215, 0, 0.6);
+}
+
+.play-name .firefly:nth-child(1) {
+  top: -30rpx;
+  left: 15%;
+  animation: floatAround 4s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.play-name .firefly:nth-child(2) {
+  top: 25rpx;
+  right: 20%;
+  animation: floatAround 4s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+.play-name .firefly:nth-child(3) {
+  bottom: -25rpx;
+  left: 10%;
+  animation: floatAround 4s ease-in-out infinite;
+  animation-delay: 2.4s;
+}
+
+
 .user-welcome {
   position: absolute;
   z-index: 100;
@@ -41,11 +118,12 @@ page {
   display: flex;
   align-items: center;
   border-radius: 30rpx;
-  padding: 5rpx 10rpx;
+  padding: 3rpx;
   backdrop-filter: blur(15px);
-  animation: slideInLeft 0.6s ease-out;
-  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.1);
-  border: 1rpx solid rgba(255, 255, 255, 0.5);
+  animation: slideInLeft 1s ease-out;
+  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.05);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
 
   .user-avatar {
     width: 30rpx;
@@ -57,14 +135,14 @@ page {
 
   .welcome-text {
     font-size: 18rpx;
-    color: #333;
+    color: rgba(51, 51, 51, 0.7);
     font-weight: 600;
   }
 }
 
 .game-section {
   flex: 1;
-  padding: 80rpx 120px 0;
+  padding: 140rpx 40rpx 0;
   border-radius: 30rpx 30rpx 0 0;
   margin-top: -30rpx;
   position: relative;
@@ -81,8 +159,8 @@ page {
 }
 
 .action-buttons {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 4fr));
   gap: 20rpx;
   justify-content: center;
 }
@@ -91,17 +169,19 @@ page {
   background: white;
   border: 2rpx solid #f0f0f0;
   border-radius: 20rpx;
-  padding: 15rpx 10rpx;
+  padding: 10rpx 5rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.1);
-  min-width: 140rpx;
-  max-width: 200rpx;
+  min-width: 120rpx;
+  max-width: 150rpx;
   flex: 1 1 auto;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
 }
 
 .action-btn:active {
@@ -110,29 +190,35 @@ page {
 }
 
 .action-btn[disabled] {
-  opacity: 0.6;
+  opacity: 0.5;
   transform: none;
 }
 
 .btn-icon {
-  font-size: 42rpx;
+  font-size: 32rpx;
   margin-bottom: 12rpx;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: iconGlow 4s ease-in-out infinite;
+  transform-origin: center center;
 }
 
 .btn-text {
-  font-size: 26rpx;
+  font-size: 22rpx;
   font-weight: 600;
   color: #333;
-  margin-bottom: 6rpx;
+  margin-bottom: 3rpx;
   text-align: center;
   word-wrap: break-word;
 }
 
 .btn-desc {
-  font-size: 20rpx;
+  font-size: 16rpx;
   color: #666;
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.1;
 }
 
 /* 响应式布局 */
@@ -185,7 +271,7 @@ page {
 
 .quick-start-btn {
   border-color: #667eea;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.7) 0%, rgba(118, 75, 162, 0.7) 100%);
   color: white;
 }
 
@@ -196,7 +282,7 @@ page {
 
 .join-btn {
   border-color: #f9a602;
-  background: linear-gradient(135deg, #f9a602 0%, #ff7e5f 100%);
+  background: linear-gradient(135deg, rgba(249, 166, 2, 0.7) 0%, rgba(255, 126, 95, 0.7) 100%);
   color: white;
 }
 
@@ -207,7 +293,7 @@ page {
 
 .rules-btn {
   border-color: #333;
-  background: linear-gradient(135deg, #333 0%, #555 100%);
+  background: linear-gradient(135deg, rgba(51, 51, 51, 0.7) 0%, rgba(85, 85, 85, 0.7) 100%);
   color: white;
 }
 
@@ -218,7 +304,7 @@ page {
 
 .mode-btn {
   border-color: #1aad19;
-  background: linear-gradient(135deg, #1aad19 0%, #2ecc71 100%);
+  background: linear-gradient(135deg, rgba(26, 173, 25, 0.7) 0%, rgba(46, 204, 113, 0.7) 100%);
   color: white;
 }
 
@@ -476,6 +562,38 @@ page {
   }
 }
 
+/* 版权信息样式 */
+.copyright {
+  position: absolute;
+  bottom: 20rpx;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 100;
+  animation: slideInUp 1s ease-out both;
+  animation-delay: 1.2s;
+}
+
+.copyright-text {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5rpx);
+  background: rgba(0, 0, 0, 0.1);
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  display: inline-block;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+/* 未登录状态的版权信息 */
+.login-page .copyright {
+  position: fixed;
+  bottom: 20rpx;
+}
+
 /* 加载遮罩 */
 .loading-overlay {
   position: fixed;
@@ -517,7 +635,7 @@ page {
 @keyframes slideInLeft {
   from {
     opacity: 0;
-    transform: translateX(-30rpx);
+    transform: translateX(-60rpx);
   }
 
   to {
@@ -535,6 +653,32 @@ page {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 按钮从左进入动画 */
+@keyframes slideInLeftButton {
+  0% {
+    opacity: 0;
+    transform: translateX(-80rpx) translateY(15rpx) rotate(-8deg) scale(0.7);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) rotate(0) scale(1);
+  }
+}
+
+/* 按钮从右进入动画 */
+@keyframes slideInRightButton {
+  0% {
+    opacity: 0;
+    transform: translateX(80rpx) translateY(15rpx) rotate(8deg) scale(0.7);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) rotate(0) scale(1);
   }
 }
 
@@ -564,4 +708,180 @@ page {
 
 .animate-slide-up {
   animation: slideInUp 0.6s ease-out;
+}
+
+/* 按钮进入动画 */
+.animate-slide-in-left {
+  animation: slideInLeftButton 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRightButton 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* 为不同按钮设置动画延迟 */
+.quick-start-btn {
+  animation-delay: 0.1s;
+}
+
+.join-btn {
+  animation-delay: 0.3s;
+}
+
+.rules-btn {
+  animation-delay: 0.5s;
+}
+
+.mode-btn {
+  animation-delay: 0.7s;
+}
+
+/* 萤火虫主文字浮动动画 */
+@keyframes fireflyFloat {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-10rpx);
+  }
+}
+
+/* 萤火虫发光动画 */
+@keyframes firefly {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+    filter: brightness(1);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(0.8) rotate(90deg);
+    filter: brightness(1.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) rotate(180deg);
+    filter: brightness(2);
+  }
+  75% {
+    opacity: 0.9;
+    transform: scale(1.1) rotate(270deg);
+    filter: brightness(1.8);
+  }
+}
+
+/* 萤火虫粒子环绕动画 */
+@keyframes floatAround {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0.4;
+    filter: brightness(1.2);
+  }
+  20% {
+    transform: translate(20rpx, -25rpx) scale(1.3);
+    opacity: 1;
+    filter: brightness(1.8);
+  }
+  40% {
+    transform: translate(-15rpx, -35rpx) scale(1.2);
+    opacity: 0.9;
+    filter: brightness(1.6);
+  }
+  60% {
+    transform: translate(25rpx, -15rpx) scale(1.1);
+    opacity: 0.8;
+    filter: brightness(1.5);
+  }
+  80% {
+    transform: translate(-10rpx, -20rpx) scale(0.9);
+    opacity: 0.6;
+    filter: brightness(1.3);
+  }
+  100% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0.4;
+    filter: brightness(1.2);
+  }
+}
+
+/* 文字渐变发光动画 */
+@keyframes textGlow {
+  0% {
+    filter: brightness(1.05) drop-shadow(0 0 15px rgba(255, 68, 68, 0.2));
+  }
+  50% {
+    filter: brightness(1.15) drop-shadow(0 0 20px rgba(255, 140, 0, 0.3));
+  }
+  100% {
+    filter: brightness(1.1) drop-shadow(0 0 18px rgba(255, 215, 0, 0.25));
+  }
+}
+
+/* 渐变色流动动画 */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes iconGlow {
+
+  //  来回上下摆懂得动画
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-10rpx);
+  }
+  50% {
+    transform: translateY(0rpx);
+  }
+  75% {
+    transform: translateY(10rpx);
+  }
+  100% {
+    transform: translateY(0);
+
+  }
+}
+
+/* 为每个按钮设置不同的动画延迟 */
+.quick-start-btn .btn-icon {
+  animation-delay: 0s;
+}
+
+.join-btn .btn-icon {
+  animation-delay: 1s;
+}
+
+.rules-btn .btn-icon {
+  animation-delay: 2s;
+}
+
+.mode-btn .btn-icon {
+  animation-delay: 3s;
+}
+
+
+
+/* 按钮悬停效果增强 */
+.action-btn:hover {
+  transform: translateY(-3rpx);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.12);
+}
+
+.action-btn:hover .btn-icon {
+  animation-play-state: paused;
+  filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+}
+
+/* 按钮点击时的效果 */
+.action-btn:active .btn-icon {
+  filter: brightness(0.95);
 }

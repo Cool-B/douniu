@@ -36,7 +36,7 @@
   height: 100%;
 }
 
-.floating-card {
+.floating-card, .falling-card {
   position: absolute;
   width: 60px;
   height: 80px;
@@ -49,6 +49,12 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   border: 2px solid rgba(0, 0, 0, 0.1);
   transition: all 0.5s ease;
+}
+
+/* 飘落卡片特定样式 */
+.falling-card {
+  transition: none;
+  animation: fallGlow 3s infinite alternate;
 }
 
 .card-content {
@@ -70,11 +76,13 @@
 }
 
 /* 根据花色设置颜色 */
-.floating-card:nth-child(odd) .card-suit {
+.floating-card:nth-child(odd) .card-suit,
+.card-content.red .card-suit {
   color: #e74c3c; /* 红心/方块 */
 }
 
-.floating-card:nth-child(even) .card-suit {
+.floating-card:nth-child(even) .card-suit,
+.card-content.black .card-suit {
   color: #2c3e50; /* 黑桃/梅花 */
 }
 
@@ -110,8 +118,18 @@
 }
 
 /* 性能优化 */
-.particle, .floating-card {
+.particle, .floating-card, .falling-card {
   will-change: transform, opacity;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+}
+
+/* 飘落卡片发光效果 */
+@keyframes fallGlow {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+  }
+  100% {
+    filter: brightness(1.2) drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+  }
 }

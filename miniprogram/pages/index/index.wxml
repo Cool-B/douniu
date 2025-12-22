@@ -8,37 +8,47 @@
 
   <!-- 已登录状态 -->
   <view wx:if="{{loginFlag===1}}" class="home-page">
+    <view class="play-name">
+      斗牛
+      <view class="firefly"></view>
+      <view class="firefly"></view>
+      <view class="firefly"></view>
+    </view>
     <view class="user-welcome">
       <image class="user-avatar" src="{{currentUser.avatar}}" mode="aspectFill"></image>
       <text class="welcome-text">{{currentUser.name}}！</text>
     </view>
-
     <view class="game-section animate-fade-in">
       <view class="action-buttons">
-        <button class="action-btn quick-start-btn" bindtap="quickStart" disabled="{{loading}}">
+        <button class="action-btn quick-start-btn animate-slide-in-left" bindtap="quickStart" disabled="{{loading}}">
           <view class="btn-icon">⚡</view>
           <text class="btn-text">快速开始</text>
           <text class="btn-desc">创建新房间</text>
         </button>
 
-        <button class="action-btn join-btn" bindtap="showModal" disabled="{{loading}}">
+        <button class="action-btn join-btn animate-slide-in-right" bindtap="showModal" disabled="{{loading}}">
           <view class="btn-icon">🚪</view>
           <text class="btn-text">加入游戏</text>
           <text class="btn-desc">输入房间号</text>
         </button>
 
-        <button class="action-btn rules-btn" bindtap="showRules">
+        <button class="action-btn rules-btn animate-slide-in-left" bindtap="showRules">
           <view class="btn-icon">📖</view>
           <text class="btn-text">游戏规则</text>
           <text class="btn-desc">了解玩法</text>
         </button>
 
-        <button class="action-btn mode-btn" bindtap="selectMode">
+        <button class="action-btn mode-btn animate-slide-in-right" bindtap="selectMode">
           <view class="btn-icon">👑</view>
           <text class="btn-text">游戏模式</text>
           <text class="btn-desc">敬请期待</text>
         </button>
       </view>
+    </view>
+    
+    <!-- 版权信息 -->
+    <view class="copyright animate-slide-up">
+      <text class="copyright-text">© {{currentYear}} 斗牛游戏 - 仅供娱乐</text>
     </view>
   </view>
 
@@ -77,6 +87,11 @@
         </view>
       </block>
     </view>
+    
+    <!-- 版权信息 -->
+    <view class="copyright animate-slide-up">
+      <text class="copyright-text">© {{currentYear}} 斗牛游戏 - 仅供娱乐</text>
+    </view>
   </view>
 
   <!-- 错误提示 -->
@@ -94,5 +109,6 @@
   <rules-modal visible="{{showRulesModal}}" bind:close="onCloseRules"></rules-modal>
 
   <!-- 房间号弹窗组件 -->
-  <room-modal visible="{{modalShow}}" title="房间号" showQuickStart="{{true}}" bind:close="onCloseModal" bind:cancel="onCancel" bind:confirm="onConfirm"></room-modal>
+  <room-modal visible="{{modalShow}}" title="房间号" showQuickStart="{{true}}" bind:close="onCloseModal"
+    bind:cancel="onCancel" bind:confirm="onConfirm"></room-modal>
 </view>

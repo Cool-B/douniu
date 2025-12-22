@@ -23,7 +23,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
   const { url, data, method = 'POST' } = options;
   
   // 模拟网络延迟
-  await simulateDelay();
+  // await simulateDelay();
   
   try {
     // 根据URL路由到对应的Mock API

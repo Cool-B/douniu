@@ -7,11 +7,11 @@
     </view>
   </view>
 
-  <!-- 浮动卡片效果 -->
+  <!-- 飘落卡片效果 -->
   <view wx:if="{{cards.length > 0}}" class="card-system">
-    <view wx:for="{{cards}}" wx:key="id" class="floating-card" 
-          style="left: {{item.x}}%; transform: rotate({{item.rotation}}deg); opacity: {{item.opacity}}">
-      <view class="card-content">
+    <view wx:for="{{cards}}" wx:key="id" class="falling-card" 
+          style="left: {{item.x}}%;top: {{item.y}}%; transform: rotate({{item.rotation}}deg); opacity: {{item.opacity}}">
+      <view class="card-content {{item.suit === '♥' || item.suit === '♦' ? 'red' : 'black'}}">
         <text class="card-rank">{{item.rank}}</text>
         <text class="card-suit">{{item.suit}}</text>
       </view>

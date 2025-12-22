@@ -24,6 +24,7 @@ Component({
     showRulesModal: false,
     loading: false,
     errorMsg: '',
+    currentYear: new Date().getFullYear(), // 动态获取当前年份
     
     // 动画数据由animation-component组件处理
   },
