@@ -1,5 +1,36 @@
 <!--index.wxml-->
 <view class="index-container">
+  <!-- 背景动画元素 -->
+  <view class="background-animations">
+    <!-- 烟花效果 -->
+    <view class="firework firework-1"></view>
+    <view class="firework firework-2"></view>
+    <view class="firework firework-3"></view>
+    
+    <!-- 浮动方块 -->
+    <view class="floating-cube cube-1"></view>
+    <view class="floating-cube cube-2"></view>
+    <view class="floating-cube cube-3"></view>
+    <view class="floating-cube cube-4"></view>
+    
+    <!-- 闪烁星星 -->
+    <view class="twinkle-star star-1"></view>
+    <view class="twinkle-star star-2"></view>
+    <view class="twinkle-star star-3"></view>
+    <view class="twinkle-star star-4"></view>
+    <view class="twinkle-star star-5"></view>
+    
+    <!-- 扑克牌动画 -->
+    <view class="floating-card card-1">♠</view>
+    <view class="floating-card card-2">♥</view>
+    <view class="floating-card card-3">♦</view>
+    <view class="floating-card card-4">♣</view>
+    <view class="floating-card card-5">A</view>
+    <view class="floating-card card-6">K</view>
+    <view class="floating-card card-7">Q</view>
+    <view class="floating-card card-8">J</view>
+  </view>
+
   <!-- 已登录状态 -->
   <view wx:if="{{loginFlag===1}}" class="home-page">
     <view class="user-welcome">
