@@ -40,25 +40,27 @@ page {
   transform: translateX(-50%);
   font-size: 56rpx;
   font-weight: 900;
-  background: linear-gradient(135deg, 
-    #ff3333 0%, 
-    #ff6b35 15%, 
-    #ffd700 30%, 
-    #ff8c00 45%, 
-    #ff4444 60%, 
-    #ffaa00 75%, 
-    #ff2222 100%);
+  background: linear-gradient(
+    135deg,
+    #ff3333 0%,
+    #ff6b35 15%,
+    #ffd700 30%,
+    #ff8c00 45%,
+    #ff4444 60%,
+    #ffaa00 75%,
+    #ff2222 100%
+  );
   background-size: 300% 300%;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  text-shadow: 
-    0 0 15px rgba(255, 68, 68, 0.3),
-    0 0 30px rgba(255, 140, 0, 0.25),
+  text-shadow: 0 0 15px rgba(255, 68, 68, 0.3), 0 0 30px rgba(255, 140, 0, 0.25),
     0 0 45px rgba(255, 215, 0, 0.2);
   letter-spacing: 12rpx;
   z-index: 100;
-  animation: fireflyFloat 4s ease-in-out infinite, textGlow 2.5s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+  animation: fireflyFloat 4s ease-in-out infinite,
+    textGlow 2.5s ease-in-out infinite alternate,
+    gradientShift 4s ease-in-out infinite;
   white-space: nowrap;
   filter: brightness(1.1);
   -webkit-text-stroke: 1rpx rgba(255, 100, 0, 0.2);
@@ -81,7 +83,12 @@ page {
   position: absolute;
   width: 10rpx;
   height: 10rpx;
-  background: radial-gradient(circle, rgba(255, 215, 0, 0.95) 0%, rgba(255, 140, 0, 0.6) 40%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 215, 0, 0.95) 0%,
+    rgba(255, 140, 0, 0.6) 40%,
+    transparent 70%
+  );
   border-radius: 50%;
   pointer-events: none;
   filter: blur(0.5rpx) brightness(1.8);
@@ -108,7 +115,6 @@ page {
   animation: floatAround 4s ease-in-out infinite;
   animation-delay: 2.4s;
 }
-
 
 .user-welcome {
   position: absolute;
@@ -271,7 +277,11 @@ page {
 
 .quick-start-btn {
   border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.7) 0%, rgba(118, 75, 162, 0.7) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.7) 0%,
+    rgba(118, 75, 162, 0.7) 100%
+  );
   color: white;
 }
 
@@ -282,7 +292,11 @@ page {
 
 .join-btn {
   border-color: #f9a602;
-  background: linear-gradient(135deg, rgba(249, 166, 2, 0.7) 0%, rgba(255, 126, 95, 0.7) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(249, 166, 2, 0.7) 0%,
+    rgba(255, 126, 95, 0.7) 100%
+  );
   color: white;
 }
 
@@ -293,7 +307,11 @@ page {
 
 .rules-btn {
   border-color: #333;
-  background: linear-gradient(135deg, rgba(51, 51, 51, 0.7) 0%, rgba(85, 85, 85, 0.7) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(51, 51, 51, 0.7) 0%,
+    rgba(85, 85, 85, 0.7) 100%
+  );
   color: white;
 }
 
@@ -304,7 +322,11 @@ page {
 
 .mode-btn {
   border-color: #1aad19;
-  background: linear-gradient(135deg, rgba(26, 173, 25, 0.7) 0%, rgba(46, 204, 113, 0.7) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 173, 25, 0.7) 0%,
+    rgba(46, 204, 113, 0.7) 100%
+  );
   color: white;
 }
 
@@ -326,45 +348,12 @@ page {
   z-index: 10;
 }
 
-.login-header {
-  text-align: center;
-  margin-bottom: 60rpx;
-  max-width: 100%;
-  position: relative;
-  z-index: 11;
-}
-
-.login-title {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 20rpx;
-  text-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.5);
-  word-wrap: break-word;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 20rpx 40rpx;
-  border-radius: 25rpx;
-  backdrop-filter: blur(10px);
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
-}
-
-.login-subtitle {
-  font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.4;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 15rpx 30rpx;
-  border-radius: 20rpx;
-  backdrop-filter: blur(10px);
-  border: 1rpx solid rgba(255, 255, 255, 0.1);
-}
-
 .login-form {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 25rpx;
-  padding: 40rpx;
-  width: 100%;
-  max-width: 600rpx;
+  padding: 15rpx;
+  width: 80%;
+  max-width: 400rpx;
   min-width: 280rpx;
   box-shadow: 0 15rpx 40rpx rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
@@ -376,14 +365,14 @@ page {
 
 .avatar-section,
 .nickname-section {
-  margin-bottom: 30rpx;
+  margin-bottom: 10rpx;
 }
 
 .section-label {
   display: block;
-  font-size: 26rpx;
+  font-size: 16rpx;
   color: #333;
-  margin-bottom: 15rpx;
+  margin-bottom: 5rpx;
   font-weight: 500;
 }
 
@@ -392,8 +381,8 @@ page {
   background: transparent;
   border: 2rpx dashed #ddd;
   border-radius: 50%;
-  width: 100rpx !important;
-  height: 100rpx;
+  width: 40rpx !important;
+  height: 40rpx;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -432,12 +421,12 @@ page {
 .nickname-input {
   border: 2rpx solid #e0e0e0;
   border-radius: 12rpx;
-  padding: 20rpx;
-  font-size: 26rpx;
+  padding: 10rpx 5rpx;
+  height: 16rpx;
+  font-size: 16rpx;
   background: #f8f9fa;
   transition: all 0.3s ease;
   width: 100%;
-  box-sizing: border-box;
 }
 
 .nickname-input:focus {
@@ -451,8 +440,8 @@ page {
   color: white;
   border: none;
   border-radius: 12rpx;
-  padding: 24rpx;
-  font-size: 28rpx;
+  padding: 8rpx;
+  font-size: 14rpx;
   font-weight: 500;
   width: 100%;
   transition: all 0.3s ease;
@@ -505,11 +494,6 @@ page {
     font-size: 24rpx;
     padding: 18rpx;
   }
-
-  .login-submit-btn {
-    font-size: 26rpx;
-    padding: 22rpx;
-  }
 }
 
 /* 错误提示 */
@@ -532,7 +516,7 @@ page {
   backdrop-filter: blur(10px);
 
   &::before {
-    content: '⚠️';
+    content: "⚠️";
     margin-right: 12rpx;
     font-size: 24rpx;
   }
@@ -551,7 +535,6 @@ page {
 }
 
 @keyframes errorPulse {
-
   0%,
   100% {
     box-shadow: 0 8rpx 25rpx rgba(255, 107, 107, 0.4);
@@ -738,7 +721,8 @@ page {
 
 /* 萤火虫主文字浮动动画 */
 @keyframes fireflyFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(-50%) translateY(0);
   }
   50% {
@@ -748,7 +732,8 @@ page {
 
 /* 萤火虫发光动画 */
 @keyframes firefly {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
     transform: scale(0.3) rotate(0deg);
     filter: brightness(1);
@@ -831,7 +816,6 @@ page {
 }
 
 @keyframes iconGlow {
-
   //  来回上下摆懂得动画
   0% {
     transform: translateY(0);
@@ -847,7 +831,6 @@ page {
   }
   100% {
     transform: translateY(0);
-
   }
 }
 
@@ -867,8 +850,6 @@ page {
 .mode-btn .btn-icon {
   animation-delay: 3s;
 }
-
-
 
 /* 按钮悬停效果增强 */
 .action-btn:hover {

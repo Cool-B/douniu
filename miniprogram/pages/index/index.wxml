@@ -3,7 +3,7 @@
   <!-- 新的高级动画系统 -->
   <view class="background-animations">
     <!-- 使用新的动画组件 -->
-    <animation-component enableAnimation="{{true}}" animationType="both"></animation-component>
+    <!-- <animation-component enableAnimation="{{true}}" animationType="both"></animation-component> -->
   </view>
 
   <!-- 已登录状态 -->
@@ -45,7 +45,7 @@
         </button>
       </view>
     </view>
-    
+
     <!-- 版权信息 -->
     <view class="copyright animate-slide-up">
       <text class="copyright-text">© {{currentYear}} 斗牛游戏 - 仅供娱乐</text>
@@ -54,11 +54,6 @@
 
   <!-- 未登录状态 -->
   <view wx:elif="{{loginFlag===2}}" class="login-page">
-    <view class="login-header">
-      <text class="login-title">斗牛扑克</text>
-      <text class="login-subtitle">经典扑克游戏，体验刺激对决</text>
-    </view>
-
     <view class="login-form animate-slide-up">
       <block wx:if="{{canIUseNicknameComp && !hasUserInfo}}">
         <view class="avatar-section">
@@ -68,29 +63,22 @@
             <view class="avatar-overlay">点击更换</view>
           </button>
         </view>
-
         <view class="nickname-section">
           <text class="section-label">设置昵称</text>
           <input type="nickname" class="nickname-input" placeholder="请输入您的游戏昵称" bind:change="onInputChange" />
         </view>
 
-        <button class="login-submit-btn" bindtap="bindViewTap" disabled="{{loading}}">
-          <text wx:if="{{!loading}}">开始游戏</text>
-          <text wx:else class="loading-text">登录中...</text>
-        </button>
       </block>
-
       <block wx:elif="{{!hasUserInfo}}">
         <view class="compatibility-warning">
           <text wx:if="{{canIUseGetUserProfile}}">请使用微信授权登录</text>
           <text wx:else>请使用2.10.4及以上版本基础库</text>
         </view>
       </block>
-    </view>
-    
-    <!-- 版权信息 -->
-    <view class="copyright animate-slide-up">
-      <text class="copyright-text">© {{currentYear}} 斗牛游戏 - 仅供娱乐</text>
+      <button class="login-submit-btn" bindtap="bindViewTap" disabled="{{loading}}">
+        <text wx:if="{{!loading}}">开始游戏</text>
+        <text wx:else class="loading-text">登录中...</text>
+      </button>
     </view>
   </view>
 
@@ -109,6 +97,5 @@
   <rules-modal visible="{{showRulesModal}}" bind:close="onCloseRules"></rules-modal>
 
   <!-- 房间号弹窗组件 -->
-  <room-modal visible="{{modalShow}}" title="房间号" showQuickStart="{{true}}" bind:close="onCloseModal"
-    bind:cancel="onCancel" bind:confirm="onConfirm"></room-modal>
+  <room-modal visible="{{modalShow}}" title="房间号" showQuickStart="{{true}}" bind:close="onCloseModal" bind:cancel="onCancel" bind:confirm="onConfirm"></room-modal>
 </view>
