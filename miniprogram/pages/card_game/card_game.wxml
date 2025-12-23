@@ -8,8 +8,7 @@
           <block wx:if="{{item.name}}">
             <view class="player-pokes" bindtap="checkPokes" data-index="{{index}}">
               <view wx:if="{{item.show}}">
-                <image wx:for="{{item.pokes}}" wx:key="index" class="player-poke"
-                  src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
+                <image wx:for="{{item.pokes}}" wx:key="index" class="player-poke" src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
               </view>
               <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item}}" mode="" />
             </view>
@@ -18,15 +17,14 @@
               <view class="player-text">{{item.name}}</view>
               <view class="player-bet">{{item.bet}}</view>
               <view class="player-score">{{item.score}}</view>
-              <view wx:if="{{!isGaming&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip"
-                data-index="{{index}}"></view>
+              <view wx:if="{{!isGaming&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip" data-index="{{index}}"></view>
             </view>
           </block>
           <view wx:if="{{item.name===''}}">
           </view>
         </block>
         <block wx:if="{{!item.userId&&index!==4}}">
-        
+
         </block>
       </view>
     </block>
@@ -43,8 +41,7 @@
       <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
     </block>
     <block wx:if="{{isGaming&&isStart}}">
-      <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" disabled='{{!isAllShow}}'
-        bindtap="settlementCurrent">结算</button>
+      <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" disabled='{{!isAllShow}}' bindtap="settlementCurrent">结算</button>
       <button class="show-cards btn" bindtap="showCards">亮牌</button>
     </block>
     <block wx:if="{{!isStart}}">
@@ -62,8 +59,7 @@
       </view>
     </picker>
   </block>
-  <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal"
-    bindconfirm="confirmModal">
+  <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal" bindconfirm="confirmModal">
     <view>弹窗内容：{{modalData}}1111111</view>
   </modal>
   <view class="room-num">

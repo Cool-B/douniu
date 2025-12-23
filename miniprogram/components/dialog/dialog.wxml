@@ -1,4 +1,0 @@
-<view class="container">
-  <text>{{title}}</text>
- <button class="button" bindtap="handleClick">点击我</button>
-</view>
