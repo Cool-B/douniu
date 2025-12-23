@@ -2,8 +2,6 @@
 <view class="index-container">
   <!-- 新的高级动画系统 -->
   <view class="background-animations">
-    <!-- 使用新的动画组件 -->
-    <!-- <animation-component enableAnimation="{{true}}" animationType="both"></animation-component> -->
   </view>
 
   <!-- 已登录状态 -->

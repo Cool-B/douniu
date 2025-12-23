@@ -25,7 +25,7 @@ Component({
     loading: false,
     errorMsg: '',
     currentYear: new Date().getFullYear(), // 动态获取当前年份
-    
+
     // 动画数据由animation-component组件处理
   },
   methods: {
@@ -59,6 +59,8 @@ Component({
     onChooseAvatar(e: any) {
       const { avatarUrl } = e.detail
       const { nickName } = this.data.userInfo
+      console.log(avatarUrl, nickName);
+
       this.setData({
         "userInfo.avatarUrl": avatarUrl,
         hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
@@ -70,6 +72,7 @@ Component({
     onInputChange(e: any) {
       const nickName = e.detail.value
       const { avatarUrl } = this.data.userInfo
+      console.log(avatarUrl, nickName);
       this.setData({
         "userInfo.nickName": nickName,
         hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
@@ -99,6 +102,8 @@ Component({
               name: this.data.userInfo.nickName,
               avatar: this.data.userInfo.avatarUrl
             }).then(response => {
+              console.log(response);
+
               if (response.code === 200 && response.data) {
                 setUserInfo(response.data.data)
                 this.setData({

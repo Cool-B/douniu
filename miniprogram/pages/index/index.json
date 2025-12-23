@@ -1,7 +1,6 @@
 {
   "usingComponents": {
     "rules-modal": "/components/rules-modal/rules-modal",
-    "room-modal": "/components/room-modal/room-modal",
-    "animation-component": "/pages/index/animation-component"
+    "room-modal": "/components/room-modal/room-modal"
   }
 }
