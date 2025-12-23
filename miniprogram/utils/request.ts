@@ -21,21 +21,23 @@ export const baseUrl = 'http://b89669be.natappfree.cc'
 
 const request = async (options: RequestOptions & defaultConfig): Promise<ResponseResult<any>> => {
   const { url, data, method = 'POST' } = options;
-  
+
   // 模拟网络延迟
   // await simulateDelay();
-  
+
   try {
     // 根据URL路由到对应的Mock API
     switch (url) {
       case '/api/wx/user/login':
+        console.log(data);
+
         const loginResult = await mockApi.login(data);
         return {
           code: loginResult.code,
           data: loginResult.data,
           msg: loginResult.message
         };
-        
+
       case '/poker/createRoom':
         const createRoomResult = await mockApi.createRoom(data);
         return {
@@ -43,7 +45,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: createRoomResult.data,
           msg: createRoomResult.message
         };
-        
+
       case '/poker/joinRoom':
         const joinRoomResult = await mockApi.joinRoom(data);
         return {
@@ -51,7 +53,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: joinRoomResult.data,
           msg: joinRoomResult.message
         };
-        
+
       case '/poker/getRoomInfo':
         const getRoomInfoResult = await mockApi.getRoomInfo(data);
         return {
@@ -59,7 +61,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: getRoomInfoResult.data,
           msg: getRoomInfoResult.message
         };
-        
+
       case '/poker/startGame':
         const startGameResult = await mockApi.startGame(data);
         return {
@@ -67,7 +69,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: startGameResult.data,
           msg: startGameResult.message
         };
-        
+
       case '/poker/gameAction':
         const gameActionResult = await mockApi.gameAction(data);
         return {
@@ -75,7 +77,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: gameActionResult.data,
           msg: gameActionResult.message
         };
-        
+
       case '/poker/exitRoom':
         const exitRoomResult = await mockApi.exitRoom(data);
         return {
@@ -83,7 +85,7 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: exitRoomResult.data,
           msg: exitRoomResult.message
         };
-        
+
       default:
         // 默认返回成功响应
         return {

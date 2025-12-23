@@ -10,8 +10,30 @@ export interface userInfo {
 }
 
 export interface roomInfo {
-  roomId: number
-  roomNumber: number
+  roomId: number,
+  roomNumber: number,
+  // 当前所有的玩家信息
+  players: player[],
+  // 这个房间是否正在游戏中
+  isGaming: boolean,
+  // 是否开始本局游戏
+  isStart: boolean,
+}
+export interface player {
+  name: string
+  bet?: number,
+  lookHand?: boolean
+  showOther?: boolean
+  pokers?: string[],
+  // 积分
+  score: number,
+  // 1.正常2.退出房间/被踢出房间3.离线   
+  state: number,
+  // 1.待准备2.已准备
+  status: number,
+  userId: number,
+  roomId: number,
+  userType: number,
 }
 
 export function setUserInfo(userInfo: userInfo) {
@@ -34,10 +56,12 @@ export function removeUserInfo() {
 }
 
 export function setRoomInfo(roomInfo: roomInfo) {
-  wx.setStorageSync('roomInfo', JSON.stringify(roomInfo));
+  const localRoomInfo = getRoomInfo()
+  localRoomInfo.push(roomInfo)
+  wx.setStorageSync('roomInfo', JSON.stringify([...new Set(localRoomInfo)]));
 }
-export function getRoomInfo(): roomInfo | '' {
-  if (!wx.getStorageSync('roomInfo')) return ''
+export function getRoomInfo(): roomInfo[] {
+  if (!wx.getStorageSync('roomInfo')) return []
   return JSON.parse(wx.getStorageSync('roomInfo'));
 }
 export function removeRoomInfo() {

@@ -30,12 +30,6 @@
     </block>
   </view>
   <block wx:if="{{currentUser==='banker'}}">
-
-    <!-- <view class="dealing" wx:else>
-    <block wx:for="{{dealtCards}}" wx:key="index">
-      <image class="card" src="/images/card_{{item}}.png" />
-    </block>
-  </view> -->
     <block wx:if="{{!isGaming&&isStart}}">
       <button class="deal-cards btn" bindtap="dealCards">发牌</button>
       <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
@@ -64,5 +58,8 @@
   </modal>
   <view class="room-num">
     房间号：{{roomNumber}}
+  </view>
+  <view class="go-out">
+    退出房间
   </view>
 </view>

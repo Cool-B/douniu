@@ -3,7 +3,7 @@
 
 import { IAppOption } from "../../typings/index";
 import { createRoom, login, joinRoom } from "../../api/index";
-import { getUserInfo, setUserInfo, userInfo, getRoomInfo, setRoomInfo } from "../../utils/localStorage";
+import { getUserInfo, setUserInfo, userInfo, getRoomInfo, setRoomInfo, removeRoomInfo } from "../../utils/localStorage";
 
 const app = getApp<IAppOption>()
 const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
@@ -30,27 +30,33 @@ Component({
   },
   methods: {
     onLoad() {
-      // 检查房间状态，如果在房间内则自动跳转
-      const roomInfo = getRoomInfo();
-      if (roomInfo && roomInfo.roomId) {
-        app.globalData.roomId = roomInfo.roomId;
-        app.globalData.roomNumber = roomInfo.roomNumber;
-        wx.reLaunch({
-          url: '../card_game/card_game'
-        });
-        return;
-      }
-
-      // 监听 WebSocket 连接关闭事件
-      wx.onSocketClose(function (res) {
-        console.log('WebSocket 已关闭:', res);
-      });
-
       const userInfo = getUserInfo();
       this.setData({
         loginFlag: userInfo === '' ? 2 : 1,
         currentUser: userInfo === '' ? null : userInfo
       })
+      // 检查房间状态，如果在房间内则自动跳转
+      const roomInfo = getRoomInfo();
+      console.log(roomInfo);
+      if (roomInfo) {
+        roomInfo.forEach(info => {
+          const flag = info.players.some(item => item && item.userId === this.data.currentUser.id)
+          if (flag) {
+            app.globalData.roomId = info.roomId;
+            app.globalData.roomNumber = info.roomNumber;
+            wx.reLaunch({
+              url: '../card_game/card_game'
+            });
+          }
+        })
+        return;
+      }
+      // 监听 WebSocket 连接关闭事件
+      wx.onSocketClose(function (res) {
+        console.log('WebSocket 已关闭:', res);
+      });
+
+
     },
 
 
@@ -59,8 +65,6 @@ Component({
     onChooseAvatar(e: any) {
       const { avatarUrl } = e.detail
       const { nickName } = this.data.userInfo
-      console.log(avatarUrl, nickName);
-
       this.setData({
         "userInfo.avatarUrl": avatarUrl,
         hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
@@ -72,7 +76,6 @@ Component({
     onInputChange(e: any) {
       const nickName = e.detail.value
       const { avatarUrl } = this.data.userInfo
-      console.log(avatarUrl, nickName);
       this.setData({
         "userInfo.nickName": nickName,
         hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
@@ -102,13 +105,11 @@ Component({
               name: this.data.userInfo.nickName,
               avatar: this.data.userInfo.avatarUrl
             }).then(response => {
-              console.log(response);
-
               if (response.code === 200 && response.data) {
-                setUserInfo(response.data.data)
+                setUserInfo(response.data)
                 this.setData({
                   loginFlag: 1,
-                  currentUser: response.data.data
+                  currentUser: response.data
                 })
                 wx.showToast({
                   title: '登录成功',
@@ -158,10 +159,10 @@ Component({
           app.globalData.roomId = roomData.roomInfo.roomId;
           app.globalData.roomNumber = roomData.roomInfo.roomNumber;
           // 保存房间信息到本地存储
-          setRoomInfo({
-            roomId: roomData.roomId,
-            roomNumber: roomData.roomNumber
-          });
+          // setRoomInfo({
+          //   roomId: roomData.roomId,
+          //   roomNumber: roomData.roomNumber
+          // });
 
           wx.showToast({
             title: '房间创建成功',
@@ -255,10 +256,10 @@ Component({
           app.globalData.roomNumber = roomData.roomNumber;
 
           // 保存房间信息到本地存储
-          setRoomInfo({
-            roomId: roomData.roomId,
-            roomNumber: roomData.roomNumber
-          });
+          // setRoomInfo({
+          //   roomId: roomData.roomId,
+          //   roomNumber: roomData.roomNumber
+          // });
 
           wx.showToast({
             title: '加入房间成功',

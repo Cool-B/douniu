@@ -3,20 +3,17 @@
   // 想要一个高级点的绿色
   background-color: green;
 }
-
-.room-num {
-  position: absolute;
-  z-index: 999;
-  left: 50%;
-  top: 40%;
-  color: #fff;
-  font-size: 25rpx;
-  transform: translateX(-50%);
-}
-
 .room-num {
   position: absolute;
   z-index: -1;
+  right: 60rpx;
+  top: 10rpx;
+  color: #fff;
+  font-size: 10rpx;
+  transform: translateX(-50%);
+}
+.go-out {
+  position: absolute;
   left: 60rpx;
   top: 10rpx;
   color: #fff;
@@ -61,6 +58,7 @@
       justify-content: space-between;
       align-items: center;
       width: 90%;
+      margin-bottom: 10rpx;
       .player-avatar {
         width: 40rpx;
         height: 40rpx;
@@ -72,10 +70,10 @@
         color: #fff;
         flex: 2;
       }
-      .player-bet{
+      .player-bet {
         flex: 2;
       }
-      .player-score{
+      .player-score {
         flex: 2;
         font-size: 15rpx;
       }
@@ -88,22 +86,31 @@
       left: 50%;
       transform: translateX(-50%);
       top: -24px;
+      font-size: 18rpx;
+      font-weight: 600;
+      background: linear-gradient(
+        135deg,
+        #ff3333 0%,
+        #ff6b35 15%,
+        #ffd700 30%,
+        #ff8c00 45%,
+        #ff4444 60%,
+        #ffaa00 75%,
+        #ff2222 100%
+      );
+      background-size: 300% 300%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 15px rgba(255, 68, 68, 0.3),
+        0 0 30px rgba(255, 140, 0, 0.25), 0 0 45px rgba(255, 215, 0, 0.2);
+      letter-spacing: 6rpx;
     }
 
     .ready-tip {
       background-color: transparent;
     }
   }
-
-  .banker-tip,
-  .player-score {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    font-size: 30rpx;
-    text-align: center;
-  }
-
 
   .handle-poke {
     width: 60%;
@@ -130,7 +137,13 @@
     display: flex;
     position: relative;
     height: 150rpx;
-    width: 100%;
+    width: 60%;
+    min-width: 100rpx;
+    border-radius: 40rpx;
+    box-shadow: 0 0 black;
+    border: 1rpx solid #ccc;
+    background: radial-gradient(transparent, black);
+    margin: 5rpx;
 
     .player-poke {
       position: absolute;
@@ -161,36 +174,6 @@
     }
   }
 
-  .player0,
-  .player1,
-  .player2 {
-    .banker-tip {
-      bottom: 0rpx;
-    }
-
-    .player-score {
-      bottom: 80rpx;
-      font-size: larger;
-      font-weight: 700;
-    }
-  }
-
-  .player6,
-  .player7,
-  .player8 {
-    .banker-tip {
-      top: -10rpx;
-    }
-  }
-
-  .player3,
-  .player5,
-  .player6,
-  .player7,
-  .player8 {
-    flex-direction: column-reverse;
-  }
-
   .cancel_ready {
     background-color: red;
   }
@@ -205,8 +188,8 @@
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
   width: auto !important;
-  background-color: green;
-  color: #fff;
+  background-color: rgb(195, 219, 108);
+  color: rgb(54, 31, 31);
   padding: 6px 12px;
 }
 
@@ -244,7 +227,7 @@
   top: 60%;
 }
 
-// 
+//
 .start-dealing {
   margin-top: 20px;
   background-color: #1aad19;

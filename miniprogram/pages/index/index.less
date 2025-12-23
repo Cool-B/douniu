@@ -180,7 +180,7 @@ page {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 1s ease;
   box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.1);
   min-width: 120rpx;
   max-width: 150rpx;
@@ -207,7 +207,7 @@ page {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  animation: iconGlow 4s ease-in-out infinite;
+  animation: iconGlow 2s ease-in-out infinite;
   transform-origin: center center;
 }
 
@@ -816,21 +816,14 @@ page {
 }
 
 @keyframes iconGlow {
-  //  来回上下摆懂得动画
   0% {
-    transform: translateY(0);
-  }
-  25% {
-    transform: translateY(-10rpx);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(0rpx);
-  }
-  75% {
-    transform: translateY(10rpx);
+    transform: translate3d(0, -10rpx, 0);
   }
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 

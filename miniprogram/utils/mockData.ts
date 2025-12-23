@@ -195,12 +195,17 @@ function shuffleArray<T>(array: T[]): T[] {
 // Mock响应数据
 const mockResponses = {
   // 登录响应
-  login: {
-    code: 200,
-    message: "登录成功",
-    data: {
-      userInfo: mockUsers[0],
-      token: "mock_token_1001"
+  login: (data: { code: string; name: string; avatar: string }) => {
+    const userInfo = {
+      ...mockUsers[0],
+      ...data,
+      token: "mock_token_1001",
+      username: data.name
+    }
+    return {
+      code: 200,
+      message: "登录成功",
+      data: userInfo
     }
   },
 
@@ -303,7 +308,7 @@ export const mockApi = {
   // 用户登录
   async login(data: { code: string; name: string; avatar: string }) {
     await simulateDelay();
-    return mockResponses.login;
+    return mockResponses.login(data);
   },
 
   // 创建房间
