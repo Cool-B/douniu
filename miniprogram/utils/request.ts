@@ -29,8 +29,6 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
     // 根据URL路由到对应的Mock API
     switch (url) {
       case '/api/wx/user/login':
-        console.log(data);
-
         const loginResult = await mockApi.login(data);
         return {
           code: loginResult.code,
@@ -61,14 +59,14 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: getRoomInfoResult.data,
           msg: getRoomInfoResult.message
         };
-        case '/poker/assAssistant':
-          const assAssistantResult = await mockApi.assAssistant(data);
-          return {
-            code: assAssistantResult.code,
-            data: assAssistantResult.data,
-            msg: assAssistantResult.message
-          };
-        
+      case '/poker/assAssistant':
+        const assAssistantResult = await mockApi.assAssistant(data);
+        return {
+          code: assAssistantResult.code,
+          data: assAssistantResult.data,
+          msg: assAssistantResult.message
+        };
+
       case '/poker/startGame':
         const startGameResult = await mockApi.startGame(data);
         return {

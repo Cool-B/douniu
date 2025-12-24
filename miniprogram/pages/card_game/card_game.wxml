@@ -23,7 +23,7 @@
             </view>
           </block>
           <block wx:else>
-            <view class="add-assistant" bindtap="assAssistant" data-item="{{item}}" data-index="{{index}}"></view>
+            <view wx:if="{{item.userType===1}}" class="add-assistant" bindtap="assAssistant" data-item="{{item}}" data-index="{{index}}"></view>
           </block>
         </block>
       </view>

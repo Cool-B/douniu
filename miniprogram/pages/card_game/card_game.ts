@@ -60,7 +60,7 @@ Page<data, Record<string, any>>({
     // 当前用户的下注大小
     selectedValue: 0,
     isReady: false,
-    isAllShow: false
+    isAllShow: false,
   },
   showLoading(title?: string, mask?: boolean) {
     wx.showLoading({
@@ -69,17 +69,13 @@ Page<data, Record<string, any>>({
     });
   },
   hideLoading() {
-    console.log(1);
-
     wx.hideLoading()
-    console.log(1);
   },
   onLoad() {
     // 显示全屏loading
     this.showLoading()
     const roomInfo = getRoomInfo();
     const currentUserInfo = getUserInfo() as userInfo
-    console.log(roomInfo);
     if (roomInfo) {
       roomInfo.forEach(info => {
         const flag = info.players.some(item => item && item.userId === currentUserInfo.id)
@@ -87,8 +83,6 @@ Page<data, Record<string, any>>({
           this.setData({
             roomInfo: info
           }, () => {
-            console.log(roomInfo);
-
             wx.hideLoading();
           })
         }
@@ -216,7 +210,6 @@ Page<data, Record<string, any>>({
     });
   },
   confirmModal() {
-    console.log('用户点击了确认按钮');
     this.setData({
       modalVisible: false
     });
@@ -293,33 +286,43 @@ Page<data, Record<string, any>>({
       setRoomInfo(this.data.roomInfo);
     })
   },
-  // 发牌
+  // 发牌 - 延迟发牌效果
   dealCards() {
     this.showLoading('发牌中')
-    // const params = {
-    //   type: 5,
-    //   roomId: this.data.roomInfo.roomId,
-    //   uid: this.data.currentUserInfo.id,
-    // }
-    // this.sendMseeage(params)
-    // const playerCount = this.data.roomInfo.players.filter(info => info.status === 2 || info.userType === 1)
-
-    const pokers = this.data.pokers
-    const rounds = 5
-    for (let round = 0; round < rounds; round++) {
-      this.data.roomInfo.players.map(player => {
-        if ((player.status === 2 || player.userType === 1) && player.pokers.length !== 5) {
-          player.pokers.push(pokers[0])
-          pokers.splice(0, 1)
-        }
-        return player
-      })
-      this.setData({
-        roomInfo: this.data.roomInfo,
-        pokers
-      })
+    const pokers = [...this.data.pokers]
+    const players = this.data.roomInfo.players.filter(player =>
+      (player.status === 2 || player.userType === 1) && player.pokers.length !== 5
+    )
+    if (players.length === 0) {
+      this.hideLoading()
+      return
     }
-    this.hideLoading()
+    let currentPlayerIndex = 0
+    // 发牌动画函数
+    const dealNextCard = () => {
+      const currentPlayer = players[currentPlayerIndex]
+      if (currentPlayer.pokers.length < 5 && pokers.length > 0) {
+        // 延迟显示卡片
+        setTimeout(() => {
+          currentPlayer.pokers.push(pokers[0])
+          pokers.splice(0, 1)
+          this.setData({
+            roomInfo: this.data.roomInfo,
+            pokers,
+          })
+          // 移动到下一个玩家
+          currentPlayerIndex = (currentPlayerIndex + 1) % players.length
+          // 继续发下一张牌
+          setTimeout(dealNextCard, 300)
+        }, 1000)
+      } else {
+        this.hideLoading()
+      }
+    }
+    // 开始发牌
+    setTimeout(() => {
+      dealNextCard()
+    }, 1000)
   },
   // 是不是炸弹
   isBoom(cards: poke[]) {
@@ -477,8 +480,6 @@ Page<data, Record<string, any>>({
   },
   assAssistant(event: { currentTarget: { dataset: { item: any; index: any; }; }; }) {
     const { item, index } = event.currentTarget.dataset;
-    console.log(item, index);
-
     assAssistant({ roomId: item.roomId, seatIndex: index }).then(res => {
       if (res.code === 200) {
         const { roomInfo } = res.data

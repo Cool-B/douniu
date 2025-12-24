@@ -52,7 +52,6 @@ Component({
       }
       // 监听 WebSocket 连接关闭事件
       wx.onSocketClose(function (res) {
-        console.log('WebSocket 已关闭:', res);
       });
 
 
@@ -153,7 +152,6 @@ Component({
       createRoom({ userId: this.data.currentUser.id, roomType: 2 }).then(response => {
         if (response.code === 200 && response.data) {
           const roomInfo = response.data.roomInfo;
-          console.log(roomInfo);
           app.globalData.roomId = roomInfo.roomId;
           app.globalData.roomNumber = roomInfo.roomNumber;
           // 保存房间信息到本地存储
@@ -175,7 +173,6 @@ Component({
           this.showError(response.msg || '创建房间失败，请稍后重试', 3000);
         }
       }).catch((err) => {
-        console.log(err);
         this.showError('网络连接异常，请检查网络后重试', 3000);
       }).finally(() => {
         this.setData({ loading: false });
