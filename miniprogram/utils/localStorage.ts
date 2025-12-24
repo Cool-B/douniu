@@ -1,3 +1,5 @@
+import { poke } from "../pages/card_game/card_game";
+
 export interface userInfo {
   avatar: string
   id: number
@@ -12,6 +14,7 @@ export interface userInfo {
 export interface roomInfo {
   roomId: number,
   roomNumber: number,
+  creatorId: number
   // 当前所有的玩家信息
   players: player[],
   // 这个房间是否正在游戏中
@@ -21,10 +24,11 @@ export interface roomInfo {
 }
 export interface player {
   name: string
+  avatar: string
   bet?: number,
   lookHand?: boolean
   showOther?: boolean
-  pokers?: string[],
+  pokers: poke[],
   // 积分
   score: number,
   // 1.正常2.退出房间/被踢出房间3.离线   
@@ -57,8 +61,15 @@ export function removeUserInfo() {
 
 export function setRoomInfo(roomInfo: roomInfo) {
   const localRoomInfo = getRoomInfo()
-  localRoomInfo.push(roomInfo)
-  wx.setStorageSync('roomInfo', JSON.stringify([...new Set(localRoomInfo)]));
+  const roomIndex = localRoomInfo.findIndex(room => room.roomId === roomInfo.roomId);
+  if (roomIndex !== -1) {
+    // 存在则替换（使用扩展运算符保持响应性）
+    localRoomInfo.splice(roomIndex, 1, { ...roomInfo });
+  } else {
+    // 不存在则添加
+    localRoomInfo.push({ ...roomInfo });
+  }
+  wx.setStorageSync('roomInfo', JSON.stringify(localRoomInfo));
 }
 export function getRoomInfo(): roomInfo[] {
   if (!wx.getStorageSync('roomInfo')) return []
@@ -68,6 +79,14 @@ export function removeRoomInfo() {
   wx.removeStorageSync('roomInfo');
 }
 
-export function removeAll() {
+export function removeAll(roomId?: number) {
+  if (roomId) {
+    const localRoomInfo = getRoomInfo()
+    const roomIndex = localRoomInfo.findIndex(room => room.roomId === roomId);
+    if (roomIndex !== -1) {
+      localRoomInfo.splice(roomIndex, 1,);
+    }
+    return wx.setStorageSync('roomInfo', JSON.stringify(localRoomInfo));
+  }
   wx.clearStorageSync();
 }

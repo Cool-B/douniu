@@ -1,16 +1,15 @@
-import { IAppOption } from "../../../typings/index"
-import { baseUrl } from "../../utils/request"
-import { getUserInfo, roomInfo, setRoomInfo, userInfo, player } from "../../utils/localStorage"
+// import { IAppOption } from "../../../typings/index"
+// import { baseUrl } from "../../utils/request"
+import { assAssistant } from "../../api/index";
+import { getUserInfo, roomInfo, setRoomInfo, userInfo, player, getRoomInfo, removeAll } from "../../utils/localStorage"
 import { uniqueObjectArray } from "../../utils/util"
-import request from "../../utils/request"
-const app = getApp<IAppOption>()
-const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
+// import request from "../../utils/request"
 interface data {
   roomInfo: roomInfo,
   // 当前玩家信息
   currentUserInfo: userInfo,
   session: string,
-  pokers?: poke[],
+  pokers: poke[],
   range: number[],
   playerNumber: playerNumber[],
   selectedValue: number,
@@ -22,13 +21,13 @@ interface data {
 }
 interface playerNumber { has: boolean, number: number, id: number, maxCard?: { number: number, suit: string }, isBoth?: boolean, isBoom: boolean }
 
-interface poke {
+export interface poke {
   suit: string,
   number: number,
   url?: string
 }
 //     方块     梅花        红桃     黑桃 
-const suit = ['Spade', 'Heart', 'Club', 'Diamond',]
+const suits = ['Spade', 'Heart', 'Club', 'Diamond',]
 Page<data, Record<string, any>>({
   data: {
     roomInfo: {
@@ -37,6 +36,7 @@ Page<data, Record<string, any>>({
       isGaming: false,
       players: [],
       isStart: false,
+      creatorId: 0
     },
     session: '',
     // 当前登录人的身份信息
@@ -68,21 +68,37 @@ Page<data, Record<string, any>>({
       mask: mask === undefined ? true : mask, // 是否显示透明蒙层，防止触摸穿透，默认：false
     });
   },
+  hideLoading() {
+    console.log(1);
+
+    wx.hideLoading()
+    console.log(1);
+  },
   onLoad() {
     // 显示全屏loading
     this.showLoading()
-    const { roomId, roomNumber } = app.globalData
+    const roomInfo = getRoomInfo();
+    const currentUserInfo = getUserInfo() as userInfo
+    console.log(roomInfo);
+    if (roomInfo) {
+      roomInfo.forEach(info => {
+        const flag = info.players.some(item => item && item.userId === currentUserInfo.id)
+        if (flag) {
+          this.setData({
+            roomInfo: info
+          }, () => {
+            console.log(roomInfo);
+
+            wx.hideLoading();
+          })
+        }
+      })
+    }
     this.setData({
-      roomId,
-      roomNumber,
-      currentUserInfo: getUserInfo() as userInfo
+      currentUserInfo
     }, () => {
       wx.hideLoading();
-      this.initPlayers()
       // 1.创建房间进来的时候，当前用户就是房主，并且只有当前用户
-      const { avatar, name, id } = this.data.currentUserInfo
-      const userInfoResList = [{ avatar, name, score: 0, state: 1, status: 2, userId: id, roomId, pokers: [], userType: 1, }]
-      this.updateUserInfoResList(userInfoResList)
     })
     // websocket暂时注释
     // wx.connectSocket({
@@ -156,44 +172,37 @@ Page<data, Record<string, any>>({
   /**
    * 更新玩家列表信息
    */
-  updateUserInfoResList(userInfoResList: player[]) {
-    userInfoResList.map((item: player,) => {
-      if (item.userId === this.data.currentUserInfo.id) {
-        this.data.roomInfo.players[7] = item
-        this.setData({
-          currentUser: item.userType === 1 ? 'banker' : 'player',
-          isReady: item.status === 1 ? false : true
-        })
+  // updateUserInfoResList(userInfoResList: player[]) {
+  //   userInfoResList.map((item: player,) => {
+  //     if (item.userId === this.data.currentUserInfo.id) {
+  //       this.data.roomInfo.players[7] = item
+  //       this.setData({
+  //         currentUser: item.userType === 1 ? 'banker' : 'player',
+  //         isReady: item.status === 1 ? false : true
+  //       })
+  //     }
+  //   })
+  //   this.setData({
+  //     roomInfo: this.data.roomInfo
+  //   }, () => {
+  //     setRoomInfo(this.data.roomInfo);
+  //   })
+  // },
+  startGame() {
+    // this.showLoading('正在准备中')
+    this.shufflePoke()
+    this.setData({
+      roomInfo: {
+        ...this.data.roomInfo,
+        isStart: true
       }
     })
-    this.setData({
-      roomInfo: this.data.roomInfo
-    }, () => {
-      setRoomInfo(this.data.roomInfo);
-    })
-  },
-  initPlayers() {
-    const players = [
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '', score: 0, state: 1, status: 2, userId: 0, roomId: 0, userType: 0, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 1, },
-      { avatar: defaultAvatarUrl, name: '空位置', score: 0, state: 1, status: 2, userId: 0, roomId: 0, pokers: [], userType: 2, },
-    ]
-    this.setData({ players })
-  },
-  startGame() {
-    this.showLoading('正在准备中')
-    const params = {
-      type: 3,
-      roomId: this.data.roomInfo.roomId,
-      uid: this.data.currentUserInfo.id,
-    }
-    this.sendMseeage(params)
+    // const params = {
+    //   type: 3,
+    //   roomId: this.data.roomInfo.roomId,
+    //   uid: this.data.currentUserInfo.id,
+    // }
+    // this.sendMseeage(params)
   },
   showModal() {
     this.setData({
@@ -251,12 +260,7 @@ Page<data, Record<string, any>>({
   },
   // 结算本局数据
   settlementCurrent() {
-    clearInterval(this.countdownInterval)
     this.shufflePoke()
-    this.setData({
-      isGaming: false,
-      isAllShow: false
-    })
   },
 
   changeReady() {
@@ -292,12 +296,30 @@ Page<data, Record<string, any>>({
   // 发牌
   dealCards() {
     this.showLoading('发牌中')
-    const params = {
-      type: 5,
-      roomId: this.data.roomInfo.roomId,
-      uid: this.data.currentUserInfo.id,
+    // const params = {
+    //   type: 5,
+    //   roomId: this.data.roomInfo.roomId,
+    //   uid: this.data.currentUserInfo.id,
+    // }
+    // this.sendMseeage(params)
+    // const playerCount = this.data.roomInfo.players.filter(info => info.status === 2 || info.userType === 1)
+
+    const pokers = this.data.pokers
+    const rounds = 5
+    for (let round = 0; round < rounds; round++) {
+      this.data.roomInfo.players.map(player => {
+        if ((player.status === 2 || player.userType === 1) && player.pokers.length !== 5) {
+          player.pokers.push(pokers[0])
+          pokers.splice(0, 1)
+        }
+        return player
+      })
+      this.setData({
+        roomInfo: this.data.roomInfo,
+        pokers
+      })
     }
-    this.sendMseeage(params)
+    this.hideLoading()
   },
   // 是不是炸弹
   isBoom(cards: poke[]) {
@@ -318,7 +340,7 @@ Page<data, Record<string, any>>({
     if (card1.number !== card2.number) {
       return card1.number - card2.number;
     } else {
-      return suit.indexOf(card1.suit) - suit.indexOf(card2.suit);
+      return suits.indexOf(card1.suit) - suits.indexOf(card2.suit);
     }
   },
   // 排序
@@ -388,12 +410,12 @@ Page<data, Record<string, any>>({
   // 洗牌
   shufflePoke() {
     this.showLoading('洗牌中')
-    const params = {
-      type: 4,
-      roomId: this.data.roomInfo.roomId,
-      uid: this.data.currentUserInfo.id,
-    }
-    this.sendMseeage(params)
+    // const params = {
+    //   type: 4,
+    //   roomId: this.data.roomInfo.roomId,
+    //   uid: this.data.currentUserInfo.id,
+    // }
+    // this.sendMseeage(params)
     // this.clearPokes()
     // // if (this.data.isGaming) return
     // if (event) {
@@ -403,15 +425,34 @@ Page<data, Record<string, any>>({
     //     duration: 2000, // 持续时间，单位毫秒
     //   });
     // }
-    // const pokers = this.shuffleArray(this.data.pokers)
-    // this.setData({ pokers })
+    const pokers = this.shuffleArray()
+    this.setData({ pokers })
+    this.hideLoading()
   },
   shuffleArray<T>(array: T[]) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+    const cards = [];
+
+    // 生成牌
+    for (let number = 1; number <= 10; number++) {
+      for (let suit of suits) {
+        cards.push({
+          id: `${number}${suit}`,
+          number,
+          suit,
+          display: `${number}${suit}`,
+          value: number,
+          color: suit === '♥' || suit === '♦' ? 'red' : 'black'
+        });
+      }
     }
-    return array;
+
+    // 洗牌算法 (Fisher-Yates shuffle)
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+
+    return cards;
   },
   // toggleReady(e: { currentTarget: { dataset: { index: number } } }) {
   //   if (this.data.isGaming) return
@@ -426,6 +467,29 @@ Page<data, Record<string, any>>({
   //   })
   //   this.setData({ players })
   // },
+  /**/
+  goToHome() {
+    this.showLoading('正在退出')
+    wx.redirectTo({
+      url: '../index/index'
+    });
+    removeAll(this.data.roomInfo.roomId)
+  },
+  assAssistant(event: { currentTarget: { dataset: { item: any; index: any; }; }; }) {
+    const { item, index } = event.currentTarget.dataset;
+    console.log(item, index);
+
+    assAssistant({ roomId: item.roomId, seatIndex: index }).then(res => {
+      if (res.code === 200) {
+        const { roomInfo } = res.data
+        this.setData({
+          roomInfo
+        }, () => {
+          setRoomInfo(roomInfo);
+        })
+      }
+    })
+  },
   isCanReady() {
     return this.data.selectedValue
   },

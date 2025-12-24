@@ -43,7 +43,16 @@ export async function getRoomInfo(data: {
     method: 'POST'
   })
 }
-
+export async function assAssistant(data: {
+  roomId: number,
+  seatIndex: number
+}) {
+  return await request({
+    url: '/poker/assAssistant',
+    data,
+    method: 'POST'
+  })
+}
 export async function startGame(data: {
   roomId: number,
   userId: number,

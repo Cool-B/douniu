@@ -1,48 +1,48 @@
 <view class="room-container">
   <view class="players">
-    <block wx:for="{{players}}" wx:key="index">
+    <block wx:for="{{roomInfo.players}}" wx:key="index">
       <view class="player{{index}} {{item.userType===1?'banker':'player'}}">
-        <view wx:if="{{}}"></view>
-        <block wx:if="{{item.userId}}">
+        <block wx:if="{{index!==4}}">
           <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
-          <block wx:if="{{item.name}}">
-            <view class="player-pokes" bindtap="checkPokes" data-index="{{index}}">
-              <view wx:if="{{item.show}}">
-                <image wx:for="{{item.pokes}}" wx:key="index" class="player-poke" src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
+          <block wx:if="{{item.userType !== 4 }}">
+            <view class="player-pokes_box">
+              <view class="{{['player-pokes', roomInfo.isStart ? 'is-gaming' : '']}}" bindtap="checkPokes" data-index="{{index}}">
+                <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
+                <!-- <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item}}" mode="" /> -->
               </view>
-              <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item}}" mode="" />
+            </view>
+            <view wx:if="{{item.userType!==1}}" class="player-status">
+              {{item.status===1?'未准备':'已准备'}}
             </view>
             <view class="player-info">
               <image class="player-avatar" src="{{item.avatar}}" mode="cover"></image>
               <view class="player-text">{{item.name}}</view>
-              <view class="player-bet">{{item.bet}}</view>
-              <view class="player-score">{{item.score}}</view>
+              <view class="player-bet" wx:if="{{item.userType!==1}}">下注:{{item.bet}}</view>
+              <view class="player-score">积分:{{item.score}}</view>
               <view wx:if="{{!isGaming&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip" data-index="{{index}}"></view>
             </view>
           </block>
-          <view wx:if="{{item.name===''}}">
-          </view>
-        </block>
-        <block wx:if="{{!item.userId&&index!==4}}">
-
+          <block wx:else>
+            <view class="add-assistant" bindtap="assAssistant" data-item="{{item}}" data-index="{{index}}"></view>
+          </block>
         </block>
       </view>
     </block>
   </view>
   <block wx:if="{{currentUser==='banker'}}">
-    <block wx:if="{{!isGaming&&isStart}}">
+    <block wx:if="{{!roomInfo.isGaming&&roomInfo.isStart}}">
       <button class="deal-cards btn" bindtap="dealCards">发牌</button>
       <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
     </block>
-    <block wx:if="{{isGaming&&isStart}}">
+    <block wx:if="{{roomInfo.isGaming&&roomInfo.isStart}}">
       <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" disabled='{{!isAllShow}}' bindtap="settlementCurrent">结算</button>
       <button class="show-cards btn" bindtap="showCards">亮牌</button>
     </block>
-    <block wx:if="{{!isStart}}">
+    <block wx:if="{{!roomInfo.isStart}}">
       <button class="start-game btn" bindtap="startGame">开始游戏</button>
     </block>
   </block>
-  <block wx:if="{{isGaming}}">
+  <block wx:if="{{roomInfo.isGaming}}">
     <text class="countdown btn">{{countdown}}</text>
   </block>
   <block wx:if="{{currentUser==='player'}}">
@@ -59,7 +59,7 @@
   <view class="room-num">
     房间号：{{roomNumber}}
   </view>
-  <view class="go-out">
+  <view class="go-out" bindtap="goToHome">
     退出房间
   </view>
 </view>

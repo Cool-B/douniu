@@ -37,7 +37,6 @@ Component({
       })
       // 检查房间状态，如果在房间内则自动跳转
       const roomInfo = getRoomInfo();
-      console.log(roomInfo);
       if (roomInfo) {
         roomInfo.forEach(info => {
           const flag = info.players.some(item => item && item.userId === this.data.currentUser.id)
@@ -144,7 +143,6 @@ Component({
         duration: 2000,
       });
     },
-
     // 快速开始 - 创建房间
     quickStart() {
       if (!this.data.currentUser) {
@@ -152,35 +150,32 @@ Component({
         return;
       }
       this.setData({ loading: true, errorMsg: '' });
-
       createRoom({ userId: this.data.currentUser.id, roomType: 2 }).then(response => {
         if (response.code === 200 && response.data) {
-          const roomData = response.data;
-          app.globalData.roomId = roomData.roomInfo.roomId;
-          app.globalData.roomNumber = roomData.roomInfo.roomNumber;
+          const roomInfo = response.data.roomInfo;
+          console.log(roomInfo);
+          app.globalData.roomId = roomInfo.roomId;
+          app.globalData.roomNumber = roomInfo.roomNumber;
           // 保存房间信息到本地存储
           // setRoomInfo({
           //   roomId: roomData.roomId,
           //   roomNumber: roomData.roomNumber
           // });
-
           wx.showToast({
             title: '房间创建成功',
             icon: 'success',
             duration: 1000
           });
+          setRoomInfo(roomInfo);
+          wx.redirectTo({
+            url: '../card_game/card_game'
+          });
 
-          setTimeout(() => {
-            wx.redirectTo({
-              url: '../card_game/card_game'
-            });
-          }, 1000);
         } else {
           this.showError(response.msg || '创建房间失败，请稍后重试', 3000);
         }
       }).catch((err) => {
         console.log(err);
-
         this.showError('网络连接异常，请检查网络后重试', 3000);
       }).finally(() => {
         this.setData({ loading: false });

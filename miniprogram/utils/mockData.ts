@@ -3,6 +3,8 @@
  * 包含用户、房间、游戏等所有模拟数据
  */
 
+import { getRoomInfo, getUserInfo, player, roomInfo } from "./localStorage";
+
 export interface MockUserInfo {
   id: number;
   name: string;
@@ -30,7 +32,7 @@ export interface MockPlayer {
   userId: number;
   name: string;
   avatar: string;
-  userType: 1 | 2; // 1: 庄家, 2: 玩家
+  userType: 1 | 2 | 3 | 4; // 1: 庄家, 2: 玩家  3 机器人  4   空
   status: number; // 1: 待准备, 2: 已准备
   state: number; // 1: 正常, 2: 退出房间, 3: 离线
   score: number;
@@ -51,7 +53,7 @@ export interface MockGameData {
   gameId: string;
   roomId: number;
   round: number;
-  players: MockPlayer[];
+  players: player[];
   dealerId: number;
   status: number; // 0: 准备中, 1: 发牌中, 2: 游戏中, 3: 结算中
   cards: MockCard[];
@@ -92,51 +94,7 @@ const mockUsers: MockUserInfo[] = [
 ];
 
 // Mock房间数据
-const mockRooms: MockRoomInfo[] = [
-  {
-    roomId: 2001,
-    roomNumber: "888888",
-    roomType: 1,
-    creatorId: 1001,
-    status: 0,
-    maxPlayers: 5,
-    currentRound: 0,
-    players: [
-      {
-        userId: 1001,
-        name: "玩家一号",
-        avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
-        userType: 1,
-        status: 2,
-        state: 1,
-        score: 1000,
-        ready: true
-      }
-    ]
-  },
-  {
-    roomId: 2002,
-    roomNumber: "666666",
-    roomType: 2,
-    creatorId: 1002,
-    status: 0,
-    maxPlayers: 5,
-    currentRound: 0,
-    players: [
-      {
-        userId: 1002,
-        name: "玩家二号",
-        avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83eoj0hHXhgJNOTSOFsS4uZs8x1ConecaVOB8eIl115xmJZcT4oCicvia7wMEufibKtTLqiaJeanU2Lpg3w/132",
-        userType: 1,
-        status: 1,
-        state: 1,
-        score: 800,
-        ready: false
-      }
-    ]
-  }
-];
-
+const mockRooms: roomInfo[] = getRoomInfo() || [];
 // Mock游戏数据
 const mockGames: MockGameData[] = [
   {
@@ -154,7 +112,7 @@ const mockGames: MockGameData[] = [
         status: 2,
         state: 1,
         score: 1000,
-        ready: true,
+        roomId: 2001,
         pokers: [
           { suit: "Spade", number: 10 },
           { suit: "Heart", number: 7 },
@@ -235,7 +193,7 @@ const mockResponses = {
     message: "获取房间信息成功",
     data: {
       roomInfo: mockRooms[0],
-      userInfoList: mockRooms[0].players
+      userInfoList: mockRooms[0] && mockRooms[0].players
     }
   },
 
@@ -314,41 +272,43 @@ export const mockApi = {
   // 创建房间
   async createRoom(data: { userId: number; roomType: 1 | 2 }) {
     await simulateDelay();
-    const newRoom: MockRoomInfo = {
+    const userInfo: any = getUserInfo();
+    // 动态生成8条机器人玩家数据
+    const players: player[] = []
+    const newRoom: roomInfo = {
       roomId: Date.now(),
-      roomNumber: Math.floor(100000 + Math.random() * 900000).toString(),
-      roomType: data.roomType,
+      roomNumber: Math.floor(100000 + Math.random() * 900000),
       creatorId: data.userId,
-      status: 0,
-      maxPlayers: 5,
-      currentRound: 0,
-      players: [
-        {
-          userId: data.userId,
-          name: mockUsers.find(u => u.id === data.userId)?.name || "玩家",
-          avatar: mockUsers.find(u => u.id === data.userId)?.avatar || "",
-          userType: 1,
-          status: 2,
-          state: 1,
-          score: 1000,
-          ready: true
-        }
-      ]
+      isGaming: false,
+      isStart: false,
+      players: players
     };
-    mockRooms.push(newRoom);
-
+    for (let i = 0; i < 9; i++) {
+      const botUser = mockUsers[0] || {};
+      players.push({
+        roomId: newRoom.roomId,
+        userId: i === 7 ? userInfo.id : 0,
+        name: i === 7 ? userInfo.name : '空',
+        avatar: i === 7 ? userInfo.avatar : botUser.avatar,
+        userType: i === 7 ? 1 : 4,
+        status: 1,
+        state: 0, // 
+        score: 0, //
+        bet: 1,
+        pokers: [],
+      });
+    }
     return {
       code: 200,
       message: "房间创建成功",
       data: {
         roomInfo: newRoom,
-        userInfo: mockUsers.find(u => u.id === data.userId)
       }
     };
   },
 
   // 加入房间
-  async joinRoom(data: { userId: number; roomNumber: string }) {
+  async joinRoom(data: { userId: number; roomNumber: number }) {
     await simulateDelay();
     const room = mockRooms.find(r => r.roomNumber === data.roomNumber);
 
@@ -356,20 +316,12 @@ export const mockApi = {
       return mockErrors.notFound;
     }
 
-    if (room.players.length >= room.maxPlayers) {
-      return mockErrors.roomFull;
-    }
-
-    if (room.status === 1) {
-      return mockErrors.gameStarted;
-    }
-
     const user = mockUsers.find(u => u.id === data.userId);
     if (!user) {
       return mockErrors.unauthorized;
     }
 
-    const newPlayer: MockPlayer = {
+    const newPlayer: player = {
       userId: data.userId,
       name: user.name,
       avatar: user.avatar,
@@ -377,7 +329,8 @@ export const mockApi = {
       status: 1,
       state: 1,
       score: 1000,
-      ready: false
+      roomId: room.roomId,
+      pokers: []
     };
 
     room.players.push(newPlayer);
@@ -408,7 +361,30 @@ export const mockApi = {
       }
     };
   },
-
+  // 新增机器人
+  async assAssistant(data: { roomId: number, seatIndex: number }) {
+    await simulateDelay();
+    const room = mockRooms.find(r => r.roomId === data.roomId);
+    if (!room) {
+      return mockErrors.notFound;
+    }
+    room.players.map((player, index) => {
+      if (index === data.seatIndex) {
+        player.name = Math.random().toString(36).substring(2, 8)
+        player.userId = player.roomId + Date.now()
+        player.userType = 3
+        player.status = 2
+      }
+    })
+    return {
+      code: 200,
+      message: "新增机器人成功",
+      data: {
+        roomInfo: room,
+        userInfoList: room.players
+      }
+    };
+  },
   // 开始游戏
   async startGame(data: { roomId: number; userId: number }) {
     await simulateDelay();
@@ -426,14 +402,13 @@ export const mockApi = {
       };
     }
 
-    room.status = 1;
     const gameId = `game_${Date.now()}`;
-
+    const player = room.players.find(p => p.userType === 1)
     const newGame: MockGameData = {
       gameId,
       roomId: data.roomId,
       round: 1,
-      dealerId: room.players.find(p => p.userType === 1)?.userId || room.players[0].userId,
+      dealerId: player && player.userId || room.players[0].userId,
       status: 1,
       players: room.players.map(player => ({
         ...player,
@@ -482,10 +457,10 @@ export const mockApi = {
 
       case "showCards":
         // 亮牌逻辑
-        const player = game.players.find(p => p.userId === data.userId);
-        if (player) {
-          player.show = true;
-        }
+        // const player = game.players.find(p => p.userId === data.userId);
+        // if (player) {
+        //   player.show = true;
+        // }
         break;
 
       case "settlement":

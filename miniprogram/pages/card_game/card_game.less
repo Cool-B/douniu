@@ -14,7 +14,7 @@
 }
 .go-out {
   position: absolute;
-  left: 60rpx;
+  left: 30rpx;
   top: 10rpx;
   color: #fff;
   font-size: 10rpx;
@@ -41,6 +41,7 @@
 
   .banker,
   .player {
+    overflow: hidden;
     width: 33%;
     height: 33%;
     position: relative;
@@ -64,19 +65,33 @@
         height: 40rpx;
         border-radius: 50%;
       }
+      .player-text,
+      .player-bet,
+      .player-score {
+        margin-top: 15rpx;
+        font-size: 12rpx;
+        color: #fff;
+      }
       .player-text {
         overflow: hidden;
         text-overflow: ellipsis;
-        color: #fff;
         flex: 2;
+        text-align: left;
+        text-indent: 10rpx;
       }
       .player-bet {
         flex: 2;
       }
       .player-score {
         flex: 2;
-        font-size: 15rpx;
       }
+    }
+    .player-status {
+      position: absolute;
+      right: 10rpx;
+      top: 30rpx;
+      color: #fff;
+      font-size: 12rpx;
     }
   }
 
@@ -132,23 +147,34 @@
     height: 8px;
     border-radius: 50%;
   }
-
-  .player-pokes {
-    display: flex;
-    position: relative;
+  .player-pokes_box {
+    overflow: hidden;
     height: 150rpx;
     width: 60%;
     min-width: 100rpx;
-    border-radius: 40rpx;
-    box-shadow: 0 0 black;
-    border: 1rpx solid #ccc;
-    background: radial-gradient(transparent, black);
     margin: 5rpx;
-
-    .player-poke {
-      position: absolute;
-      width: 120rpx;
-      height: 150rpx;
+    .player-pokes {
+      display: flex;
+      box-sizing: border-box;
+      position: relative;
+      height: 100%;
+      transition: all 1.5s ease-in-out;
+      transform: translateX(-100%); /* 初始状态：隐藏在左侧 */
+      opacity: 0; /* 初始状态：透明 */
+      &.is-gaming {
+        border-radius: 40rpx;
+        box-shadow: 0 0 black;
+        border: 1rpx solid #ccc;
+        background: radial-gradient(transparent, black);
+        transform: translateX(0); /* 最终状态：回到原位 */
+        opacity: 1; /* 最终状态：完全不透明 */
+      }
+      .player-poke {
+        position: absolute;
+        height: 100%;
+        width: 40rpx;
+        z-index: 9999999;
+      }
     }
   }
 
@@ -158,19 +184,19 @@
     }
 
     &:nth-of-type(2) {
-      transform: translateX(40rpx);
+      transform: translateX(37rpx);
     }
 
     &:nth-of-type(3) {
-      transform: translateX(60rpx);
+      transform: translateX(55rpx);
     }
 
     &:nth-of-type(4) {
-      transform: translateX(80rpx);
+      transform: translateX(72rpx);
     }
 
     &:nth-of-type(5) {
-      transform: translateX(100rpx);
+      transform: translateX(90rpx);
     }
   }
 
@@ -248,4 +274,20 @@
   width: 50px;
   height: 70px;
   margin: 5px;
+}
+
+.add-assistant {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+  border: 3rpx solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &::before {
+    content: "+";
+    font-size: 40rpx;
+    color: #fff;
+    font-weight: 800;
+  }
 }
