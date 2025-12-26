@@ -19,7 +19,7 @@ interface data {
   modalVisible: boolean,
   modalData: string,
 }
-interface playerNumber { has: boolean, number: number, id: number, maxCard?: { number: number, suit: string }, isBoth?: boolean, isBoom: boolean }
+interface playerNumber { has: boolean, number: number, id: number, maxNumber?: { number: number, suit: string }, isBoth?: boolean, isBoom: boolean }
 
 export interface poke {
   suit: string,
@@ -36,7 +36,9 @@ Page<data, Record<string, any>>({
       isGaming: false,
       players: [],
       isStart: false,
-      creatorId: 0
+      creatorId: 0,
+      isStartDeal: false,
+      isDealComplete: false
     },
     session: '',
     // 当前登录人的身份信息
@@ -162,33 +164,28 @@ Page<data, Record<string, any>>({
     // });
 
   },
-
-  /**
-   * 更新玩家列表信息
-   */
-  // updateUserInfoResList(userInfoResList: player[]) {
-  //   userInfoResList.map((item: player,) => {
-  //     if (item.userId === this.data.currentUserInfo.id) {
-  //       this.data.roomInfo.players[7] = item
-  //       this.setData({
-  //         currentUser: item.userType === 1 ? 'banker' : 'player',
-  //         isReady: item.status === 1 ? false : true
-  //       })
-  //     }
-  //   })
-  //   this.setData({
-  //     roomInfo: this.data.roomInfo
-  //   }, () => {
-  //     setRoomInfo(this.data.roomInfo);
-  //   })
-  // },
+  // 新增机器人玩家
+  assAssistant(event: { currentTarget: { dataset: { item: any; index: any; }; }; }) {
+    const { item, index } = event.currentTarget.dataset;
+    assAssistant({ roomId: item.roomId, seatIndex: index }).then(res => {
+      if (res.code === 200) {
+        const { roomInfo } = res.data
+        this.setData({
+          roomInfo
+        }, () => {
+          setRoomInfo(roomInfo);
+        })
+      }
+    })
+  },
+  // 开始游戏
   startGame() {
     // this.showLoading('正在准备中')
     this.shufflePoke()
     this.setData({
       roomInfo: {
         ...this.data.roomInfo,
-        isStart: true
+        isStart: true,
       }
     })
     // const params = {
@@ -197,6 +194,109 @@ Page<data, Record<string, any>>({
     //   uid: this.data.currentUserInfo.id,
     // }
     // this.sendMseeage(params)
+  },
+  // 先生成扑克牌，再洗牌
+  shufflePoke() {
+    this.showLoading('洗牌中')
+    // const params = {
+    //   type: 4,
+    //   roomId: this.data.roomInfo.roomId,
+    //   uid: this.data.currentUserInfo.id,
+    // }
+    // this.sendMseeage(params)
+    // this.clearPokes()
+    // // if (this.data.isGaming) return
+    // if (event) {
+    //   wx.showToast({
+    //     title: '洗牌中',
+    //     icon: 'loading',
+    //     duration: 2000, // 持续时间，单位毫秒
+    //   });
+    // }
+    const pokers = this.shuffleArray()
+    this.setData({ pokers })
+    this.hideLoading()
+  },
+  // 
+  shuffleArray() {
+    const cards = [];
+    // 生成牌
+    for (let number = 1; number <= 10; number++) {
+      for (let suit of suits) {
+        cards.push({
+          id: `${number}${suit}`,
+          number,
+          suit,
+          display: `${number}${suit}`,
+          value: number,
+          color: suit === '♥' || suit === '♦' ? 'red' : 'black'
+        });
+      }
+    }
+    // 洗牌算法 (Fisher-Yates shuffle)
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+    return cards;
+  },
+  // 发牌 - 延迟发牌效果   暂时设置为1ms
+  dealCards() {
+    this.showLoading('发牌中')
+    const roomInfo = this.data.roomInfo
+    this.setData({
+      roomInfo: {
+        ...roomInfo,
+        isStartDeal: true,
+      }
+    })
+    const pokers = [...this.data.pokers]
+    const players = roomInfo.players.filter(player =>
+      (player.status === 2 || player.userType === 1) && player.pokers.length !== 5
+    )
+    if (players.length === 0) {
+      this.hideLoading()
+      return
+    }
+    let currentPlayerIndex = 0
+    // 发牌动画函数
+    const dealNextCard = () => {
+      const currentPlayer = players[currentPlayerIndex]
+      if (currentPlayer.pokers.length < 5 && pokers.length > 0) {
+        // 延迟显示卡片
+        setTimeout(() => {
+          currentPlayer.pokers.push(pokers[0])
+          pokers.splice(0, 1)
+          this.setData({
+            roomInfo: roomInfo,
+            pokers,
+          })
+          // 移动到下一个玩家
+          currentPlayerIndex = (currentPlayerIndex + 1) % players.length
+          // 继续发下一张牌
+          setTimeout(dealNextCard, 300)
+        }, 1)
+      } else {
+        this.setData({
+          roomInfo: {
+            ...roomInfo,
+            isStartDeal: false,
+            isDealComplete: true,
+          }
+        }, () => {
+          this.hideLoading()
+          this.gettlementCurrent()
+        })
+      }
+    }
+    // 开始发牌
+    setTimeout(() => {
+      dealNextCard()
+    }, 1)
+  },
+  // 结算本局数据  数据回显
+  settlementCurrent() {
+    this.shufflePoke()
   },
   showModal() {
     this.setData({
@@ -251,11 +351,7 @@ Page<data, Record<string, any>>({
       })
     })
   },
-  // 结算本局数据
-  settlementCurrent() {
-    this.shufflePoke()
-  },
-
+  // 修改准备状态
   changeReady() {
     if (this.data.roomInfo.isGaming) return
     const { roomId, status, state } = this.data.roomInfo.players.find(item => item.userId === this.data.currentUserInfo.id) as player
@@ -268,6 +364,7 @@ Page<data, Record<string, any>>({
       uid: this.data.currentUserInfo.id
     })
   },
+  // 修改下注
   onPickerChange(e: { detail: { value: number } }) {
     this.setData({
       selectedValue: this.data.range[e.detail.value],
@@ -286,44 +383,31 @@ Page<data, Record<string, any>>({
       setRoomInfo(this.data.roomInfo);
     })
   },
-  // 发牌 - 延迟发牌效果
-  dealCards() {
-    this.showLoading('发牌中')
-    const pokers = [...this.data.pokers]
-    const players = this.data.roomInfo.players.filter(player =>
-      (player.status === 2 || player.userType === 1) && player.pokers.length !== 5
-    )
-    if (players.length === 0) {
-      this.hideLoading()
-      return
-    }
-    let currentPlayerIndex = 0
-    // 发牌动画函数
-    const dealNextCard = () => {
-      const currentPlayer = players[currentPlayerIndex]
-      if (currentPlayer.pokers.length < 5 && pokers.length > 0) {
-        // 延迟显示卡片
-        setTimeout(() => {
-          currentPlayer.pokers.push(pokers[0])
-          pokers.splice(0, 1)
-          this.setData({
-            roomInfo: this.data.roomInfo,
-            pokers,
-          })
-          // 移动到下一个玩家
-          currentPlayerIndex = (currentPlayerIndex + 1) % players.length
-          // 继续发下一张牌
-          setTimeout(dealNextCard, 300)
-        }, 1000)
-      } else {
-        this.hideLoading()
+  /**
+   * 获取结算数据
+   * @param cards 
+   */
+  gettlementCurrent() {
+    const players = this.data.roomInfo.players
+    players.map((player: player) => {
+      const { pokers, status, userId, userType, pokeData } = player
+      if (pokers.length && (status === 2 || userType === 1) && userId) {
+        const isBoom = this.isBoom(pokers)
+        pokeData.isBoom = isBoom
+        const { hasNiu, isDoubleTen, pointNumber, maxNumber, suit } = this.getMaxPoint(pokers)
+        pokeData.hasNiu = hasNiu
+        pokeData.isDoubleTen = isDoubleTen
+        pokeData.pointNumber = pointNumber
+        pokeData.maxNumber = maxNumber
+        pokeData.suit = suit
       }
-    }
-    // 开始发牌
-    setTimeout(() => {
-      dealNextCard()
-    }, 1000)
+      return player
+    })
+    this.setData({
+      roomInfo: this.data.roomInfo
+    })
   },
+
   // 是不是炸弹
   isBoom(cards: poke[]) {
     const poke = uniqueObjectArray<poke>(cards, 'number')
@@ -383,113 +467,97 @@ Page<data, Record<string, any>>({
     }
     return cards[0];
   },
-  // 检查任意三张牌的点数之和是否为 10 的倍数
-  isSumMultipleOfTen(cards: { number: number; suit: string }[], num: number): boolean {
-    for (let i = 0; i < cards.length - num; i++) {
-      for (let j = i + 1; j < cards.length - 1; j++) {
-        for (let k = j + 1; k < cards.length; k++) {
-          const sum = cards[i].number + cards[j].number + cards[k].number;
+  // 检查任意三张牌的点数之和是否为 10 的倍数，并返回相关数据
+  getMaxPoint(cards: { number: number; suit: string }[]): {
+    hasNiu: boolean;
+    isDoubleTen: boolean;
+    pointNumber: number;   //hasNiu,pointNumber,maxNumber,suit
+    maxNumber: number;  // 只返回数字
+    suit: string;
+  } {
+    if (!cards || cards.length < 3) {
+      return {
+        hasNiu: false,
+        isDoubleTen: true,
+        pointNumber: 0,
+        maxNumber: cards[0].number,
+        suit: cards?.[0]?.suit
+      };
+    }
+    // 花色权重
+    const suitWeights: Record<string, number> = {
+      'Spade': 4,
+      'Heart': 3,
+      'Club': 2,
+      'Diamond': 1
+    };
+    // 辅助函数：比较两张牌的大小
+    const compareCards = (a: { number: number, suit: string }, b: { number: number, suit: string }) => {
+      if (a.number !== b.number) return b.number - a.number;
+      return suitWeights[b.suit] - suitWeights[a.suit];
+    };
+    // 先排序，方便后续处理
+    const sortedCards = [...cards].sort(compareCards);
+    let bestResult: {
+      pointNumber: number;
+      maxCardNumber: number;
+      suit: string;
+    } | null = null;
+    // 查找所有三张牌和为10的组合
+    for (let i = 0; i < sortedCards.length - 2; i++) {
+      for (let j = i + 1; j < sortedCards.length - 1; j++) {
+        for (let k = j + 1; k < sortedCards.length; k++) {
+          const sum = sortedCards[i].number + sortedCards[j].number + sortedCards[k].number;
           if (sum % 10 === 0) {
-            return true;
+            // 找到三张牌和为10，计算剩余两张牌
+            const remainingCards = sortedCards.filter(
+              (_, index) => index !== i && index !== j && index !== k
+            );
+            // 计算剩余两张牌和的个位数
+            const pointNumber = (remainingCards[0].number + remainingCards[1].number) % 10;
+            // 找出剩余两张牌中最大的(已排序，第一张就是最大的)
+            const maxCardNumber = remainingCards[0].number;
+            const suit = remainingCards[0].suit;
+            // 选择最优结果：优先比较remainingSum，再比较maxCardNumber
+            if (!bestResult ||
+              pointNumber > bestResult.pointNumber ||
+              (pointNumber === bestResult.pointNumber &&
+                maxCardNumber > bestResult.maxCardNumber)) {
+              bestResult = {
+                pointNumber,
+                maxCardNumber,
+                suit
+              };
+            }
           }
         }
       }
     }
-    return false;
-  },
-
-  // 排序
-  // sortCards(cards: poke[]): poke[] {
-  //   return cards.sort((a, b) => {
-  //     const valueDifference = a.number - b.number;
-  //     if (valueDifference !== 0) {
-  //       return valueDifference;
-  //     }
-
-  //     const suitDifference = suit.indexOf(a.suit) - suit.indexOf(b.suit);
-  //     return suitDifference;
-  //   });
-  // },
-  // 洗牌
-  shufflePoke() {
-    this.showLoading('洗牌中')
-    // const params = {
-    //   type: 4,
-    //   roomId: this.data.roomInfo.roomId,
-    //   uid: this.data.currentUserInfo.id,
-    // }
-    // this.sendMseeage(params)
-    // this.clearPokes()
-    // // if (this.data.isGaming) return
-    // if (event) {
-    //   wx.showToast({
-    //     title: '洗牌中',
-    //     icon: 'loading',
-    //     duration: 2000, // 持续时间，单位毫秒
-    //   });
-    // }
-    const pokers = this.shuffleArray()
-    this.setData({ pokers })
-    this.hideLoading()
-  },
-  shuffleArray<T>(array: T[]) {
-    const cards = [];
-
-    // 生成牌
-    for (let number = 1; number <= 10; number++) {
-      for (let suit of suits) {
-        cards.push({
-          id: `${number}${suit}`,
-          number,
-          suit,
-          display: `${number}${suit}`,
-          value: number,
-          color: suit === '♥' || suit === '♦' ? 'red' : 'black'
-        });
-      }
+    if (bestResult) {
+      return {
+        hasNiu: true,
+        isDoubleTen: bestResult.pointNumber === 10 && bestResult.pointNumber === 10,
+        pointNumber: bestResult.pointNumber,
+        maxNumber: bestResult.maxCardNumber,
+        suit: bestResult.suit
+      };
     }
-
-    // 洗牌算法 (Fisher-Yates shuffle)
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
-    }
-
-    return cards;
+    // 没有找到三张牌和为10的组合，返回五张牌中最大的
+    return {
+      hasNiu: false,
+      isDoubleTen: false,
+      pointNumber: 0,
+      maxNumber: sortedCards[0].number,
+      suit: sortedCards[0].suit
+    };
   },
-  // toggleReady(e: { currentTarget: { dataset: { index: number } } }) {
-  //   if (this.data.isGaming) return
-  //   const index = e.currentTarget.dataset.index
-  //   const players = this.data.players.map((player: player, i: number) => {
-  //     console.log(i, e);
-  //     if (i === index) {
-
-  //       return { ...player, ready: !player.ready }
-  //     }
-  //     return player
-  //   })
-  //   this.setData({ players })
-  // },
-  /**/
+  // 退出房间
   goToHome() {
     this.showLoading('正在退出')
     wx.redirectTo({
       url: '../index/index'
     });
     removeAll(this.data.roomInfo.roomId)
-  },
-  assAssistant(event: { currentTarget: { dataset: { item: any; index: any; }; }; }) {
-    const { item, index } = event.currentTarget.dataset;
-    assAssistant({ roomId: item.roomId, seatIndex: index }).then(res => {
-      if (res.code === 200) {
-        const { roomInfo } = res.data
-        this.setData({
-          roomInfo
-        }, () => {
-          setRoomInfo(roomInfo);
-        })
-      }
-    })
   },
   isCanReady() {
     return this.data.selectedValue

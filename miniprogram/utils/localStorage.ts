@@ -21,6 +21,10 @@ export interface roomInfo {
   isGaming: boolean,
   // 是否开始本局游戏
   isStart: boolean,
+  // 是否开始发牌
+  isStartDeal: boolean,
+  // 是否完成发牌
+  isDealComplete: boolean
 }
 export interface player {
   name: string
@@ -38,8 +42,22 @@ export interface player {
   userId: number,
   roomId: number,
   userType: number,
+  pokeData: PokeData
 }
-
+export interface PokeData {
+  // 是否是炸弹
+  isBoom: boolean,
+  // 是否有牛
+  hasNiu: boolean,
+  // 是否是牛双十
+  isDoubleTen: boolean,
+  // 点数   不管有牛没有牛  最大的点数
+  pointNumber: number,
+  // 点数里面最大的牌面
+  maxNumber: number,
+  // 最大牌面花色
+  suit: 'Spade' | 'Heart' | 'Club' | 'Diamond' | ''
+}
 export function setUserInfo(userInfo: userInfo) {
   wx.setStorageSync('setUserInfo', JSON.stringify(userInfo));
 }

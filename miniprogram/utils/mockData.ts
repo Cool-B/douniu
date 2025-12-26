@@ -119,7 +119,15 @@ const mockGames: MockGameData[] = [
           { suit: "Club", number: 3 },
           { suit: "Diamond", number: 12 },
           { suit: "Spade", number: 5 }
-        ]
+        ],
+        pokeData: {
+          isBoom: false,
+          isDoubleTen: false,
+          hasNiu: false,
+          maxNumber: 0,
+          suit: '',
+          pointNumber: 0
+        }
       }
     ],
     cards: generateDeck()
@@ -281,7 +289,9 @@ export const mockApi = {
       creatorId: data.userId,
       isGaming: false,
       isStart: false,
-      players: players
+      players: players,
+      isStartDeal: false,
+      isDealComplete: false
     };
     for (let i = 0; i < 9; i++) {
       const botUser = mockUsers[0] || {};
@@ -296,6 +306,15 @@ export const mockApi = {
         score: 0, //
         bet: 1,
         pokers: [],
+        pokeData: {
+          isBoom: false,
+          isDoubleTen: false,
+          hasNiu: false,
+          maxNumber: 0,
+          suit: '',
+          pointNumber: 0
+
+        }
       });
     }
     return {
@@ -330,7 +349,15 @@ export const mockApi = {
       state: 1,
       score: 1000,
       roomId: room.roomId,
-      pokers: []
+      pokers: [],
+      pokeData: {
+        isBoom: false,
+        isDoubleTen: false,
+        hasNiu: false,
+        maxNumber: 0,
+        suit: '',
+        pointNumber: 0
+      }
     };
 
     room.players.push(newPlayer);
