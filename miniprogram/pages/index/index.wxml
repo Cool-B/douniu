@@ -1,99 +1,197 @@
 <!--index.wxml-->
 <view class="index-container">
-  <!-- 新的高级动画系统 -->
+  <!-- 背景装饰 -->
   <view class="background-animations">
+    <view class="bg-circle circle-1"></view>
+    <view class="bg-circle circle-2"></view>
+    <view class="bg-circle circle-3"></view>
   </view>
 
-  <!-- 已登录状态 -->
-  <view wx:if="{{loginFlag===1}}" class="home-page">
-    <view class="play-name">
-      斗牛
-      <view class="firefly"></view>
-      <view class="firefly"></view>
-      <view class="firefly"></view>
+  <!-- 加载中状态 -->
+  <view wx:if="{{loginFlag===0}}" class="loading-page">
+    <view class="loading-content">
+      <view class="game-logo">
+        <text class="logo-icon">🎮</text>
+        <text class="logo-text">斗牛扑克</text>
+      </view>
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在登录...</text>
     </view>
-    <view class="user-welcome">
-      <image class="user-avatar" src="{{currentUser.avatar}}" mode="aspectFill"></image>
-      <text class="welcome-text">{{currentUser.name}}！</text>
-    </view>
-    <view class="game-section animate-fade-in">
-      <view class="action-buttons">
-        <button class="action-btn quick-start-btn animate-slide-in-left" bindtap="quickStart" disabled="{{loading}}">
-          <view class="btn-icon">⚡</view>
-          <text class="btn-text">快速开始</text>
-          <text class="btn-desc">创建新房间</text>
-        </button>
+  </view>
 
-        <button class="action-btn join-btn animate-slide-in-right" bindtap="showModal" disabled="{{loading}}">
-          <view class="btn-icon">🚪</view>
-          <text class="btn-text">加入游戏</text>
-          <text class="btn-desc">输入房间号</text>
-        </button>
-
-        <button class="action-btn rules-btn animate-slide-in-left" bindtap="showRules">
-          <view class="btn-icon">📖</view>
-          <text class="btn-text">游戏规则</text>
-          <text class="btn-desc">了解玩法</text>
-        </button>
-
-        <button class="action-btn mode-btn animate-slide-in-right" bindtap="selectMode">
-          <view class="btn-icon">👑</view>
-          <text class="btn-text">游戏模式</text>
-          <text class="btn-desc">敬请期待</text>
-        </button>
+  <!-- 已登录状态 - 主页 -->
+  <view wx:elif="{{loginFlag===1}}" class="home-page">
+    <!-- 用户信息卡片 - 重新设计 -->
+    <view class="user-card-new">
+      <view class="user-avatar-container">
+        <image class="user-avatar-new" src="{{currentUser.avatar}}" mode="aspectFill"></image>
+        <view class="avatar-border"></view>
+      </view>
+      <view class="user-info-new">
+        <text class="user-name-new">{{currentUser.name}}</text>
+        <view class="user-status">
+          <view class="status-dot"></view>
+          <text class="status-text">在线</text>
+        </view>
+      </view>
+      <view class="user-actions">
+        <view class="action-icon" bindtap="showUserMenu">
+          <text class="icon-text">⚙️</text>
+        </view>
       </view>
     </view>
 
+    <!-- 游戏标题 -->
+    <view class="game-title">
+      <text class="title-main">斗牛扑克</text>
+      <text class="title-sub">NIU NIU POKER</text>
+    </view>
+
+    <!-- 功能按钮 -->
+    <view class="action-section">
+      <button class="action-btn primary-btn" bindtap="quickStart" disabled="{{loading}}">
+        <view class="btn-content">
+          <text class="btn-icon">⚡</text>
+          <text class="btn-text">快速开始</text>
+        </view>
+      </button>
+
+      <button class="action-btn secondary-btn" bindtap="showModal" disabled="{{loading}}">
+        <view class="btn-content">
+          <text class="btn-icon">🚪</text>
+          <text class="btn-text">加入房间</text>
+        </view>
+      </button>
+
+      <button class="action-btn tertiary-btn" bindtap="showRules">
+        <view class="btn-content">
+          <text class="btn-icon">📖</text>
+          <text class="btn-text">游戏规则</text>
+        </view>
+      </button>
+
+      <button class="action-btn tertiary-btn" bindtap="selectMode">
+        <view class="btn-content">
+          <text class="btn-icon">👑</text>
+          <text class="btn-text">更多模式</text>
+        </view>
+      </button>
+    </view>
+
     <!-- 版权信息 -->
-    <view class="copyright animate-slide-up">
-      <text class="copyright-text">© {{currentYear}} 斗牛游戏 - 仅供娱乐</text>
+    <view class="copyright">
+      <text>© {{currentYear}} 斗牛游戏 · 仅供娱乐</text>
     </view>
   </view>
 
-  <!-- 未登录状态 -->
+  <!-- 未登录状态 - 登录页 -->
   <view wx:elif="{{loginFlag===2}}" class="login-page">
-    <view class="login-form animate-slide-up">
-      <block wx:if="{{canIUseNicknameComp && !hasUserInfo}}">
-        <view class="avatar-section">
-          <text class="section-label">选择头像</text>
-          <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-            <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
-            <view class="avatar-overlay">点击更换</view>
-          </button>
-        </view>
-        <view class="nickname-section">
-          <text class="section-label">设置昵称</text>
-          <input type="nickname" class="nickname-input" placeholder="请输入您的游戏昵称" bind:change="onInputChange" />
-        </view>
+    <!-- 游戏Logo -->
+    <view class="login-logo">
+      <view class="logo-container">
+        <text class="logo-icon">🎮</text>
+        <text class="logo-title">斗牛扑克</text>
+        <text class="logo-subtitle">NIU NIU POKER</text>
+      </view>
+    </view>
 
-      </block>
-      <block wx:elif="{{!hasUserInfo}}">
-        <view class="compatibility-warning">
-          <text wx:if="{{canIUseGetUserProfile}}">请使用微信授权登录</text>
-          <text wx:else>请使用2.10.4及以上版本基础库</text>
+    <!-- 登录卡片 -->
+    <view class="login-card">
+      <view class="card-title">
+        <text>创建游戏角色</text>
+      </view>
+      <view class="card-desc">
+        <text>请设置您的头像和昵称</text>
+      </view>
+
+      <!-- 头像选择 -->
+      <view class="avatar-section">
+        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image class="avatar-img" src="{{tempAvatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
+          <view class="avatar-mask">
+            <text class="avatar-tip">点击选择头像</text>
+          </view>
+        </button>
+      </view>
+
+      <!-- 昵称输入 -->
+      <view class="nickname-section">
+        <view class="input-label">
+          <text>昵称</text>
+          <text class="required">*</text>
         </view>
-      </block>
-      <button class="login-submit-btn" bindtap="bindViewTap" disabled="{{loading}}">
-        <text wx:if="{{!loading}}">开始游戏</text>
-        <text wx:else class="loading-text">登录中...</text>
+        <input 
+          id="nicknameInput"
+          class="nickname-input" 
+          type="text"
+          placeholder="请输入昵称(2-10字符)" 
+          maxlength="10"
+          value="{{tempNickname}}"
+          bindinput="onNicknameInput"
+          bindblur="onNicknameBlur"
+          bindconfirm="onNicknameBlur"
+          confirm-type="done"
+        />
+        <!-- 调试信息 -->
+        <view class="debug-text">
+          <text>data中的值: [{{tempNickname}}]</text>
+        </view>
+      </view>
+
+      <!-- 登录按钮 -->
+      <button class="login-btn" bindtap="handleManualLogin" disabled="{{loading}}">
+        <view wx:if="{{!loading}}" class="login-btn-content">
+          <text class="login-icon">🚀</text>
+          <text class="login-text">开始游戏</text>
+        </view>
+        <view wx:else class="loading-btn-content">
+          <view class="btn-spinner"></view>
+          <text>登录中...</text>
+        </view>
       </button>
+
+      <!-- 说明文字 -->
+      <view class="login-tips">
+        <text class="tip-icon">🔒</text>
+        <text class="tip-text">您的信息将被安全保护</text>
+      </view>
+    </view>
+
+    <!-- 特性展示 -->
+    <view class="features">
+      <view class="feature-item">
+        <text class="feature-icon">⚡</text>
+        <text class="feature-text">快速匹配</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">👥</text>
+        <text class="feature-text">多人对战</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🎁</text>
+        <text class="feature-text">丰富奖励</text>
+      </view>
     </view>
   </view>
 
   <!-- 错误提示 -->
-  <view wx:if="{{errorMsg}}" class="error-message animate-fade-in">
-    <text>{{errorMsg}}</text>
+  <view wx:if="{{errorMsg}}" class="error-toast">
+    <text class="error-icon">⚠️</text>
+    <text class="error-text">{{errorMsg}}</text>
   </view>
 
-  <!-- 加载遮罩 -->
+  <!-- 全屏加载遮罩 -->
   <view wx:if="{{loading}}" class="loading-overlay">
-    <view class="loading-spinner"></view>
-    <text class="loading-text">处理中...</text>
+    <view class="overlay-content">
+      <view class="loading-spinner"></view>
+      <text class="overlay-text">处理中...</text>
+    </view>
   </view>
 
-  <!-- 规则弹窗组件 -->
+  <!-- 规则弹窗 -->
   <rules-modal visible="{{showRulesModal}}" bind:close="onCloseRules"></rules-modal>
 
-  <!-- 房间号弹窗组件 -->
-  <room-modal visible="{{modalShow}}" title="房间号" showQuickStart="{{true}}" bind:close="onCloseModal" bind:cancel="onCancel" bind:confirm="onConfirm"></room-modal>
+  <!-- 房间号弹窗 -->
+  <room-modal visible="{{modalShow}}" title="加入房间" showQuickStart="{{false}}" bind:close="onCloseModal" bind:cancel="onCancel" bind:confirm="onConfirm">
+  </room-modal>
 </view>

@@ -1,14 +1,14 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/card_game/card_game"
+    "pages/card_game/card_game",
+    "pages/profile/profile"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "斗牛游戏",
     "navigationBarTextStyle": "black",
-    "pageOrientation": "landscape",
     "navigationStyle": "custom"
   },
   "style": "v2",

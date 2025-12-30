@@ -1,0 +1,61 @@
+<view class="profile-container">
+  <!-- 内容区域 -->
+  <view class="profile-content">
+    <!-- 头像设置 -->
+    <view class="setting-item">
+      <view class="item-label">
+        <text class="label-icon">👤</text>
+        <text class="label-text">头像</text>
+      </view>
+      <view class="item-value" bindtap="chooseAvatar">
+        <image class="avatar-preview" src="{{userInfo.avatar}}" mode="aspectFill"></image>
+        <text class="action-text">点击修改</text>
+      </view>
+    </view>
+
+    <!-- 昵称设置 -->
+    <view class="setting-item">
+      <view class="item-label">
+        <text class="label-icon">✏️</text>
+        <text class="label-text">昵称</text>
+      </view>
+      <view class="item-value" bindtap="showNicknameInput">
+        <text class="nickname-text">{{userInfo.name}}</text>
+        <text class="action-text">点击修改</text>
+      </view>
+    </view>
+
+    <!-- 修改昵称弹窗 -->
+    <view class="nickname-modal" wx:if="{{showNicknameModal}}">
+      <view class="modal-mask" bindtap="hideNicknameInput" catchtouchmove="preventTouchMove"></view>
+      <view class="modal-container">
+        <view class="modal-header">
+          <text class="modal-title">修改昵称</text>
+        </view>
+        <view class="modal-content">
+          <view class="input-wrapper">
+            <input 
+              class="nickname-input" 
+              type="text" 
+              value="{{tempNickname}}" 
+              bindinput="onNicknameInput"
+              placeholder="请输入新昵称"
+              maxlength="20"
+              focus="{{showNicknameModal}}"
+            />
+            <text class="input-length">{{tempNickname.length}}/20</text>
+          </view>
+        </view>
+        <view class="modal-footer">
+          <button class="modal-btn cancel-btn" bindtap="hideNicknameInput">取消</button>
+          <button class="modal-btn confirm-btn" bindtap="confirmNickname">确定</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 保存按钮 -->
+    <view class="save-section">
+      <button class="save-btn" bindtap="saveProfile">保存修改</button>
+    </view>
+  </view>
+</view>

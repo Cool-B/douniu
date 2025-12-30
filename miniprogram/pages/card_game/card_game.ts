@@ -400,6 +400,8 @@ Page<data, Record<string, any>>({
         pokeData.pointNumber = pointNumber
         pokeData.maxNumber = maxNumber
         pokeData.suit = suit
+        console.log(pokeData);
+
       }
       return player
     })
@@ -481,7 +483,7 @@ Page<data, Record<string, any>>({
         isDoubleTen: true,
         pointNumber: 0,
         maxNumber: cards[0].number,
-        suit: cards?.[0]?.suit
+        suit: cards[0].suit
       };
     }
     // 花色权重

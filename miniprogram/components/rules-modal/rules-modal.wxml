@@ -1,6 +1,6 @@
-<view class="rules-modal" wx:if="{{visible}}" catchtouchmove="preventTouchMove">
-  <view class="modal-mask" bindtap="onClose"></view>
-  <view class="modal-container">
+<view class="rules-modal" wx:if="{{showModal}}">
+  <view class="modal-mask {{animateOut ? 'fade-out' : ''}}" bindtap="onClose" catchtouchmove="preventTouchMove"></view>
+  <view class="modal-container {{animateOut ? 'slide-out' : ''}}">
     <view class="modal-header">
       <text class="header-icon">📖</text>
       <text class="header-title">游戏规则</text>

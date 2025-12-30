@@ -2,5 +2,7 @@
   "usingComponents": {
     "rules-modal": "/components/rules-modal/rules-modal",
     "room-modal": "/components/room-modal/room-modal"
-  }
+  },
+  "pageOrientation": "portrait",
+  "navigationStyle": "custom"
 }

@@ -23,25 +23,29 @@
             </view>
           </block>
           <block wx:else>
-            <view wx:if="{{item.userType===4}}" class="add-assistant" bindtap="assAssistant" data-item="{{item}}" data-index="{{index}}"></view>
+            <view wx:if="{{item.userType===4&&!roomInfo.isStart}}" class="add-assistant" bindtap="assAssistant" data-item="{{item}}" data-index="{{index}}"></view>
+          </block>
+        </block>
+        <block wx:else>
+          <view class="room-num">
+            房间号：{{roomInfo.roomNumber}}
+          </view>
+          <block wx:if="{{roomInfo.isStart&&!roomInfo.isDealComplete&&!isStartDeal}}">
+            <button class="deal-cards btn" bindtap="dealCards">发牌</button>
+            <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
+          </block>
+          <block wx:if="{{roomInfo.isStart&&roomInfo.isDealComplete}}">
+            <!-- disabled='{{!isAllShow}}' -->
+            <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" bindtap="settlementCurrent">结算</button>
+            <button class="show-cards btn" bindtap="showCards">亮牌</button>
+          </block>
+          <block wx:if="{{!roomInfo.isStart}}">
+            <button class="start-game btn" bindtap="startGame">开始游戏</button>
           </block>
         </block>
       </view>
     </block>
   </view>
-  <block wx:if="{{currentUser==='banker'}}">
-    <block wx:if="{{roomInfo.isStart&&!roomInfo.isDealComplete&&!isStartDeal}}">
-      <button class="deal-cards btn" bindtap="dealCards">发牌</button>
-      <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
-    </block>
-    <block wx:if="{{roomInfo.isStart&&roomInfo.isDealComplete}}">
-      <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" disabled='{{!isAllShow}}' bindtap="settlementCurrent">结算</button>
-      <button class="show-cards btn" bindtap="showCards">亮牌</button>
-    </block>
-    <block wx:if="{{!roomInfo.isStart}}">
-      <button class="start-game btn" bindtap="startGame">开始游戏</button>
-    </block>
-  </block>
   <block wx:if="{{roomInfo.isStart}}">
     <text class="countdown btn">{{countdown}}</text>
   </block>
@@ -56,9 +60,6 @@
   <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal" bindconfirm="confirmModal">
     <view>弹窗内容：{{modalData}}1111111</view>
   </modal>
-  <view class="room-num">
-    房间号：{{roomNumber}}
-  </view>
   <view class="go-out" bindtap="goToHome">
     退出房间
   </view>

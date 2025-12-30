@@ -1,6 +1,6 @@
-<view class="room-modal" wx:if="{{visible}}" catchtouchmove="preventTouchMove">
-  <view class="modal-mask" bindtap="onClose"></view>
-  <view class="modal-container">
+<view class="room-modal" wx:if="{{showModal}}">
+  <view class="modal-mask {{animateOut ? 'fade-out' : ''}}" bindtap="onClose" catchtouchmove="preventTouchMove"></view>
+  <view class="modal-container {{animateOut ? 'bounce-out' : ''}}">
     <view class="modal-header">
       <text class="header-icon">🏠</text>
       <text class="header-title">{{title}}</text>
@@ -15,8 +15,18 @@
           <text class="label-icon">🎮</text>
           <text class="label-text">房间号</text>
         </view>
-        <input class="custom-input" type="text" placeholder="请输入房间号" value="{{inputValue}}" bindinput="onInput" placeholder-class="input-placeholder" maxlength="20" />
-        <view class="input-border"></view>
+        <input 
+          class="custom-input" 
+          type="text" 
+          placeholder="请输入房间号" 
+          value="{{inputValue}}" 
+          bindinput="onInput" 
+          bindfocus="onFocus"
+          bindblur="onBlur"
+          placeholder-class="input-placeholder" 
+          maxlength="20" 
+        />
+        <view class="input-border" style="opacity: {{inputFocused ? 1 : 0}}"></view>
       </view>
     </view>
 
