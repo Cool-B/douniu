@@ -120,22 +120,7 @@
           <text>昵称</text>
           <text class="required">*</text>
         </view>
-        <input 
-          id="nicknameInput"
-          class="nickname-input" 
-          type="text"
-          placeholder="请输入昵称(2-10字符)" 
-          maxlength="10"
-          value="{{tempNickname}}"
-          bindinput="onNicknameInput"
-          bindblur="onNicknameBlur"
-          bindconfirm="onNicknameBlur"
-          confirm-type="done"
-        />
-        <!-- 调试信息 -->
-        <view class="debug-text">
-          <text>data中的值: [{{tempNickname}}]</text>
-        </view>
+        <input id="nicknameInput" class="nickname-input" type="text" placeholder="请输入昵称(2-10字符)" maxlength="10" value="{{tempNickname}}" bindinput="onNicknameInput" bindblur="onNicknameBlur" bindconfirm="onNicknameBlur" confirm-type="done" />
       </view>
 
       <!-- 登录按钮 -->
@@ -154,22 +139,6 @@
       <view class="login-tips">
         <text class="tip-icon">🔒</text>
         <text class="tip-text">您的信息将被安全保护</text>
-      </view>
-    </view>
-
-    <!-- 特性展示 -->
-    <view class="features">
-      <view class="feature-item">
-        <text class="feature-icon">⚡</text>
-        <text class="feature-text">快速匹配</text>
-      </view>
-      <view class="feature-item">
-        <text class="feature-icon">👥</text>
-        <text class="feature-text">多人对战</text>
-      </view>
-      <view class="feature-item">
-        <text class="feature-icon">🎁</text>
-        <text class="feature-text">丰富奖励</text>
       </view>
     </view>
   </view>

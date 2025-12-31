@@ -46,6 +46,8 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
 
       case '/poker/joinRoom':
         const joinRoomResult = await mockApi.joinRoom(data);
+        console.log(joinRoomResult);
+
         return {
           code: joinRoomResult.code,
           data: joinRoomResult.data,
@@ -59,8 +61,8 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: getRoomInfoResult.data,
           msg: getRoomInfoResult.message
         };
-      case '/poker/assAssistant':
-        const assAssistantResult = await mockApi.assAssistant(data);
+      case '/poker/addAssistantOrChangeSeat':
+        const assAssistantResult = await mockApi.addAssistantOrChangeSeat(data);
         return {
           code: assAssistantResult.code,
           data: assAssistantResult.data,
@@ -90,7 +92,30 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
           data: exitRoomResult.data,
           msg: exitRoomResult.message
         };
+      case '/poker/kickPlayer':
+        const kickPlayerResult = await mockApi.kickPlayer(data);
+        return {
+          code: kickPlayerResult.code,
+          data: kickPlayerResult.data,
+          msg: kickPlayerResult.message
+        };
 
+      case '/poker/playerReady':
+        const playerReadyResult = await mockApi.playerReady(data);
+        return {
+          code: playerReadyResult.code,
+          data: playerReadyResult.data,
+          msg: playerReadyResult.message
+        };
+      // changeBet   /poker/changeBet
+
+      case '/poker/changeBet':
+        const playerBetResult = await mockApi.changeBet(data);
+        return {
+          code: playerBetResult.code,
+          data: playerBetResult.data,
+          msg: playerBetResult.message
+        };
       default:
         // 默认返回成功响应
         return {

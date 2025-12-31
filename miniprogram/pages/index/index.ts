@@ -11,7 +11,7 @@ Component({
   data: {
     motto: '欢迎来到斗牛扑克',
     modalShow: false,
-    inputValue: '',
+    inputValue: '', // 已废弃：现在直接从room-modal组件的confirm事件获取房间号
     userInfo: {
       avatarUrl: '',
       nickName: '',
@@ -250,15 +250,12 @@ Component({
           const roomInfo = response.data.roomInfo;
           app.globalData.roomId = roomInfo.roomId;
           app.globalData.roomNumber = roomInfo.roomNumber;
-
           setRoomInfo(roomInfo);
-
           wx.showToast({
             title: '房间创建成功',
             icon: 'success',
             duration: 1000
           });
-
           setTimeout(() => {
             wx.redirectTo({
               url: '../card_game/card_game'
@@ -289,40 +286,43 @@ Component({
     },
 
     // 确认加入房间
-    onConfirm() {
-      if (this.data.inputValue.trim() === '') {
+    onConfirm(e: any) {
+      // 从组件的confirm事件中获取房间号
+      const roomNumber = e.detail.value.trim() || '';
+
+      if (roomNumber === '') {
         this.showError('请输入房间号', 2000);
         return;
       }
 
-      const roomNumber = this.data.inputValue.trim();
+      // room-modal组件已经验证了格式（4-8位字母数字）
+      // 这里再验证是否符合6位数字的业务规则
       if (!/^\d{6}$/.test(roomNumber)) {
         this.showError('房间号应为6位数字', 3000);
         return;
       }
-
-      this.setData({ loading: true, errorMsg: '' });
-
+      this.setData({ loading: true, errorMsg: '', modalShow: false });
       joinRoom({
         userId: this.data.currentUser.id,
         roomNumber: roomNumber
       }).then(response => {
-        if (response.code === 200 && response.data) {
-          const roomData = response.data.data;
-          app.globalData.roomId = roomData.roomId;
-          app.globalData.roomNumber = roomData.roomNumber;
-
+        const { roomInfo } = response.data
+        if (response.code === 200 && roomInfo) {
+          app.globalData.roomId = roomInfo.roomId;
+          app.globalData.roomNumber = roomInfo.roomNumber;
           wx.showToast({
             title: '加入成功',
             icon: 'success',
             duration: 1000
           });
-
           setTimeout(() => {
             wx.redirectTo({
               url: '../card_game/card_game'
             });
           }, 1000);
+          console.log(roomInfo);
+
+          setRoomInfo(roomInfo)
         } else {
           this.setData({ loading: false });
           this.showError(response.msg || '房间不存在', 3000);
@@ -337,6 +337,8 @@ Component({
       this.setData({ modalShow: false });
     },
 
+    // 已废弃：现在直接从room-modal组件的confirm事件参数中获取房间号
+    // 保留此方法以防将来需要实时监听输入变化
     dialogInputChange(e: { detail: { value: any } }) {
       this.setData({ inputValue: e.detail.value, errorMsg: '' });
     },

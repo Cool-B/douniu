@@ -17,14 +17,14 @@
         </view>
         <input 
           class="custom-input" 
-          type="text" 
-          placeholder="请输入房间号" 
+          type="number" 
+          placeholder="请输入6位数字房间号" 
           value="{{inputValue}}" 
           bindinput="onInput" 
           bindfocus="onFocus"
           bindblur="onBlur"
           placeholder-class="input-placeholder" 
-          maxlength="20" 
+          maxlength="6" 
         />
         <view class="input-border" style="opacity: {{inputFocused ? 1 : 0}}"></view>
       </view>

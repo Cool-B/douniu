@@ -6,41 +6,61 @@
           <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
           <block wx:if="{{item.userType !== 4 }}">
             <view class="player-pokes_box">
-              <view class="{{['player-pokes', roomInfo.isStart ? 'is-gaming' : '']}}" bindtap="checkPokes" data-index="{{index}}">
+              <view class="{{['player-pokes',(item.status===2||item.userType===1) ? 'is-gaming' : '']}}" bindtap="checkPokes" data-index="{{index}}">
                 <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
                 <!-- <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item}}" mode="" /> -->
               </view>
             </view>
-            <view wx:if="{{item.userType!==1&&!roomInfo.isStart}}" class="player-status">
-              {{item.status===1?'未准备':'已准备'}}
+            <view wx:if="{{item.userType!==1&&!roomInfo.isStart}}" style="display: flex;flex-direction: row-reverse;gap: 10rpx;position: absolute;top: 10rpx;">
+              <view class="player-status">
+                {{item.status===1?'未准备':'已准备'}}
+              </view>
+              <view wx:if="{{currentUser==='banker'}}" class="delete-players" bindtap="kickPlayer" data-index="{{index}}">
+                移除
+              </view>
             </view>
             <view class="player-info">
               <image class="player-avatar" src="{{item.avatar}}" mode="cover"></image>
               <view class="player-text">{{item.name}}</view>
               <view class="player-bet" wx:if="{{item.userType!==1}}">下注:{{item.bet}}</view>
               <view class="player-score">积分:{{item.score}}</view>
-              <view wx:if="{{!roomInfo.isStart&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip" data-index="{{index}}"></view>
+              <!-- 结算结果显示 -->
+              <view wx:if="{{item.settlementResult}}" class="settlement-result {{item.settlementResult.change > 0 ? 'win' : 'lose'}}">
+                <view class="settlement-change">{{item.settlementResult.change > 0 ? '+' : ''}}{{item.settlementResult.change}}</view>
+              </view>
             </view>
           </block>
           <block wx:else>
-            <view wx:if="{{item.userType===4&&!roomInfo.isStart}}" class="add-assistant" bindtap="assAssistant" data-item="{{item}}" data-index="{{index}}"></view>
+            <view wx:if="{{!roomInfo.isStart&&((item.userType===4&&currentUser==='banker')||currentPlayerStatus===1)}}" class="add-assistant" bindtap="addAssistantOrChangeSeat" data-index="{{index}}"></view>
           </block>
         </block>
         <block wx:else>
           <view class="room-num">
             房间号：{{roomInfo.roomNumber}}
           </view>
-          <block wx:if="{{roomInfo.isStart&&!roomInfo.isDealComplete&&!isStartDeal}}">
-            <button class="deal-cards btn" bindtap="dealCards">发牌</button>
-            <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
+          <block wx:if="{{currentUser==='banker'}}">
+            <block wx:if="{{roomInfo.isStart&&!roomInfo.isDealComplete&&!isStartDeal}}">
+              <button class="deal-cards btn" bindtap="dealCards">发牌</button>
+              <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
+            </block>
+            <block wx:if="{{roomInfo.isStart&&roomInfo.isDealComplete}}">
+              <!-- disabled='{{!isAllShow}}' -->
+              <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" bindtap="settlementCurrent">结算</button>
+              <button class="show-cards btn" bindtap="showCards">亮牌</button>
+            </block>
+            <block wx:if="{{!roomInfo.isStart}}">
+              <button class="start-game btn" bindtap="startGame" disabled="{{!canStartGame}}">开始游戏</button>
+            </block>
           </block>
-          <block wx:if="{{roomInfo.isStart&&roomInfo.isDealComplete}}">
-            <!-- disabled='{{!isAllShow}}' -->
-            <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" bindtap="settlementCurrent">结算</button>
-            <button class="show-cards btn" bindtap="showCards">亮牌</button>
-          </block>
-          <block wx:if="{{!roomInfo.isStart}}">
-            <button class="start-game btn" bindtap="startGame">开始游戏</button>
+          <block wx:else class="player-operate">
+            <!-- 准备按钮 -->
+            <button class="deal-cards btn" bindtap="changeReady">{{currentPlayerStatus===2?'取消准备':'准备'}}</button>
+            <!-- 下注按钮（仅在未准备状态显示），点击后弹出选择器 -->
+            <button class="bet-btn btn" wx:if="{{currentPlayerStatus===1}}">
+              <picker mode="selector" range="{{range}}" value="{{selectedValue}}" bindchange="onBetChange">
+                下注
+              </picker>
+            </button>
           </block>
         </block>
       </view>
@@ -49,18 +69,9 @@
   <block wx:if="{{roomInfo.isStart}}">
     <text class="countdown btn">{{countdown}}</text>
   </block>
-  <block wx:if="{{currentUser==='player'}}">
-    <button class="ready-btn btn" bindtap="changeReady" disabled="{{!selectedValue}}">{{isReady?'取消准备':'准备'}}</button>
-    <picker class="bet-select btn" mode="selector" disabled="{{isReady}}" range="{{range}}" bindchange="onPickerChange">
-      <view class="picker">
-        当前下注：{{selectedValue}}
-      </view>
-    </picker>
-  </block>
   <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal" bindconfirm="confirmModal">
     <view>弹窗内容：{{modalData}}1111111</view>
   </modal>
   <view class="go-out" bindtap="goToHome">
-    退出房间
   </view>
 </view>

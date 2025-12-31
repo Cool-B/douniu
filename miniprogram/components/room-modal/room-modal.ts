@@ -31,7 +31,7 @@ Component({
    * 监听属性变化
    */
   observers: {
-    'visible': function(newVal) {
+    'visible': function (newVal) {
       if (newVal) {
         // 打开弹窗
         this.setData({
@@ -61,10 +61,17 @@ Component({
      * 输入框输入事件
      */
     onInput(e: any) {
+      let value = e.detail.value;
+      // 过滤非数字字符（额外保护，虽然type="number"已经限制）
+      value = value.replace(/[^\d]/g, '');
+      // 限制最多6位
+      if (value.length > 6) {
+        value = value.slice('', 6);
+      }
       this.setData({
-        inputValue: e.detail.value
+        inputValue: value
       });
-      this.triggerEvent('input', { value: e.detail.value });
+      this.triggerEvent('input', { value: value });
     },
 
     /**
@@ -109,8 +116,8 @@ Component({
      * 确定按钮
      */
     onConfirm() {
-      const value = this.data.inputValue.trim();
-      
+      const value = this.data.inputValue.toString().trim();
+
       if (!value) {
         wx.showToast({
           title: '请输入房间号',
@@ -120,20 +127,20 @@ Component({
         return;
       }
 
-      if (value.length < 4 || value.length > 8) {
+      // 验证房间号格式（只允许数字）
+      const regex = /^\d+$/;
+      if (!regex.test(value)) {
         wx.showToast({
-          title: '房间号长度为4-8位',
+          title: '房间号只能包含数字',
           icon: 'none',
           duration: 2000
         });
         return;
       }
 
-      // 验证房间号格式（只允许字母和数字）
-      const regex = /^[a-zA-Z0-9]+$/;
-      if (!regex.test(value)) {
+      if (value.length !== 6) {
         wx.showToast({
-          title: '房间号只能包含字母和数字',
+          title: '房间号必须为6位数字',
           icon: 'none',
           duration: 2000
         });
@@ -156,7 +163,7 @@ Component({
       for (let i = 0; i < 6; i++) {
         roomId += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      
+
       this.triggerEvent('quickstart', { value: roomId });
       this.setData({
         inputValue: ''

@@ -1,3 +1,4 @@
+import { player } from "../utils/localStorage";
 import request from "../utils/request";
 
 export async function login(data: {
@@ -43,12 +44,14 @@ export async function getRoomInfo(data: {
     method: 'POST'
   })
 }
-export async function assAssistant(data: {
+export async function addAssistantOrChangeSeat(data: {
   roomId: number,
-  seatIndex: number
+  userId: number,
+  seatIndex: number,
+  isBanker: boolean
 }) {
   return await request({
-    url: '/poker/assAssistant',
+    url: '/poker/addAssistantOrChangeSeat',
     data,
     method: 'POST'
   })
@@ -83,6 +86,44 @@ export async function exitRoom(data: {
 }) {
   return await request({
     url: '/poker/exitRoom',
+    data,
+    method: 'POST'
+  })
+}
+
+// 玩家准备/取消准备
+export async function playerReady(data: {
+  roomId: number,
+  userId: number,
+  status: 1 | 2,  // 1取消准备 2确认准备
+}) {
+  return await request({
+    url: '/poker/playerReady',
+    data,
+    method: 'POST'
+  })
+}
+
+// 踢出玩家（庄家权限）
+export async function kickPlayer(data: {
+  roomId: number,
+  userId: number,
+  player: player,
+}) {
+  return await request({
+    url: '/poker/kickPlayer',
+    data,
+    method: 'POST'
+  })
+}
+// 下注
+export async function changeBet(data: {
+  roomId: number,
+  userId: number,
+  bet: number
+}) {
+  return await request({
+    url: '/poker/changeBet',
     data,
     method: 'POST'
   })

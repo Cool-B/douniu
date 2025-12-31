@@ -3,7 +3,7 @@
  * 包含用户、房间、游戏等所有模拟数据
  */
 
-import { getRoomInfo, getUserInfo, player, roomInfo } from "./localStorage";
+import { getRoomInfo, getUserInfo, player, roomInfo, setRoomInfo } from "./localStorage";
 
 export interface MockUserInfo {
   id: number;
@@ -36,7 +36,7 @@ export interface MockPlayer {
   status: number; // 1: 待准备, 2: 已准备
   state: number; // 1: 正常, 2: 退出房间, 3: 离线
   score: number;
-  bet?: number;
+  bet: number;
   ready?: boolean;
   pokers?: MockCard[];
   lookHand?: boolean;
@@ -93,8 +93,26 @@ const mockUsers: MockUserInfo[] = [
   }
 ];
 
-// Mock房间数据
-const mockRooms: roomInfo[] = getRoomInfo() || [];
+const defaultPlayer: player = {
+  userId: 0,
+  name: '空',
+  avatar: 'https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132',
+  userType: 4,
+  status: 1,
+  state: 1,
+  score: 0,
+  roomId: 0,
+  bet: 1,
+  pokers: [],
+  pokeData: {
+    isBoom: false,
+    isDoubleTen: false,
+    hasNiu: false,
+    maxNumber: 0,
+    suit: '',
+    pointNumber: 0
+  }
+};
 // Mock游戏数据
 const mockGames: MockGameData[] = [
   {
@@ -113,6 +131,7 @@ const mockGames: MockGameData[] = [
         state: 1,
         score: 1000,
         roomId: 2001,
+        bet: 1,
         pokers: [
           { suit: "Spade", number: 10 },
           { suit: "Heart", number: 7 },
@@ -180,7 +199,7 @@ const mockResponses = {
     code: 200,
     message: "房间创建成功",
     data: {
-      roomInfo: mockRooms[0],
+      roomInfo: (getRoomInfo() || [])[0],
       userInfo: mockUsers[0]
     }
   },
@@ -190,7 +209,7 @@ const mockResponses = {
     code: 200,
     message: "加入房间成功",
     data: {
-      roomInfo: mockRooms[0],
+      roomInfo: (getRoomInfo() || [])[0],
       userInfo: mockUsers[1]
     }
   },
@@ -200,8 +219,8 @@ const mockResponses = {
     code: 200,
     message: "获取房间信息成功",
     data: {
-      roomInfo: mockRooms[0],
-      userInfoList: mockRooms[0] && mockRooms[0].players
+      roomInfo: (getRoomInfo() || [])[0],
+      userInfoList: (getRoomInfo() || [])[0] && (getRoomInfo() || [])[0].players
     }
   },
 
@@ -231,7 +250,6 @@ const mockResponses = {
     message: "退出房间成功",
     data: {
       roomInfo: null,
-      userInfo: mockUsers[0]
     }
   }
 };
@@ -296,25 +314,12 @@ export const mockApi = {
     for (let i = 0; i < 9; i++) {
       const botUser = mockUsers[0] || {};
       players.push({
+        ...defaultPlayer,
         roomId: newRoom.roomId,
         userId: i === 7 ? userInfo.id : 0,
         name: i === 7 ? userInfo.name : '空',
         avatar: i === 7 ? userInfo.avatar : botUser.avatar,
         userType: i === 7 ? 1 : 4,
-        status: 1,
-        state: 0, // 
-        score: 0, //
-        bet: 1,
-        pokers: [],
-        pokeData: {
-          isBoom: false,
-          isDoubleTen: false,
-          hasNiu: false,
-          maxNumber: 0,
-          suit: '',
-          pointNumber: 0
-
-        }
       });
     }
     return {
@@ -327,47 +332,41 @@ export const mockApi = {
   },
 
   // 加入房间
-  async joinRoom(data: { userId: number; roomNumber: number }) {
+  async joinRoom(data: { userId: number; roomNumber: string }) {
     await simulateDelay();
-    const room = mockRooms.find(r => r.roomNumber === data.roomNumber);
-
+    // Mock房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
+    const room = mockRooms.find(r => r.roomNumber === Number(data.roomNumber));
     if (!room) {
       return mockErrors.notFound;
     }
-
-    const user = mockUsers.find(u => u.id === data.userId);
-    if (!user) {
-      return mockErrors.unauthorized;
-    }
-
+    const userInfo: any = getUserInfo();
     const newPlayer: player = {
+      ...defaultPlayer,
       userId: data.userId,
-      name: user.name,
-      avatar: user.avatar,
+      name: userInfo.name,
+      avatar: userInfo.avatar,
       userType: 2,
-      status: 1,
-      state: 1,
-      score: 1000,
       roomId: room.roomId,
-      pokers: [],
-      pokeData: {
-        isBoom: false,
-        isDoubleTen: false,
-        hasNiu: false,
-        maxNumber: 0,
-        suit: '',
-        pointNumber: 0
-      }
     };
-
-    room.players.push(newPlayer);
+    let flag = false
+    room.players = room.players.map(item => {
+      if (item.userType === 4 && !flag) {
+        flag = true
+        return {
+          ...item,
+          ...newPlayer
+        }
+      }
+      return item
+    })
+    console.log(room, 222222);
 
     return {
       code: 200,
       message: "加入房间成功",
       data: {
         roomInfo: room,
-        userInfo: user
       }
     };
   },
@@ -375,6 +374,8 @@ export const mockApi = {
   // 获取房间信息
   async getRoomInfo(data: { roomId: number }) {
     await simulateDelay();
+    // Mock房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
     const room = mockRooms.find(r => r.roomId === data.roomId);
     if (!room) {
       return mockErrors.notFound;
@@ -388,33 +389,196 @@ export const mockApi = {
       }
     };
   },
-  // 新增机器人
-  async assAssistant(data: { roomId: number, seatIndex: number }) {
+  // 添加机器人或换座位
+  async addAssistantOrChangeSeat(data: { 
+    roomId: number, 
+    userId: number,
+    seatIndex: number, 
+    isBanker: boolean 
+  }) {
     await simulateDelay();
-    const room = mockRooms.find(r => r.roomId === data.roomId);
-    if (!room) {
-      return mockErrors.notFound;
+    
+    // ========== 参数验证 ==========
+    if (!data.roomId || !data.userId || data.seatIndex === undefined || data.seatIndex === null) {
+      return {
+        code: 400,
+        message: "参数不完整",
+        data: null
+      };
     }
-    room.players.map((player, index) => {
-      if (index === data.seatIndex) {
-        player.name = Math.random().toString(36).substring(2, 8)
-        player.userId = player.roomId + Date.now()
-        player.userType = 3
-        player.status = 2
+
+    // 获取房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
+    const room = mockRooms.find(r => r.roomId === data.roomId);
+    
+    if (!room) {
+      return {
+        code: 404,
+        message: "房间不存在",
+        data: null
+      };
+    }
+
+    // 验证座位索引
+    if (data.seatIndex < 0 || data.seatIndex >= room.players.length) {
+      return {
+        code: 400,
+        message: "座位索引无效",
+        data: null
+      };
+    }
+
+    // 查找操作玩家
+    const operatorIndex = room.players.findIndex(p => p.userId === data.userId);
+    
+    if (operatorIndex === -1) {
+      return {
+        code: 404,
+        message: "操作玩家不在房间中",
+        data: null
+      };
+    }
+
+    const operator = room.players[operatorIndex];
+    const targetSeat = room.players[data.seatIndex];
+
+    // ========== 通用验证 ==========
+    // 1. 游戏已开始不能操作
+    if (room.isGaming || room.isStart) {
+      return {
+        code: 400,
+        message: "游戏已开始，无法操作",
+        data: null
+      };
+    }
+
+    // 2. 目标座位不能是空位类型以外的玩家
+    if (targetSeat.userType !== 4) {
+      return {
+        code: 400,
+        message: "目标座位已被占用",
+        data: null
+      };
+    }
+
+    // 3. 不能操作第7位（庄家位）
+    if (data.seatIndex === 7) {
+      return {
+        code: 400,
+        message: "不能操作庄家位置",
+        data: null
+      };
+    }
+
+    // ========== 分支逻辑：庄家添加机器人 VS 玩家换座位 ==========
+    if (data.isBanker) {
+      // ========== 庄家添加机器人 ==========
+      
+      // 验证操作者是否是庄家
+      if (operator.userType !== 1) {
+        return {
+          code: 403,
+          message: "只有庄家才能添加机器人",
+          data: null
+        };
       }
-    })
-    return {
-      code: 200,
-      message: "新增机器人成功",
-      data: {
-        roomInfo: room,
-        userInfoList: room.players
+
+      // 生成机器人玩家
+      const botName = 'Bot_' + Math.random().toString(36).substring(2, 8);
+      const botUserId = room.roomId + Date.now() + Math.floor(Math.random() * 1000);
+      
+      room.players[data.seatIndex] = {
+        ...targetSeat,
+        userId: botUserId,
+        name: botName,
+        avatar: operator.avatar, // 使用庄家头像作为机器人头像
+        userType: 3, // 3 = 机器人
+        status: 2, // 机器人默认已准备
+        bet: 1,
+        score: 0,
+        state: 1,
+        roomId: room.roomId
+      };
+
+      // 保存到本地存储
+      setRoomInfo(room);
+
+      console.log(`[addAssistantOrChangeSeat] 庄家 ${operator.name}(ID:${operator.userId}) 在座位${data.seatIndex}添加了机器人 ${botName}(ID:${botUserId})`);
+
+      return {
+        code: 200,
+        message: "添加机器人成功",
+        data: {
+          roomInfo: room,
+          userInfoList: room.players
+        }
+      };
+
+    } else {
+      // ========== 玩家换座位 ==========
+      
+      // 验证操作者是否是普通玩家
+      if (operator.userType !== 2) {
+        return {
+          code: 403,
+          message: "只有普通玩家才能换座位",
+          data: null
+        };
       }
-    };
+
+      // 验证玩家是否已准备（已准备状态不能换座位）
+      if (operator.status === 2) {
+        return {
+          code: 400,
+          message: "已准备状态不能换座位，请先取消准备",
+          data: null
+        };
+      }
+
+      // 验证是否换到同一个位置
+      if (operatorIndex === data.seatIndex) {
+        return {
+          code: 400,
+          message: "您已经在这个位置了",
+          data: null
+        };
+      }
+
+      // 执行座位交换：将玩家移到目标座位，原座位变为空位
+      const oldSeatIndex = operatorIndex;
+      
+      // 将玩家移到目标座位
+      room.players[data.seatIndex] = {
+        ...operator
+      };
+
+      // 原座位变为空位
+      room.players[oldSeatIndex] = {
+        ...defaultPlayer,
+        roomId: room.roomId,
+        userType: 4
+      };
+
+      // 保存到本地存储
+      setRoomInfo(room);
+
+      console.log(`[addAssistantOrChangeSeat] 玩家 ${operator.name}(ID:${operator.userId}) 从座位${oldSeatIndex}换到座位${data.seatIndex}`);
+
+      return {
+        code: 200,
+        message: "换座成功",
+        data: {
+          roomInfo: room,
+          userInfoList: room.players
+        }
+      };
+    }
   },
   // 开始游戏
   async startGame(data: { roomId: number; userId: number }) {
     await simulateDelay();
+    // Mock房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
     const room = mockRooms.find(r => r.roomId === data.roomId);
 
     if (!room) {
@@ -509,20 +673,265 @@ export const mockApi = {
   // 退出房间
   async exitRoom(data: { roomId: number; userId: number }) {
     await simulateDelay();
+    // Mock房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
     const room = mockRooms.find(r => r.roomId === data.roomId);
-
     if (!room) {
       return mockErrors.notFound;
     }
+    // 判断退出的玩家是否是房主
+    const exitingPlayer = room.players.find(p => p.userId === data.userId);
+    const isBanker = exitingPlayer && exitingPlayer.userType === 1;
 
-    room.players = room.players.filter(p => p.userId !== data.userId);
-
+    // 将退出的玩家位置重置为空位
+    room.players = room.players.map(p => {
+      if (p.userId !== data.userId) {
+        return p
+      }
+      return {
+        ...defaultPlayer,
+        roomId: room.roomId,
+        userType: isBanker ? 1 : 4
+      }
+    });
+    // 如果是房主退出，需要处理房主转让或解散房间
+    if (isBanker) {
+      // 判断是否还有其他玩家（包括机器人）
+      const hasPlayer = room.players.some(p => p.userType !== 4);
+      if (!hasPlayer) {
+        // 没有其他玩家，解散房间
+        const roomIndex = mockRooms.findIndex(r => r.roomId === data.roomId);
+        if (roomIndex !== -1) {
+          mockRooms.splice(roomIndex, 1);
+          // 保存更新后的房间列表
+          wx.setStorageSync('roomInfo', JSON.stringify(mockRooms));
+        }
+        return {
+          code: 200,
+          message: "退出房间成功，房间已解散",
+          data: {
+            roomInfo: null,
+          }
+        };
+      }
+      // 有其他玩家，转让房主身份
+      // 找到第一个非空位玩家
+      const newBanker = room.players.find(p => p.userType !== 4);
+      if (newBanker) {
+        const newBankerIndex = room.players.findIndex(p => p.userId === newBanker.userId);
+        const bankerIndex = 7; // 房主固定在第7位
+        if (newBankerIndex !== bankerIndex && newBankerIndex !== -1) {
+          // 交换位置：将新房主移到第7位
+          const tempPlayer = { ...room.players[bankerIndex], userType: 4 };
+          room.players[bankerIndex] = {
+            ...newBanker,
+            userType: 1  // 设置为庄家
+          };
+          room.players[newBankerIndex] = tempPlayer;
+        } else if (newBankerIndex === bankerIndex) {
+          // 新房主已经在第7位，只需更新userType
+          room.players[bankerIndex].userType = 1;
+        }
+      }
+    }
+    // 保存更新后的房间信息
+    setRoomInfo(room);
     return {
       code: 200,
       message: "退出房间成功",
       data: {
+        roomInfo: room,
+      }
+    };
+  },
+  // 踢出房间
+  async kickPlayer(data: {
+    roomId: number,
+    userId: number,
+    player: player,
+  }) {
+    await simulateDelay();
+    // Mock房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
+    const room = mockRooms.find(r => r.roomId === data.roomId);
+    if (!room) {
+      return mockErrors.notFound;
+    }
+    room.players.map(p => p.score += data.player.score)
+    room.players = room.players.filter(p => p.userId !== data.player.userId);
+    return {
+      code: 200,
+      message: "踢出房间成功",
+      data: {
         roomInfo: room.players.length === 0 ? null : room,
-        userInfo: mockUsers.find(u => u.id === data.userId)
+      }
+    };
+  },
+
+  // 玩家准备/取消准备
+  async playerReady(data: {
+    roomId: number;
+    userId: number;
+    status: 1 | 2;  // 1取消准备 2确认准备
+  }) {
+    await simulateDelay();
+    // 获取房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
+    const room = mockRooms.find(r => r.roomId === data.roomId);
+    if (!room) {
+      return mockErrors.notFound;
+    }
+    // 查找玩家
+    const playerIndex = room.players.findIndex(p => p.userId === data.userId);
+
+    if (playerIndex === -1) {
+      return {
+        code: 404,
+        message: "玩家不在房间中",
+        data: null
+      };
+    }
+
+    const player = room.players[playerIndex];
+
+    // 检查是否是庄家（庄家不需要准备）
+    if (player.userType === 1) {
+      return {
+        code: 400,
+        message: "庄家不需要准备",
+        data: null
+      };
+    }
+    // 检查游戏是否已开始
+    if (room.isGaming) {
+      return {
+        code: 400,
+        message: "游戏已开始，无法改变准备状态",
+        data: null
+      };
+    }
+    // 更新玩家状态
+    room.players[playerIndex] = {
+      ...player,
+      status: data.status,
+    };
+    // 保存到本地存储
+    setRoomInfo(room);
+    return {
+      code: 200,
+      message: data.status === 2 ? "准备成功" : "取消准备成功",
+      data: {
+        roomInfo: room
+      }
+    };
+  },
+  // 下注
+  async changeBet(data: {
+    roomId: number;
+    userId: number;
+    bet: number;  // 下注倍数 1-10
+  }) {
+    await simulateDelay();
+
+    // ========== 参数验证 ==========
+    if (!data.roomId || !data.userId || data.bet === undefined || data.bet === null) {
+      return {
+        code: 400,
+        message: "参数不完整",
+        data: null
+      };
+    }
+
+    // 获取房间数据
+    const mockRooms: roomInfo[] = getRoomInfo() || [];
+    const room = mockRooms.find(r => r.roomId === data.roomId);
+
+    if (!room) {
+      return {
+        code: 404,
+        message: "房间不存在",
+        data: null
+      };
+    }
+
+    // 查找玩家
+    const playerIndex = room.players.findIndex(p => p.userId === data.userId);
+
+    if (playerIndex === -1) {
+      return {
+        code: 404,
+        message: "玩家不在房间中",
+        data: null
+      };
+    }
+
+    const player = room.players[playerIndex];
+
+    // ========== 业务规则验证 ==========
+    // 1. 庄家不能下注
+    if (player.userType === 1) {
+      return {
+        code: 400,
+        message: "庄家不能下注",
+        data: null
+      };
+    }
+
+    // 2. 已准备状态不能更改下注
+    if (player.status === 2) {
+      return {
+        code: 400,
+        message: "已准备状态不能更改下注",
+        data: null
+      };
+    }
+
+    // 3. 游戏已开始不能更改下注
+    if (room.isGaming || room.isStart) {
+      return {
+        code: 400,
+        message: "游戏已开始，无法更改下注",
+        data: null
+      };
+    }
+
+    // 4. 下注倍数必须是1-10之间的整数
+    if (!Number.isInteger(data.bet) || data.bet < 1 || data.bet > 10) {
+      return {
+        code: 400,
+        message: "下注倍数必须是1-10之间的整数",
+        data: null
+      };
+    }
+
+    // 5. 检查下注是否有变化
+    if (player.bet === data.bet) {
+      return {
+        code: 200,
+        message: "下注倍数未改变",
+        data: {
+          roomInfo: room
+        }
+      };
+    }
+
+    // ========== 更新下注信息 ==========
+    const oldBet = player.bet;
+    room.players[playerIndex] = {
+      ...player,
+      bet: data.bet
+    };
+
+    // 保存到本地存储
+    setRoomInfo(room);
+
+    console.log(`[changeBet] 玩家 ${player.name}(ID:${player.userId}) 下注从 ${oldBet}倍 改为 ${data.bet}倍`);
+
+    return {
+      code: 200,
+      message: `下注已改为${data.bet}倍`,
+      data: {
+        roomInfo: room
       }
     };
   }

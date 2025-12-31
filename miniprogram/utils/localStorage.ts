@@ -29,7 +29,7 @@ export interface roomInfo {
 export interface player {
   name: string
   avatar: string
-  bet?: number,
+  bet: number,
   lookHand?: boolean
   showOther?: boolean
   pokers: poke[],
@@ -42,7 +42,11 @@ export interface player {
   userId: number,
   roomId: number,
   userType: number,
-  pokeData: PokeData
+  pokeData: PokeData,
+  // 结算时显示的输赢信息
+  settlementResult?: {
+    change: number,
+  }
 }
 export interface PokeData {
   // 是否是炸弹
