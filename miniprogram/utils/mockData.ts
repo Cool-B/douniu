@@ -59,6 +59,13 @@ export interface MockGameData {
   cards: MockCard[];
 }
 
+// 机器人头像池 - 使用不同的微信默认头像和真实头像
+const BOT_AVATARS = [
+  "https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83eoj0hHXhgJNOTSOFsS4uZs8x1ConecaVOB8eIl115xmJZcT4oCicvia7wMEufibKtTLqiaJeanU2Lpg3w/132",
+  "https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+  "https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0",
+];
+
 // Mock用户数据
 const mockUsers: MockUserInfo[] = [
   {
@@ -180,13 +187,39 @@ function shuffleArray<T>(array: T[]): T[] {
 // Mock响应数据
 const mockResponses = {
   // 登录响应
-  login: (data: { code: string; name: string; avatar: string }) => {
-    const userInfo = {
-      ...mockUsers[0],
-      ...data,
-      token: "mock_token_1001",
-      username: data.name
+  login: (data: { code: string; name?: string; avatar?: string; encryptedData?: string; iv?: string; phoneCode?: string; loginType?: string }) => {
+    let userInfo;
+
+    if (data.loginType === 'quick') {
+      // 一键登录：模拟从微信获取的用户信息
+      console.log('[MockData] 处理一键登录请求', { encryptedData: data.encryptedData, iv: data.iv, phoneCode: data.phoneCode });
+
+      // 模拟解密手机号（实际应由后端完成）
+      const mockPhoneNumber = '138****' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+
+      // 模拟从微信获取的用户信息
+      userInfo = {
+        ...mockUsers[0],
+        token: "mock_token_quick_" + Date.now(),
+        username: "微信用户" + mockPhoneNumber.slice(-4),
+        avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/mock_avatar_" + Date.now() + ".png",
+        phone: mockPhoneNumber,
+        userId: "wx_user_" + Date.now()
+      };
+
+      console.log('[MockData] 一键登录成功', userInfo);
+    } else {
+      // 自定义登录
+      console.log('[MockData] 处理自定义登录请求', { name: data.name, avatar: data.avatar });
+
+      userInfo = {
+        ...mockUsers[0],
+        ...data,
+        token: "mock_token_1001",
+        username: data.name
+      };
     }
+
     return {
       code: 200,
       message: "登录成功",
@@ -390,14 +423,14 @@ export const mockApi = {
     };
   },
   // 添加机器人或换座位
-  async addAssistantOrChangeSeat(data: { 
-    roomId: number, 
+  async addAssistantOrChangeSeat(data: {
+    roomId: number,
     userId: number,
-    seatIndex: number, 
-    isBanker: boolean 
+    seatIndex: number,
+    isBanker: boolean
   }) {
     await simulateDelay();
-    
+
     // ========== 参数验证 ==========
     if (!data.roomId || !data.userId || data.seatIndex === undefined || data.seatIndex === null) {
       return {
@@ -410,7 +443,7 @@ export const mockApi = {
     // 获取房间数据
     const mockRooms: roomInfo[] = getRoomInfo() || [];
     const room = mockRooms.find(r => r.roomId === data.roomId);
-    
+
     if (!room) {
       return {
         code: 404,
@@ -430,7 +463,7 @@ export const mockApi = {
 
     // 查找操作玩家
     const operatorIndex = room.players.findIndex(p => p.userId === data.userId);
-    
+
     if (operatorIndex === -1) {
       return {
         code: 404,
@@ -473,7 +506,7 @@ export const mockApi = {
     // ========== 分支逻辑：庄家添加机器人 VS 玩家换座位 ==========
     if (data.isBanker) {
       // ========== 庄家添加机器人 ==========
-      
+
       // 验证操作者是否是庄家
       if (operator.userType !== 1) {
         return {
@@ -486,12 +519,15 @@ export const mockApi = {
       // 生成机器人玩家
       const botName = 'Bot_' + Math.random().toString(36).substring(2, 8);
       const botUserId = room.roomId + Date.now() + Math.floor(Math.random() * 1000);
-      
+
+      // 随机选择一个机器人头像
+      const randomBotAvatar = BOT_AVATARS[Math.floor(Math.random() * BOT_AVATARS.length)];
+
       room.players[data.seatIndex] = {
         ...targetSeat,
         userId: botUserId,
         name: botName,
-        avatar: operator.avatar, // 使用庄家头像作为机器人头像
+        avatar: randomBotAvatar, // 使用随机机器人头像
         userType: 3, // 3 = 机器人
         status: 2, // 机器人默认已准备
         bet: 1,
@@ -516,7 +552,7 @@ export const mockApi = {
 
     } else {
       // ========== 玩家换座位 ==========
-      
+
       // 验证操作者是否是普通玩家
       if (operator.userType !== 2) {
         return {
@@ -546,7 +582,7 @@ export const mockApi = {
 
       // 执行座位交换：将玩家移到目标座位，原座位变为空位
       const oldSeatIndex = operatorIndex;
-      
+
       // 将玩家移到目标座位
       room.players[data.seatIndex] = {
         ...operator
@@ -757,8 +793,13 @@ export const mockApi = {
     if (!room) {
       return mockErrors.notFound;
     }
-    room.players.map(p => p.score += data.player.score)
-    room.players = room.players.filter(p => p.userId !== data.player.userId);
+    // room.players.map(p => p.score += data.player.score)
+    room.players = room.players.map(p => {
+      if (p.userId !== data.player.userId) {
+        return p
+      }
+      return defaultPlayer
+    });
     return {
       code: 200,
       message: "踢出房间成功",
@@ -767,7 +808,6 @@ export const mockApi = {
       }
     };
   },
-
   // 玩家准备/取消准备
   async playerReady(data: {
     roomId: number;

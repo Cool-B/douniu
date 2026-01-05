@@ -1,7 +1,33 @@
 <!--index.wxml-->
-<view class="index-container">
-  <!-- 背景装饰 -->
-  <view class="background-animations">
+<!-- Canvas烟花背景 (全天显示 - 在最外层) -->
+<!-- <fireworks-canvas enabled="{{true}}" frequency="{{2500}}"></fireworks-canvas> -->
+
+<view class="index-container theme-{{timeTheme}}">
+  <!-- 动态背景装饰系统 -->
+  <view class="background-animations time-{{timeTheme}}">
+    <!-- 扑克牌飘落动画 (12张) -->
+    <view class="poker-card card-spade card-1">♠️</view>
+    <view class="poker-card card-heart card-2">♥️</view>
+    <view class="poker-card card-club card-3">♣️</view>
+    <view class="poker-card card-diamond card-4">♦️</view>
+    <view class="poker-card card-spade card-5">♠️</view>
+    <view class="poker-card card-heart card-6">♥️</view>
+    <view class="poker-card card-club card-7">♣️</view>
+    <view class="poker-card card-diamond card-8">♦️</view>
+    <view class="poker-card card-spade card-9">♠️</view>
+    <view class="poker-card card-heart card-10">♥️</view>
+    <view class="poker-card card-club card-11">♣️</view>
+    <view class="poker-card card-diamond card-12">♦️</view>
+
+    <!-- 金币/筹码飘落 (下午/白天) -->
+    <view wx:if="{{timeTheme === 'afternoon' || timeTheme === 'morning'}}" class="coins-container">
+      <view class="coin coin-1">🪙</view>
+      <view class="coin coin-2">💰</view>
+      <view class="coin coin-3">🪙</view>
+      <view class="coin coin-4">💰</view>
+    </view>
+
+    <!-- 装饰圆圈 (保留原有) -->
     <view class="bg-circle circle-1"></view>
     <view class="bg-circle circle-2"></view>
     <view class="bg-circle circle-3"></view>
@@ -21,59 +47,52 @@
 
   <!-- 已登录状态 - 主页 -->
   <view wx:elif="{{loginFlag===1}}" class="home-page">
-    <!-- 用户信息卡片 - 重新设计 -->
-    <view class="user-card-new">
-      <view class="user-avatar-container">
-        <image class="user-avatar-new" src="{{currentUser.avatar}}" mode="aspectFill"></image>
-        <view class="avatar-border"></view>
-      </view>
-      <view class="user-info-new">
-        <text class="user-name-new">{{currentUser.name}}</text>
-        <view class="user-status">
-          <view class="status-dot"></view>
-          <text class="status-text">在线</text>
-        </view>
-      </view>
-      <view class="user-actions">
-        <view class="action-icon" bindtap="showUserMenu">
-          <text class="icon-text">⚙️</text>
-        </view>
-      </view>
-    </view>
-
     <!-- 游戏标题 -->
     <view class="game-title">
+      <view class="logo-icon-large">🎮</view>
       <text class="title-main">斗牛扑克</text>
       <text class="title-sub">NIU NIU POKER</text>
     </view>
 
     <!-- 功能按钮 -->
     <view class="action-section">
-      <button class="action-btn primary-btn" bindtap="quickStart" disabled="{{loading}}">
+      <!-- 1. 快速开始 - 主要按钮(紫色渐变) -->
+      <button class="action-btn btn-quick-start" bindtap="quickStart" disabled="{{loading}}">
         <view class="btn-content">
           <text class="btn-icon">⚡</text>
           <text class="btn-text">快速开始</text>
         </view>
       </button>
 
-      <button class="action-btn secondary-btn" bindtap="showModal" disabled="{{loading}}">
+      <!-- 2. 加入房间 - 粉红渐变 -->
+      <button class="action-btn btn-join-room" bindtap="showModal" disabled="{{loading}}">
         <view class="btn-content">
           <text class="btn-icon">🚪</text>
           <text class="btn-text">加入房间</text>
         </view>
       </button>
 
-      <button class="action-btn tertiary-btn" bindtap="showRules">
+      <!-- 3. 游戏规则 - 蓝色边框 -->
+      <button class="action-btn btn-rules" bindtap="showRules">
         <view class="btn-content">
           <text class="btn-icon">📖</text>
           <text class="btn-text">游戏规则</text>
         </view>
       </button>
 
-      <button class="action-btn tertiary-btn" bindtap="selectMode">
+      <!-- 4. 更多模式 - 金色边框 -->
+      <button class="action-btn btn-modes" bindtap="selectMode">
         <view class="btn-content">
           <text class="btn-icon">👑</text>
           <text class="btn-text">更多模式</text>
+        </view>
+      </button>
+
+      <!-- 5. 个人中心 - 绿色边框 -->
+      <button class="action-btn btn-profile" bindtap="showUserMenu">
+        <view class="btn-content">
+          <text class="btn-icon">⚙️</text>
+          <text class="btn-text">个人中心</text>
         </view>
       </button>
     </view>
@@ -85,7 +104,7 @@
   </view>
 
   <!-- 未登录状态 - 登录页 -->
-  <view wx:elif="{{loginFlag===2}}" class="login-page">
+  <view wx:elif="{{loginFlag===2 || loginFlag===3 || loginFlag===4}}" class="login-page">
     <!-- 游戏Logo -->
     <view class="login-logo">
       <view class="logo-container">
@@ -98,47 +117,90 @@
     <!-- 登录卡片 -->
     <view class="login-card">
       <view class="card-title">
-        <text>创建游戏角色</text>
+        <text>{{showQuickLogin ? '欢迎来到斗牛扑克' : '创建游戏角色'}}</text>
       </view>
       <view class="card-desc">
-        <text>请设置您的头像和昵称</text>
+        <text>{{showQuickLogin ? '一键登录，快速开始游戏' : '请设置您的头像和昵称'}}</text>
       </view>
 
-      <!-- 头像选择 -->
-      <view class="avatar-section">
-        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-          <image class="avatar-img" src="{{tempAvatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
-          <view class="avatar-mask">
-            <text class="avatar-tip">点击选择头像</text>
+      <!-- 一键登录按钮（优先显示） -->
+      <view wx:if="{{showQuickLogin}}" class="quick-login-section">
+        <button class="quick-login-btn {{authorizingQuickLogin ? 'authorizing' : ''}}" open-type="getPhoneNumber" bindgetphonenumber="onGetPhoneNumber" disabled="{{authorizingQuickLogin}}">
+          <view wx:if="{{!authorizingQuickLogin}}" class="quick-login-content">
+            <text class="quick-icon">⚡</text>
+            <text class="quick-text">微信一键登录</text>
+          </view>
+          <view wx:else class="authorizing-content">
+            <view class="auth-spinner"></view>
+            <text>授权中...</text>
           </view>
         </button>
+
+        <!-- 切换到自定义登录 -->
+        <view class="switch-login">
+          <text class="switch-text" bindtap="switchToCustomLogin">使用自定义头像和昵称</text>
+        </view>
+
+        <!-- 授权说明 -->
+        <view class="auth-tips">
+          <text class="tip-icon">🔒</text>
+          <text class="tip-text">授权后将自动获取您的微信头像和昵称</text>
+        </view>
       </view>
 
-      <!-- 昵称输入 -->
-      <view class="nickname-section">
-        <view class="input-label">
-          <text>昵称</text>
-          <text class="required">*</text>
+      <!-- 自定义登录表单（备用） -->
+      <view wx:if="{{showCustomLogin}}" class="custom-login-section">
+        <!-- 授权失败提示 -->
+        <view wx:if="{{loginFlag===4}}" class="auth-failed-tips">
+          <text class="failed-icon">⚠️</text>
+          <text class="failed-text">授权失败，请使用自定义方式登录</text>
         </view>
-        <input id="nicknameInput" class="nickname-input" type="text" placeholder="请输入昵称(2-10字符)" maxlength="10" value="{{tempNickname}}" bindinput="onNicknameInput" bindblur="onNicknameBlur" bindconfirm="onNicknameBlur" confirm-type="done" />
-      </view>
 
-      <!-- 登录按钮 -->
-      <button class="login-btn" bindtap="handleManualLogin" disabled="{{loading}}">
-        <view wx:if="{{!loading}}" class="login-btn-content">
-          <text class="login-icon">🚀</text>
-          <text class="login-text">开始游戏</text>
+        <!-- 头像选择 -->
+        <view class="avatar-section">
+          <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+            <image class="avatar-img" src="{{tempAvatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
+            <view class="avatar-mask">
+              <text class="avatar-tip">点击选择头像</text>
+            </view>
+          </button>
         </view>
-        <view wx:else class="loading-btn-content">
-          <view class="btn-spinner"></view>
-          <text>登录中...</text>
-        </view>
-      </button>
 
-      <!-- 说明文字 -->
-      <view class="login-tips">
-        <text class="tip-icon">🔒</text>
-        <text class="tip-text">您的信息将被安全保护</text>
+        <!-- 昵称输入 -->
+        <view class="nickname-section">
+          <view class="input-label">
+            <text>昵称</text>
+            <text class="required">*</text>
+          </view>
+          <input id="nicknameInput" class="nickname-input {{inputFocused ? 'nickname-input-focused' : ''}}" type="nickname" placeholder="点击获取微信昵称" maxlength="10" value="{{tempNickname}}" bindinput="onNicknameInput" bindfocus="onNicknameFocus" bindblur="onNicknameBlur" confirm-type="done" />
+          <view class="input-hint">
+            <text class="hint-icon">💡</text>
+            <text class="hint-text">点击输入框可一键获取微信昵称</text>
+          </view>
+        </view>
+
+        <!-- 登录按钮 -->
+        <button class="login-btn" bindtap="handleManualLogin" disabled="{{loading}}">
+          <view wx:if="{{!loading}}" class="login-btn-content">
+            <text class="login-icon">🚀</text>
+            <text class="login-text">开始游戏</text>
+          </view>
+          <view wx:else class="loading-btn-content">
+            <view class="btn-spinner"></view>
+            <text>登录中...</text>
+          </view>
+        </button>
+
+        <!-- 切换回一键登录 -->
+        <view class="switch-login">
+          <text class="switch-text" bindtap="switchToQuickLogin">返回一键登录</text>
+        </view>
+
+        <!-- 说明文字 -->
+        <view class="login-tips">
+          <text class="tip-icon">🔒</text>
+          <text class="tip-text">您的信息将被安全保护</text>
+        </view>
       </view>
     </view>
   </view>
@@ -163,4 +225,5 @@
   <!-- 房间号弹窗 -->
   <room-modal visible="{{modalShow}}" title="加入房间" showQuickStart="{{false}}" bind:close="onCloseModal" bind:cancel="onCancel" bind:confirm="onConfirm">
   </room-modal>
+  <fireworks-canvas enabled="{{true}}" frequency="{{2500}}"></fireworks-canvas>
 </view>

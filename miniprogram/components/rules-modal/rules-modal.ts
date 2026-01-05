@@ -1,4 +1,4 @@
-Component({
+Component<any, any, any>({
   /**
    * 组件的属性列表
    */

@@ -31,7 +31,7 @@
             </view>
           </block>
           <block wx:else>
-            <view wx:if="{{!roomInfo.isStart&&((item.userType===4&&currentUser==='banker')||currentPlayerStatus===1)}}" class="add-assistant" bindtap="addAssistantOrChangeSeat" data-index="{{index}}"></view>
+            <view wx:if="{{!roomInfo.isStart}}" class="add-assistant" bindtap="addAssistantOrChangeSeat" data-index="{{index}}"></view>
           </block>
         </block>
         <block wx:else>
@@ -39,6 +39,7 @@
             房间号：{{roomInfo.roomNumber}}
           </view>
           <block wx:if="{{currentUser==='banker'}}">
+            <button class="scoreboard-btn btn" bindtap="openScoreBoard">计分板</button>
             <block wx:if="{{roomInfo.isStart&&!roomInfo.isDealComplete&&!isStartDeal}}">
               <button class="deal-cards btn" bindtap="dealCards">发牌</button>
               <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
@@ -66,12 +67,75 @@
       </view>
     </block>
   </view>
-  <block wx:if="{{roomInfo.isStart}}">
-    <text class="countdown btn">{{countdown}}</text>
-  </block>
   <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal" bindconfirm="confirmModal">
     <view>弹窗内容：{{modalData}}1111111</view>
   </modal>
-  <view class="go-out" bindtap="goToHome">
+  <view class="go-out" bindtap="goToHome"></view>
+  <view wx:if="{{scoreboardVisible}}" class="scoreboard-overlay" catchtouchmove="true">
+    <view class="scoreboard-mask" bindtap="closeScoreBoard"></view>
+    <view class="scoreboard-panel" catchtap="true">
+      <view class="scoreboard-header">
+        <view class="tabs">
+          <view class="tab {{scoreboardTab==='summary'?'active':''}}" data-tab="summary" bindtap="switchScoreboardTab">总览</view>
+          <view class="tab {{scoreboardTab==='rounds'?'active':''}}" data-tab="rounds" bindtap="switchScoreboardTab">每局</view>
+        </view>
+        <view class="close" bindtap="closeScoreBoard">✕</view>
+      </view>
+
+      <view wx:if="{{scoreboardTab==='summary'}}" class="scoreboard-table">
+        <view class="thead">
+          <text class="col-rank">名次</text>
+          <text class="col-player">玩家</text>
+          <text class="col-status">状态</text>
+          <text class="col-score">积分总数</text>
+        </view>
+        <scroll-view scroll-y="true" class="tbody">
+          <block wx:for="{{scoreBoardSorted}}" wx:key="index">
+            <view class="row">
+              <text class="col-rank">{{index + 1}}</text>
+              <view class="col-player">
+                <image class="player-avatar" src="{{item.avatar}}" mode="cover" />
+                <text class="name" number-of-lines="1">{{item.name}}</text>
+              </view>
+              <text class="col-status status {{item.statusClass}}">{{item.statusText}}</text>
+              <text class="col-score">{{item.totalScore}}</text>
+            </view>
+          </block>
+        </scroll-view>
+      </view>
+
+      <view wx:if="{{scoreboardTab==='rounds'}}" class="scoreboard-table rounds">
+        <!-- 表头：玩家名称 -->
+        <view class="rounds-header">
+          <view class="header-label">玩家</view>
+          <block wx:for="{{roundsPlayers}}" wx:key="userId" wx:for-item="player">
+            <view class="header-player">
+              <image class="player-avatar" src="{{player.avatar}}" mode="cover" />
+              <text class="player-name">{{player.name}}</text>
+            </view>
+          </block>
+        </view>
+
+        <!-- 中间可滚动区域：每局数据 -->
+        <scroll-view scroll-y="true" class="rounds-body">
+          <block wx:for="{{roundsRows}}" wx:key="round" wx:for-item="row">
+            <view class="rounds-row">
+              <view class="row-label">第{{row.round}}局</view>
+              <block wx:for="{{row.values}}" wx:key="index" wx:for-item="val">
+                <view class="row-value">{{val}}</view>
+              </block>
+            </view>
+          </block>
+        </scroll-view>
+
+        <!-- 表尾：总分 -->
+        <view class="rounds-footer">
+          <view class="footer-label">总分</view>
+          <block wx:for="{{roundsPlayers}}" wx:key="userId" wx:for-item="player">
+            <view class="footer-value">{{player.totalScore}}</view>
+          </block>
+        </view>
+      </view>
+    </view>
   </view>
 </view>

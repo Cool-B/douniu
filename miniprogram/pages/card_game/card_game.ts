@@ -1,7 +1,7 @@
 // import { IAppOption } from "../../../typings/index"
 // import { baseUrl } from "../../utils/request"
 import { addAssistantOrChangeSeat, changeBet, exitRoom, kickPlayer, playerReady } from "../../api/index";
-import { getUserInfo, roomInfo, setRoomInfo, userInfo, player, getRoomInfo, removeAll } from "../../utils/localStorage"
+import { getUserInfo, roomInfo, setRoomInfo, userInfo, player, getRoomInfo, removeAll, ScoreBoardEntry, RoundRecord } from "../../utils/localStorage"
 import { uniqueObjectArray } from "../../utils/util"
 // import request from "../../utils/request"
 interface data {
@@ -20,7 +20,15 @@ interface data {
   modalVisible: boolean,
   modalData: string,
   canStartGame: boolean,
-  currentPlayerBet: number
+  currentPlayerBet: number,
+  scoreboardVisible: boolean,
+  scoreBoardSorted: Array<ScoreBoardEntry & { statusText: string; statusClass: string }>,
+  scoreboardTab: 'summary' | 'rounds',
+  roundColumns: number[],
+  roundTableData: Array<{
+    player: ScoreBoardEntry & { statusText: string; statusClass: string };
+    roundValues: string[];
+  }>
 }
 interface playerNumber { has: boolean, number: number, id: number, maxNumber?: { number: number, suit: string }, isBoth?: boolean, isBoom: boolean }
 
@@ -69,6 +77,11 @@ Page<data, Record<string, any>>({
     currentPlayerStatus: 1,  // 当前玩家的准备状态，默认1=未准备
     isAllShow: false,
     canStartGame: false,
+    scoreboardVisible: false,
+    scoreBoardSorted: [],
+    scoreboardTab: 'summary',
+    roundColumns: [],
+    roundTableData: [],
   },
   showLoading(title?: string, mask?: boolean) {
     wx.showLoading({
@@ -97,7 +110,8 @@ Page<data, Record<string, any>>({
             canStartGame: this.checkCanStartGame(info),
             currentUser,
             currentPlayerStatus,  // 设置当前玩家状态
-            currentPlayerBet: currentPlayer.bet
+            currentPlayerBet: currentPlayer.bet,
+            scoreBoardSorted: this.buildSortedScoreBoard(info.scoreBoard)
           }, () => {
             wx.hideLoading();
           })
@@ -105,7 +119,8 @@ Page<data, Record<string, any>>({
       })
     }
     this.setData({
-      currentUserInfo
+      currentUserInfo,
+      scoreBoardSorted: this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard)
     }, () => {
       wx.hideLoading();
       // 1.创建房间进来的时候，当前用户就是房主，并且只有当前用户
@@ -229,7 +244,7 @@ Page<data, Record<string, any>>({
           wx.showToast({
             title: res.msg || (currentUser === 'banker' ? '添加成功' : '换座成功'),
             icon: 'success',
-            duration: 1500
+            duration: 500
           });
         });
       } else {
@@ -303,11 +318,17 @@ Page<data, Record<string, any>>({
       if (res.code === 200) {
         // 如果后端返回了新的房间信息，使用它
         if (res.data && res.data.roomInfo) {
+          this.appendScoreBoardForPlayer(player, 2);
+          const withScoreBoard = {
+            ...res.data.roomInfo,
+            scoreBoard: this.data.roomInfo.scoreBoard
+          };
           this.setData({
-            roomInfo: res.data.roomInfo,
-            canStartGame: this.checkCanStartGame(res.data.roomInfo)
+            roomInfo: withScoreBoard,
+            canStartGame: this.checkCanStartGame(withScoreBoard),
+            scoreBoardSorted: this.buildSortedScoreBoard(withScoreBoard.scoreBoard)
           }, () => {
-            setRoomInfo(res.data.roomInfo);
+            setRoomInfo(withScoreBoard);
             wx.showToast({
               title: '踢出成功',
               icon: 'success',
@@ -338,10 +359,13 @@ Page<data, Record<string, any>>({
             ...this.data.roomInfo,
             players: updatedPlayers
           };
+          this.appendScoreBoardForPlayer(player, 2);
+          updatedRoomInfo.scoreBoard = this.data.roomInfo.scoreBoard;
 
           this.setData({
             roomInfo: updatedRoomInfo,
-            canStartGame: this.checkCanStartGame(updatedRoomInfo)
+            canStartGame: this.checkCanStartGame(updatedRoomInfo),
+            scoreBoardSorted: this.buildSortedScoreBoard(updatedRoomInfo.scoreBoard)
           }, () => {
             setRoomInfo(updatedRoomInfo);
             wx.showToast({
@@ -583,7 +607,130 @@ Page<data, Record<string, any>>({
     };
 
     // 完成结算
+    this.appendRoundHistory(gamePlayers);
     this.finishSettlement();
+  },
+
+  // ===== 计分板 =====
+  buildSortedScoreBoard(scoreBoard?: ScoreBoardEntry[]) {
+    if (!scoreBoard || !scoreBoard.length) return [] as Array<ScoreBoardEntry & { statusText: string; statusClass: string }>;
+    const statusTextMap = (entry: ScoreBoardEntry) => {
+      if (entry.state === 2 || entry.state === 3) return '离线';
+      if (entry.userType === 1) return '庄家';
+      if (entry.userType === 3) return '机器人';
+      return '闲家';
+    };
+    const statusClassMap = (entry: ScoreBoardEntry) => {
+      if (entry.state === 2 || entry.state === 3) return 'offline';
+      if (entry.userType === 1) return 'banker';
+      if (entry.userType === 3) return 'robot';
+      return 'player';
+    };
+    return [...scoreBoard]
+      .sort((a, b) => b.totalScore - a.totalScore)
+      .map(item => ({ ...item, statusText: statusTextMap(item), statusClass: statusClassMap(item) }));
+  },
+  updateScoreBoard() {
+    const roomInfo = this.data.roomInfo;
+    const existing = roomInfo.scoreBoard ? [...roomInfo.scoreBoard] : [];
+    const map = new Map<number, ScoreBoardEntry>();
+    existing.forEach(e => map.set(e.userId, { ...e }));
+    roomInfo.players.forEach((p: player, idx: number) => {
+      if (p.userType === 4) return; // 空位不计
+      const uid = p.userId || 100000 + idx; // 兜底 ID，避免丢数据
+      const prev = map.get(uid);
+      const state = p.state || 1;
+      map.set(uid, {
+        userId: uid,
+        name: p.name,
+        avatar: p.avatar,
+        userType: p.userType,
+        state,
+        totalScore: typeof p.score === 'number' ? p.score : 0
+      });
+      // 保留更高状态优先级（离线/退出）
+      if (prev && (prev.state === 2 || prev.state === 3) && state === 1) {
+        const keep = { ...map.get(uid)!, state: prev.state };
+        map.set(uid, keep);
+      }
+    });
+    roomInfo.scoreBoard = Array.from(map.values());
+    this.data.roomInfo = roomInfo;
+    setRoomInfo(roomInfo);
+  },
+  appendRoundHistory(gamePlayers: player[]) {
+    const roomInfo = this.data.roomInfo;
+    const round = (roomInfo.roundHistory?.length || 0) + 1;
+    const results = gamePlayers.map(p => ({
+      userId: p.userId || 0,
+      name: p.name,
+      change: p.settlementResult?.change ?? 0,
+    }));
+    const history: RoundRecord[] = roomInfo.roundHistory ? [...roomInfo.roundHistory] : [];
+    history.push({ round, results });
+    roomInfo.roundHistory = history;
+    this.data.roomInfo = roomInfo;
+    setRoomInfo(roomInfo);
+  },
+  appendScoreBoardForPlayer(target: player, state: number) {
+    if (!target) return;
+    const roomInfo = this.data.roomInfo;
+    const scoreBoard = roomInfo.scoreBoard ? [...roomInfo.scoreBoard] : [];
+    const uid = target.userId || 100000 + scoreBoard.length;
+    const idx = scoreBoard.findIndex(item => item.userId === uid);
+    const entry: ScoreBoardEntry = {
+      userId: uid,
+      name: target.name,
+      avatar: target.avatar,
+      userType: target.userType,
+      state,
+      totalScore: typeof target.score === 'number' ? target.score : 0
+    };
+    if (idx >= 0) {
+      scoreBoard.splice(idx, 1, entry);
+    } else {
+      scoreBoard.push(entry);
+    }
+    roomInfo.scoreBoard = scoreBoard;
+    this.data.roomInfo = roomInfo;
+    setRoomInfo(roomInfo);
+  },
+  openScoreBoard() {
+    this.updateScoreBoard();
+    const sorted = this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard);
+    const roundsData = this.buildRoundsTableData(sorted);
+    this.setData({
+      roomInfo: this.data.roomInfo,
+      scoreboardVisible: true,
+      scoreBoardSorted: sorted,
+      scoreboardTab: 'summary',
+      roundsPlayers: roundsData.players,
+      roundsRows: roundsData.rows
+    });
+  },
+  switchScoreboardTab(e: { currentTarget: { dataset: { tab: 'summary' | 'rounds' } } }) {
+    const tab = e.currentTarget.dataset.tab;
+    this.setData({ scoreboardTab: tab });
+  },
+  buildRoundsTableData(players: Array<ScoreBoardEntry & { statusText: string; statusClass: string }>) {
+    const history = this.data.roomInfo.roundHistory || [];
+
+    // 构建每一局的行数据
+    const rows = history.map(record => {
+      const roundNum = record.round;
+      const values = players.map(player => {
+        const hit = record.results.find(r => r.userId === player.userId);
+        if (!hit) return '-';
+        const val = hit.change;
+        return (val > 0 ? '+' : '') + val;
+      });
+      return { round: roundNum, values };
+    });
+
+    return { players, rows };
+  },
+  closeScoreBoard() {
+    this.setData({ scoreboardVisible: false });
   },
 
   /**
@@ -608,7 +755,8 @@ Page<data, Record<string, any>>({
    */
   finishSettlement() {
     this.setData({
-      roomInfo: this.data.roomInfo
+      roomInfo: this.data.roomInfo,
+      scoreBoardSorted: this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard)
     }, () => {
       setRoomInfo(this.data.roomInfo);
       this.hideLoading();
@@ -626,7 +774,6 @@ Page<data, Record<string, any>>({
     this.data.roomInfo.players.forEach((player: player) => {
       player.settlementResult = undefined;
     });
-
     this.setData({
       roomInfo: this.data.roomInfo
     }, () => {
@@ -687,6 +834,7 @@ Page<data, Record<string, any>>({
    * 重置游戏状态
    */
   resetGame() {
+    // 保留 scoreBoard，不清空
     // 清空所有玩家的牌
     this.data.roomInfo.players.forEach((player: player) => {
       player.pokers = [];
@@ -724,14 +872,10 @@ Page<data, Record<string, any>>({
         isStart: false,
         isStartDeal: false,
         isDealComplete: false
-      })
+      }),
+      scoreBoardSorted: this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard)
     }, () => {
       setRoomInfo(this.data.roomInfo);
-      wx.showToast({
-        title: '准备下一局',
-        icon: 'success',
-        duration: 3000
-      });
     });
   },
 
@@ -1008,8 +1152,10 @@ Page<data, Record<string, any>>({
       }
       return player
     })
+    this.updateScoreBoard();
     this.setData({
-      roomInfo: this.data.roomInfo
+      roomInfo: this.data.roomInfo,
+      scoreBoardSorted: this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard)
     })
   },
   // 是不是炸弹

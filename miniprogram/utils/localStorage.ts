@@ -11,6 +11,24 @@ export interface userInfo {
   username: string
 }
 
+export interface ScoreBoardEntry {
+  userId: number;
+  name: string;
+  avatar: string;
+  userType: number; // 1 庄家 2 闲家 3 机器人
+  state: number; // 1 正常 2 退出/被踢 3 离线
+  totalScore: number;
+}
+
+export interface RoundRecord {
+  round: number;
+  results: Array<{
+    userId: number;
+    name: string;
+    change: number;
+  }>;
+}
+
 export interface roomInfo {
   roomId: number,
   roomNumber: number,
@@ -24,7 +42,11 @@ export interface roomInfo {
   // 是否开始发牌
   isStartDeal: boolean,
   // 是否完成发牌
-  isDealComplete: boolean
+  isDealComplete: boolean,
+  // 计分板
+  scoreBoard?: ScoreBoardEntry[],
+  // 每局记录
+  roundHistory?: RoundRecord[],
 }
 export interface player {
   name: string

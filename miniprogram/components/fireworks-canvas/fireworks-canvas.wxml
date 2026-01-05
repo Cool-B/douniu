@@ -1,0 +1,7 @@
+<!-- components/fireworks-canvas/fireworks-canvas.wxml -->
+<canvas 
+  type="2d" 
+  id="fireworks-canvas" 
+  class="fireworks-canvas"
+  style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"
+></canvas>

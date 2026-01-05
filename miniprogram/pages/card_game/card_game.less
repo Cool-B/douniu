@@ -20,6 +20,16 @@
   font-size: 18rpx;
 }
 
+.scoreboard-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 100;
+  padding: 4rpx 6rpx;
+  font-size: 12rpx !important;
+  font-weight: 400 !important;
+}
+
 .go-out::before {
   content: "⎋";
   font-size: 30rpx;
@@ -61,6 +71,82 @@
   display: flex;
   flex-wrap: wrap;
 
+  .player-card {
+    position: relative;
+  }
+  .player-card.banker {
+    outline: 2rpx solid rgba(255, 181, 94, 0.85);
+    box-shadow: 0 0 12rpx rgba(255, 140, 0, 0.45);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 157, 66, 0.12),
+      rgba(255, 221, 150, 0.06)
+    );
+  }
+  .player-card.player {
+    outline: 1rpx solid rgba(120, 180, 255, 0.55);
+    box-shadow: 0 0 8rpx rgba(111, 134, 214, 0.35);
+    background: linear-gradient(
+      145deg,
+      rgba(111, 134, 214, 0.08),
+      rgba(72, 198, 239, 0.06)
+    );
+  }
+  .player-card.robot {
+    outline: 2rpx solid rgba(0, 198, 255, 0.75);
+    box-shadow: 0 0 14rpx rgba(0, 198, 255, 0.45);
+    background: linear-gradient(
+      145deg,
+      rgba(0, 198, 255, 0.12),
+      rgba(0, 114, 255, 0.08)
+    );
+  }
+  .role-badge {
+    position: absolute;
+    top: 8rpx;
+    left: 8rpx;
+    padding: 4rpx 10rpx;
+    border-radius: 999rpx;
+    font-size: 12rpx;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.25);
+    letter-spacing: 2rpx;
+    z-index: 5;
+    &.banker {
+      background: linear-gradient(135deg, #ff5f6d 0%, #ffc371 100%);
+      border: 1rpx solid rgba(255, 181, 94, 0.6);
+    }
+    &.player {
+      background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);
+      border: 1rpx solid rgba(79, 139, 255, 0.5);
+    }
+    &.robot {
+      background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      border: 1rpx solid rgba(0, 198, 255, 0.5);
+    }
+    &.empty {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.1)
+      );
+      color: rgba(255, 255, 255, 0.85);
+      border: 1rpx dashed rgba(255, 255, 255, 0.4);
+    }
+  }
+  .player-card.banker .player-avatar {
+    border: 2rpx solid rgba(255, 181, 94, 0.9);
+    box-shadow: 0 0 10rpx rgba(255, 181, 94, 0.4);
+  }
+  .player-card.player .player-avatar {
+    border: 2rpx solid rgba(111, 134, 214, 0.8);
+    box-shadow: 0 0 8rpx rgba(111, 134, 214, 0.35);
+  }
+  .player-card.robot .player-avatar {
+    border: 2rpx solid rgba(0, 198, 255, 0.8);
+    box-shadow: 0 0 10rpx rgba(0, 198, 255, 0.4);
+  }
   .banker,
   .player {
     width: 33%;
@@ -81,6 +167,7 @@
       align-items: center;
       width: 90%;
       margin-bottom: 10rpx;
+      position: relative;
       .player-avatar {
         width: 40rpx;
         height: 40rpx;
@@ -105,6 +192,17 @@
       }
       .player-score {
         flex: 2;
+      }
+      .player-tag {
+        padding: 4rpx 10rpx;
+        border-radius: 12rpx;
+        font-size: 10rpx;
+        margin-left: 8rpx;
+        color: #fff;
+        &.robot-tag {
+          background: linear-gradient(135deg, #00e1ff 0%, #007adf 100%);
+          border: 1rpx solid rgba(0, 122, 223, 0.4);
+        }
       }
 
       .kick-btn {
@@ -135,14 +233,15 @@
       // 结算结果显示
       .settlement-result {
         position: absolute;
-        bottom: 10rpx;
+        top: 10rpx;
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 100;
-        animation: settlement-fade-in 3s ease;
+        animation: settlement-fade-in 6s ease;
         text-align: center;
         .settlement-change {
-          font-size: 28rpx;
+          font-size: 48rpx;
+          font-weight: 800;
           margin-bottom: 4rpx;
         }
         &.win {
@@ -154,11 +253,15 @@
       }
 
       @keyframes settlement-fade-in {
-        from {
+        0% {
           opacity: 0;
           transform: translate(-50%, -50%) scale(0.8);
         }
-        to {
+        10% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(0.8);
+        }
+        100% {
           opacity: 1;
           transform: translate(-50%, -50%) scale(1);
         }
@@ -315,7 +418,29 @@
     opacity: 0.8;
   }
 }
+.add-assistant {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+  border: 3rpx dashed rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
 
+  &::before {
+    content: "+";
+    font-size: 40rpx;
+    color: #fff;
+    font-weight: 300;
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
 .btn {
   width: auto !important;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -361,14 +486,278 @@
   box-shadow: 0 3rpx 10rpx rgba(255, 217, 61, 0.3);
 }
 
-.countdown {
-  top: 68%;
-  background: rgba(0, 0, 0, 0.65);
-  color: white;
-  font-size: 30rpx;
+// .countdown {
+//   top: 68%;
+//   background: rgba(0, 0, 0, 0.65);
+//   color: white;
+//   font-size: 30rpx;
+//   font-weight: 700;
+//   box-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.4);
+//   padding: 8rpx 20rpx;
+// }
+
+/* 计分板弹窗 */
+.scoreboard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scoreboard-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4rpx);
+}
+.scoreboard-panel {
+  position: relative;
+  width: 92%;
+  max-width: 700rpx;
+  max-height: 78vh;
+  background: #101820;
+  border-radius: 20rpx;
+  box-shadow: 0 18rpx 60rpx rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 16rpx;
+}
+.scoreboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10rpx 14rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 16rpx;
   font-weight: 700;
-  box-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.4);
-  padding: 8rpx 20rpx;
+  gap: 12rpx;
+}
+.scoreboard-header .tabs {
+  display: inline-flex;
+  gap: 12rpx;
+}
+.scoreboard-header .tab {
+  padding: 6rpx 14rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.15);
+  color: #e8ecff;
+  font-size: 14rpx;
+}
+.scoreboard-header .tab.active {
+  background: rgba(255, 255, 255, 0.32);
+  color: #fff;
+}
+.scoreboard-header .close {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18rpx;
+}
+.scoreboard-table {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  flex: 1;
+  overflow: hidden;
+}
+.scoreboard-table .thead {
+  display: grid;
+  grid-template-columns: 60rpx 1fr 110rpx 120rpx;
+  padding: 6rpx 10rpx;
+  background: rgba(255, 255, 255, 0.06);
+  color: #cfd8dc;
+  font-weight: 600;
+  font-size: 16rpx;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.scoreboard-table .tbody {
+  flex: 1;
+  height: 0;
+  padding: 0;
+}
+.scoreboard-table .row {
+  display: grid;
+  grid-template-columns: 60rpx 1fr 110rpx 120rpx;
+  padding: 6rpx 10rpx;
+  align-items: center;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+  color: #e9edf0;
+  font-size: 15rpx;
+}
+.scoreboard-table .col-player {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+.scoreboard-table .col-player .player-avatar {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+.scoreboard-table .col-player .name {
+  max-width: 150rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scoreboard-table .col-status.status {
+  padding: 2rpx 4rpx;
+  border-radius: 6rpx;
+  text-align: center;
+  font-size: 13rpx;
+}
+.scoreboard-table .col-status.banker {
+  background: rgba(255, 181, 94, 0.18);
+  color: #ffdd9a;
+  border: 1rpx solid rgba(255, 181, 94, 0.35);
+}
+.scoreboard-table .col-status.player {
+  background: rgba(111, 134, 214, 0.18);
+  color: #a5b7ff;
+  border: 1rpx solid rgba(111, 134, 214, 0.35);
+}
+.scoreboard-table .col-status.robot {
+  background: rgba(0, 198, 255, 0.18);
+  color: #66d6ff;
+  border: 1rpx solid rgba(0, 198, 255, 0.35);
+}
+.scoreboard-table .col-status.offline {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfd8dc;
+  border: 1rpx dashed rgba(255, 255, 255, 0.25);
+}
+.scoreboard-table .col-score {
+  text-align: right;
+  font-weight: 700;
+}
+
+/* 每局表格 - 横向玩家,纵向局数 */
+.scoreboard-table.rounds {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 表头 - 固定顶部 */
+.scoreboard-table.rounds .rounds-header {
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 2rpx solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+  align-items: center;
+  padding: 10rpx 8rpx;
+  z-index: 3;
+}
+
+.scoreboard-table.rounds .rounds-header .header-label {
+  width: 80rpx;
+  flex-shrink: 0;
+  font-size: 16rpx;
+  font-weight: 600;
+  color: #cfd8dc;
+  text-align: center;
+}
+
+.scoreboard-table.rounds .rounds-header .header-player {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: 0 4rpx;
+  min-width: 0;
+}
+
+.scoreboard-table.rounds .rounds-header .player-avatar {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.scoreboard-table.rounds .rounds-header .player-name {
+  font-size: 14rpx;
+  color: #e9edf0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* 中间可滚动区域 */
+.scoreboard-table.rounds .rounds-body {
+  flex: 1;
+  height: 0;
+}
+
+.scoreboard-table.rounds .rounds-row {
+  display: flex;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+  align-items: center;
+  min-height: 40rpx;
+}
+
+.scoreboard-table.rounds .rounds-row .row-label {
+  width: 80rpx;
+  flex-shrink: 0;
+  font-size: 15rpx;
+  font-weight: 600;
+  color: #cfd8dc;
+  text-align: center;
+  padding: 8rpx 4rpx;
+}
+
+.scoreboard-table.rounds .rounds-row .row-value {
+  flex: 1;
+  font-size: 15rpx;
+  color: #e9edf0;
+  text-align: center;
+  padding: 8rpx 4rpx;
+  border-right: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+/* 表尾 - 固定底部 */
+.scoreboard-table.rounds .rounds-footer {
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  border-top: 2rpx solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+  align-items: center;
+  padding: 10rpx 8rpx;
+  z-index: 3;
+}
+
+.scoreboard-table.rounds .rounds-footer .footer-label {
+  width: 80rpx;
+  flex-shrink: 0;
+  font-size: 16rpx;
+  font-weight: 700;
+  color: #ffc371;
+  text-align: center;
+}
+
+.scoreboard-table.rounds .rounds-footer .footer-value {
+  flex: 1;
+  font-size: 16rpx;
+  font-weight: 700;
+  color: #ffc371;
+  text-align: center;
+  padding: 0 4rpx;
 }
 
 .bet-select {
@@ -395,64 +784,4 @@
 .shuffle-poke {
   background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
   box-shadow: 0 3rpx 10rpx rgba(54, 209, 220, 0.3);
-}
-
-//
-.start-dealing {
-  margin-top: 20px;
-  background-color: #1aad19;
-  color: white;
-  font-size: 18px;
-  padding: 10px 20px;
-  border-radius: 5px;
-}
-
-.dealing {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  width: 80%;
-}
-
-.card {
-  width: 50px;
-  height: 70px;
-  margin: 5px;
-}
-
-.add-assistant {
-  width: 50rpx;
-  height: 50rpx;
-  border-radius: 50%;
-  border: 3rpx dashed rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.2s ease;
-
-  &::before {
-    content: "+";
-    font-size: 40rpx;
-    color: #fff;
-    font-weight: 300;
-  }
-
-  &:active {
-    transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.2);
-  }
-}
-
-// 下注按钮样式
-.bet-picker {
-  margin-top: 10rpx;
-}
-.player-operate {
-  display: flex;
-}
-
-.bet-btn {
-  background: linear-gradient(135deg, #ffd93d 0%, #f6c23e 100%);
-  color: #333;
 }

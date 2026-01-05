@@ -1,6 +1,6 @@
 import { getUserInfo, setUserInfo } from '../../utils/localStorage';
 
-Page({
+Page<any, any>({
   data: {
     userInfo: {
       name: '',

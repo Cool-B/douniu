@@ -1,7 +1,8 @@
 {
   "usingComponents": {
     "rules-modal": "/components/rules-modal/rules-modal",
-    "room-modal": "/components/room-modal/room-modal"
+    "room-modal": "/components/room-modal/room-modal",
+    "fireworks-canvas": "/components/fireworks-canvas/fireworks-canvas"
   },
   "pageOrientation": "portrait",
   "navigationStyle": "custom"

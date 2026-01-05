@@ -8,7 +8,7 @@
         <text class="close-icon">✕</text>
       </view>
     </view>
-    
+
     <scroll-view class="modal-content" scroll-y="true">
       <view class="rule-section">
         <view class="section-title">
@@ -31,7 +31,7 @@
           <text class="title-text">牌型等级</text>
         </view>
         <view class="card-type-list">
-          <view class="card-type-item special">
+          <!-- <view class="card-type-item special">
             <text class="type-name">五小牛</text>
             <text class="type-desc">5张牌点数之和≤10</text>
             <text class="type-multiple">×7</text>
@@ -40,30 +40,25 @@
             <text class="type-name">五花牛</text>
             <text class="type-desc">5张牌均为J、Q、K</text>
             <text class="type-multiple">×6</text>
-          </view>
+          </view> -->
           <view class="card-type-item high">
             <text class="type-name">牛牛</text>
             <text class="type-desc">剩余2张之和为10的倍数</text>
-            <text class="type-multiple">×5</text>
+            <text class="type-multiple">×4</text>
           </view>
           <view class="card-type-item high">
             <text class="type-name">牛九</text>
             <text class="type-desc">剩余2张之和个位数为9</text>
-            <text class="type-multiple">×4</text>
+            <text class="type-multiple">×3</text>
           </view>
           <view class="card-type-item medium">
             <text class="type-name">牛八</text>
             <text class="type-desc">剩余2张之和个位数为8</text>
-            <text class="type-multiple">×3</text>
-          </view>
-          <view class="card-type-item medium">
-            <text class="type-name">牛七/牛六</text>
-            <text class="type-desc">剩余2张之和个位数为7或6</text>
             <text class="type-multiple">×2</text>
           </view>
           <view class="card-type-item normal">
-            <text class="type-name">牛五至牛一</text>
-            <text class="type-desc">剩余2张之和个位数为5-1</text>
+            <text class="type-name">牛七至牛一</text>
+            <text class="type-desc">剩余2张之和个位数为7-1</text>
             <text class="type-multiple">×1</text>
           </view>
           <view class="card-type-item low">
@@ -81,10 +76,6 @@
         </view>
         <view class="rule-item">
           <text class="item-number">•</text>
-          <text class="item-text">基础积分为10分，根据牌型倍数计算最终得分</text>
-        </view>
-        <view class="rule-item">
-          <text class="item-number">•</text>
           <text class="item-text">庄家与闲家比牌，牌型等级高者获胜</text>
         </view>
         <view class="rule-item">
@@ -93,24 +84,6 @@
         </view>
       </view>
 
-      <view class="rule-section">
-        <view class="section-title">
-          <text class="title-icon">🎯</text>
-          <text class="title-text">游戏技巧</text>
-        </view>
-        <view class="tip-item">
-          <text class="tip-label">观察牌面</text>
-          <text class="tip-text">注意花牌（J、Q、K）的数量，可能组成五花牛</text>
-        </view>
-        <view class="tip-item">
-          <text class="tip-label">计算概率</text>
-          <text class="tip-text">小牌多时，留意是否能组成五小牛</text>
-        </view>
-        <view class="tip-item">
-          <text class="tip-label">策略选择</text>
-          <text class="tip-text">当庄家时更有优势，平局时庄家获胜</text>
-        </view>
-      </view>
     </scroll-view>
 
     <view class="modal-footer">
