@@ -192,11 +192,8 @@ const mockResponses = {
 
     if (data.loginType === 'quick') {
       // 一键登录：模拟从微信获取的用户信息
-      console.log('[MockData] 处理一键登录请求', { encryptedData: data.encryptedData, iv: data.iv, phoneCode: data.phoneCode });
-
       // 模拟解密手机号（实际应由后端完成）
       const mockPhoneNumber = '138****' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-
       // 模拟从微信获取的用户信息
       userInfo = {
         ...mockUsers[0],
@@ -206,12 +203,8 @@ const mockResponses = {
         phone: mockPhoneNumber,
         userId: "wx_user_" + Date.now()
       };
-
-      console.log('[MockData] 一键登录成功', userInfo);
     } else {
       // 自定义登录
-      console.log('[MockData] 处理自定义登录请求', { name: data.name, avatar: data.avatar });
-
       userInfo = {
         ...mockUsers[0],
         ...data,
@@ -393,8 +386,6 @@ export const mockApi = {
       }
       return item
     })
-    console.log(room, 222222);
-
     return {
       code: 200,
       message: "加入房间成功",
@@ -538,9 +529,6 @@ export const mockApi = {
 
       // 保存到本地存储
       setRoomInfo(room);
-
-      console.log(`[addAssistantOrChangeSeat] 庄家 ${operator.name}(ID:${operator.userId}) 在座位${data.seatIndex}添加了机器人 ${botName}(ID:${botUserId})`);
-
       return {
         code: 200,
         message: "添加机器人成功",
@@ -597,9 +585,6 @@ export const mockApi = {
 
       // 保存到本地存储
       setRoomInfo(room);
-
-      console.log(`[addAssistantOrChangeSeat] 玩家 ${operator.name}(ID:${operator.userId}) 从座位${oldSeatIndex}换到座位${data.seatIndex}`);
-
       return {
         code: 200,
         message: "换座成功",
@@ -964,9 +949,6 @@ export const mockApi = {
 
     // 保存到本地存储
     setRoomInfo(room);
-
-    console.log(`[changeBet] 玩家 ${player.name}(ID:${player.userId}) 下注从 ${oldBet}倍 改为 ${data.bet}倍`);
-
     return {
       code: 200,
       message: `下注已改为${data.bet}倍`,

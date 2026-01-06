@@ -329,11 +329,6 @@ Page<data, Record<string, any>>({
             scoreBoardSorted: this.buildSortedScoreBoard(withScoreBoard.scoreBoard)
           }, () => {
             setRoomInfo(withScoreBoard);
-            wx.showToast({
-              title: '踢出成功',
-              icon: 'success',
-              duration: 1500
-            });
           });
         } else {
           // 否则在本地移除玩家
@@ -573,8 +568,6 @@ Page<data, Record<string, any>>({
       const compareResult = this.compareTwoPlayers(banker, player);
       const baseAmount = player.bet || 1;
       let multiplier = 1;
-      console.log(compareResult);
-
       if (compareResult > 0) {
         // 庄家赢，根据庄家牌型计算倍率
         const result = this.getMultiplierAndReason(banker.pokeData);
@@ -743,8 +736,9 @@ Page<data, Record<string, any>>({
     if (pokeData.isDoubleTen) {
       return { multiplier: 5, };
     }
-    if (pokeData.hasNiu && pokeData.pointNumber === 10) {
-      return { multiplier: pokeData.pointNumber - 6 || 1, };
+    if (pokeData.hasNiu) {
+      const multiplier = pokeData.pointNumber - 6
+      return { multiplier: multiplier > 0 ? multiplier : 1, };
     }
     // 无牛：1倍
     return { multiplier: 1, };
@@ -763,7 +757,7 @@ Page<data, Record<string, any>>({
       // 2秒后清除结算结果显示
       setTimeout(() => {
         this.clearSettlementResults();
-      }, 3000);
+      }, 5000);
     });
   },
 
@@ -777,43 +771,40 @@ Page<data, Record<string, any>>({
     this.setData({
       roomInfo: this.data.roomInfo
     }, () => {
-      // 再等1秒后重置游戏
-      setTimeout(() => {
-        this.resetGame();
-      }, 3000);
+      this.resetGame();
     });
   },
 
   /**
    * 比较两个玩家的牌型大小
-   * @param player1 玩家1
-   * @param player2 玩家2
-   * @returns >0 表示player1赢，<0 表示player2赢，0表示平局（实际不会出现）
+   * @param banker 玩家1
+   * @param player 玩家2
+   * @returns >0 表示banker赢，<0 表示player赢，0表示平局（实际不会出现）
    */
-  compareTwoPlayers(player1: player, player2: player): number {
-    const p1Data = player1.pokeData;
-    const p2Data = player2.pokeData;
+  compareTwoPlayers(banker: player, player: player): number {
+    const bankerData = banker.pokeData;
+    const playerData = player.pokeData;
     // 2. 比较是否有牛
-    if (p1Data.hasNiu && !p2Data.hasNiu) return 1;
-    if (!p1Data.hasNiu && p2Data.hasNiu) return -1;
+    if (bankerData.hasNiu && !playerData.hasNiu) return 1;
+    if (!bankerData.hasNiu && playerData.hasNiu) return -1;
     // 3. 都有牛，比较点数
-    if (p1Data.hasNiu && p2Data.hasNiu) {
-      if (p1Data.pointNumber !== p2Data.pointNumber) {
-        return p1Data.pointNumber - p2Data.pointNumber;
+    if (bankerData.hasNiu && playerData.hasNiu) {
+      if (bankerData.pointNumber !== playerData.pointNumber) {
+        return bankerData.pointNumber - playerData.pointNumber;
       }
       // 点数相同，比较最大牌
-      if (p1Data.maxNumber !== p2Data.maxNumber) {
-        return p1Data.maxNumber - p2Data.maxNumber;
+      if (bankerData.maxNumber !== playerData.maxNumber) {
+        return bankerData.maxNumber - playerData.maxNumber;
       }
       // 牌面相同，比较花色
-      return this.compareSuit(p1Data.suit, p2Data.suit);
+      return this.compareSuit(bankerData.suit, playerData.suit);
     }
     // 4. 都没有牛，比较最大牌
-    if (p1Data.maxNumber !== p2Data.maxNumber) {
-      return p1Data.maxNumber - p2Data.maxNumber;
+    if (bankerData.maxNumber !== playerData.maxNumber) {
+      return bankerData.maxNumber - playerData.maxNumber;
     }
     // 牌面相同，比较花色
-    return this.compareSuit(p1Data.suit, p2Data.suit);
+    return this.compareSuit(bankerData.suit, playerData.suit);
   },
 
   /**
@@ -977,8 +968,6 @@ Page<data, Record<string, any>>({
         // 保存到本地存储
         setRoomInfo(updatedRoomInfo);
         // 更新页面数据
-        console.log(updatedRoomInfo);
-
         this.setData({
           roomInfo: updatedRoomInfo,
           currentPlayerStatus: newStatus  // 同步更新当前玩家的准备状态
@@ -1147,8 +1136,6 @@ Page<data, Record<string, any>>({
         pokeData.pointNumber = pointNumber
         pokeData.maxNumber = maxNumber
         pokeData.suit = suit
-        console.log(pokeData);
-
       }
       return player
     })
@@ -1217,7 +1204,8 @@ Page<data, Record<string, any>>({
               (_, index) => index !== i && index !== j && index !== k
             );
             // 计算剩余两张牌和的个位数
-            const pointNumber = (remainingCards[0].number + remainingCards[1].number) % 10;
+            const subNumber = remainingCards[0].number + remainingCards[1].number
+            const pointNumber = subNumber > 10 ? subNumber === 20 ? 10 : subNumber % 10 : subNumber;
             // 找出剩余两张牌中最大的(已排序，第一张就是最大的)
             const maxCardNumber = remainingCards[0].number;
             const suit = remainingCards[0].suit;

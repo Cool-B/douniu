@@ -178,7 +178,6 @@ Component<any, any, any>({
       }
 
       // 没有本地信息,显示登录页面
-      console.log('❌ 无本地用户信息,需要手动登录');
       this.setData({
         loginFlag: LoginStatus.NEED_LOGIN,
         loading: false
@@ -219,8 +218,6 @@ Component<any, any, any>({
     // 输入昵称 - 支持type="nickname"自动获取微信昵称
     onNicknameInput(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance, e: any) {
       const nickname = e.detail.value || '';
-      console.log('[Nickname Input] 获取到昵称:', nickname);
-
       this.setData({
         tempNickname: nickname,
         errorMsg: ''
@@ -238,7 +235,6 @@ Component<any, any, any>({
 
     // 昵称输入框聚焦
     onNicknameFocus(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
-      console.log('[Nickname Input] 输入框聚焦');
       this.setData({
         inputFocused: true
       });
@@ -325,19 +321,14 @@ Component<any, any, any>({
 
     // 微信手机号授权回调（一键登录）
     onGetPhoneNumber(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance, e: any) {
-      console.log('[Quick Login] 一键登录授权回调:', e.detail);
-
       const { encryptedData, iv, errMsg, code } = e.detail;
 
       // 检查授权是否成功
       if (QUICK_LOGIN_CONFIG.SUCCESS_MESSAGES.includes(errMsg)) {
-        console.log('[Quick Login] 用户同意授权');
         this.performQuickLogin(encryptedData, iv, code);
       } else if (errMsg === QUICK_LOGIN_CONFIG.DENY_MESSAGE) {
-        console.log('[Quick Login] 用户拒绝授权');
         this.handleAuthorizationDenied();
       } else {
-        console.error('[Quick Login] 授权失败:', errMsg);
         this.handleAuthorizationFailed();
       }
     },
@@ -353,13 +344,9 @@ Component<any, any, any>({
       try {
         // 获取微信登录code
         const loginRes = await wx.login();
-
         if (!loginRes.code) {
           throw new Error('获取微信登录code失败');
         }
-
-        console.log('[Quick Login] 获取到微信登录code:', loginRes.code);
-
         // 调用登录API（Mock数据会模拟解密手机号的过程）
         const response = await login({
           code: loginRes.code,
@@ -411,8 +398,6 @@ Component<any, any, any>({
 
     // 处理用户拒绝授权
     handleAuthorizationDenied(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
-      console.log('[Quick Login] 用户拒绝授权，显示自定义登录表单');
-
       this.setData({
         showQuickLogin: false,
         showCustomLogin: true,
@@ -443,19 +428,14 @@ Component<any, any, any>({
 
     // 切换到自定义登录
     switchToCustomLogin(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
-      console.log('[Quick Login] 用户主动切换到自定义登录');
-
       this.setData({
         showQuickLogin: false,
         showCustomLogin: true,
         loginFlag: LoginStatus.NEED_LOGIN
       });
     },
-
     // 切换回一键登录
     switchToQuickLogin(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
-      console.log('[Quick Login] 切换回一键登录');
-
       this.setData({
         showQuickLogin: true,
         showCustomLogin: false,
@@ -519,7 +499,6 @@ Component<any, any, any>({
         this.setData({
           currentUser: userInfo
         });
-        console.log('✅ 用户信息已刷新:', userInfo);
       }
     },
 
@@ -529,9 +508,7 @@ Component<any, any, any>({
         this.showError('请先登录', 2000);
         return;
       }
-
       this.setData({ loading: true, errorMsg: '' });
-
       createRoom({
         userId: this.data.currentUser.id,
         roomType: 2
@@ -610,8 +587,6 @@ Component<any, any, any>({
               url: '../card_game/card_game'
             });
           }, 1000);
-          console.log(roomInfo);
-
           setRoomInfo(roomInfo)
         } else {
           this.setData({ loading: false });

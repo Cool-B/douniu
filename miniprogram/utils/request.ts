@@ -46,8 +46,6 @@ const request = async (options: RequestOptions & defaultConfig): Promise<Respons
 
       case '/poker/joinRoom':
         const joinRoomResult = await mockApi.joinRoom(data);
-        console.log(joinRoomResult);
-
         return {
           code: joinRoomResult.code,
           data: joinRoomResult.data,
