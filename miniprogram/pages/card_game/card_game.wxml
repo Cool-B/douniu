@@ -7,46 +7,26 @@
   </view>
   <view class="players">
     <block wx:for="{{players}}" wx:key="index">
-      <view class="player{{index}} {{item.userType===1?'banker':'player'}}">
-        <block wx:if="{{item.userId}}">
-          <block wx:if="{{item.name}}">
-            <image class="player-avatar" src="{{item.userType===1 ? '/assets/poke/banker.png' : (item.avatar || '/assets/avatars/default.png')}}" mode="cover" binderror="onAvatarError" data-index="{{index}}"></image>
-            <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
-            <view class="text">{{item.name}}</view>
-            <!-- 本局输赢积分情况 -->
-            <!-- <view class="bet">{{item.bet}}</view> -->
-            <view class="bet">{{item.bet}}</view>
-            <view wx:if="{{!isGaming&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip" data-index="{{index}}"></view>
-            <block >
-              <view class="player-pokes" bindtap="checkPokes" data-index="{{index}}">
-                <view wx:if="{{item.show}}">
-                  <image wx:for="{{item.pokes}}" wx:key="index" class="player-poke" src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
-                </view>
-                <view wx:if="{{!item.show}}">
-                  <image wx:for="{{item.pokes}}" bindtap="showModal" wx:key="index" class="player-poke" src="{{'../../assets/poke/Poker/Background.png'}}" mode="" />
-                </view>
-              </view>
-            </block>
-          </block>
-          <view wx:if="{{item.name===''}}">
-            <!-- <image class="center_blank-img" src="../../assets/poke/Poker/Background.png" mode="" />
-          <image class="center_blank-img" src="../../assets/poke/Poker/Background.png" mode="" />
-          <image class="center_blank-img" src="../../assets/poke/Poker/Background.png" mode="" /> -->
+      <view class="player{{index}} {{item.userType===0 ? 'center_blank' : (item.userType===1 ? 'banker' : 'player')}}">
+        <block wx:if="{{item.userType!==0}}">
+          <image class="player-avatar" src="{{item.userType===1 ? '/assets/poke/banker.png' : (item.avatar || '/assets/avatars/default.png')}}" mode="cover" binderror="onAvatarError" data-index="{{index}}"></image>
+          <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
+          <view class="text">{{item.name || '空位置'}}</view>
+          <view class="bet">{{item.bet}}</view>
+          <view wx:if="{{!isGaming&&item.userType===2}}" class="{{item.ready ? 'cancel_ready' : 'ready'}} ready-tip" data-index="{{index}}"></view>
+          <view class="player-pokes" bindtap="checkPokes" data-index="{{index}}">
+            <view wx:if="{{item.show}}">
+              <image wx:for="{{item.pokes}}" wx:for-item="p" wx:key="index" class="player-poke" src="{{p.suit ? ('/assets/poke/'+p.suit+'/'+p.number+'.png') : '/assets/poke/Poker/Background.png'}}" mode="" />
+            </view>
+            <view wx:if="{{!item.show}}">
+              <image wx:for="{{item.pokes}}" wx:for-item="p" wx:key="index" class="player-poke" src="/assets/poke/Poker/Background.png" mode="" />
+            </view>
           </view>
-        </block>
-        <block wx:if="{{!item.userId&&index!==4}}">
-          空
         </block>
       </view>
     </block>
   </view>
   <block wx:if="{{currentUser==='banker'}}">
-
-    <!-- <view class="dealing" wx:else>
-    <block wx:for="{{dealtCards}}" wx:key="index">
-      <image class="card" src="/images/card_{{item}}.png" />
-    </block>
-  </view> -->
     <block wx:if="{{!isGaming&&isStart}}">
       <button class="deal-cards btn" bindtap="dealCards">发牌</button>
       <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>

@@ -84,8 +84,18 @@ Page<data, Record<string, any>>({
     scoreboardTab: 'summary',
     roundColumns: [],
     roundTableData: [],
-    // 9 元素 players 数组 (3x3 布局, index 4 = 中心占位), observer 会自动同步 roomInfo.players
-    players: [],
+    // 9 元素 players 数组 (3x3 布局, index 4 = 中心占位), 初始预置 9 个空位避免 observer 不触发导致一片空白
+    players: [
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 0, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+      { userId: 0, name: '空位置', avatar: '', bet: 0, pokers: [], score: 0, state: 1, status: 1, roomId: 0, userType: 2, pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' } },
+    ],
     // 本地默认头像 (外网头像URL加载失败时兜底)
     defaultAvatar: '/assets/avatars/default.png',
   },
