@@ -6,6 +6,8 @@ import { uniqueObjectArray } from "../../utils/util"
 // import request from "../../utils/request"
 interface data {
   roomInfo: roomInfo,
+  // 用于 WXML 渲染的 9 元素数组: 8 玩家 + 中心 1 占位
+  players: player[],
   // 当前玩家信息
   currentUserInfo: userInfo,
   session: string,
@@ -82,13 +84,54 @@ Page<data, Record<string, any>>({
     scoreboardTab: 'summary',
     roundColumns: [],
     roundTableData: [],
+    // 9 元素 players 数组 (3x3 布局, index 4 = 中心占位), observer 会自动同步 roomInfo.players
+    players: [],
     // 本地默认头像 (外网头像URL加载失败时兜底)
     defaultAvatar: '/assets/avatars/default.png',
+  },
+  // 监听 roomInfo.players 变化, 自动展开为 9 元素数组 (3x3 布局, index 4 = 中心)
+  observers: {
+    'roomInfo.players': function(players: player[]) {
+      this.setData({ players: this.padPlayersTo9(players) });
+    },
+  },
+  // 把后端 8 元素 players 数组扩展为 9 元素, 在 index 4 插入中心占位
+  // WXML 中 index 4 是控制区 (房间号/计分板/按钮 绝对定位覆盖), 不显示玩家
+  padPlayersTo9(players: player[] | undefined | null): player[] {
+    if (!players || players.length === 0) {
+      // 没玩家时也返回 9 个空位, 保证 3x3 布局
+      return Array.from({ length: 9 }, () => this.makeEmptyPlayer());
+    }
+    if (players.length >= 9) {
+      return players.slice(0, 9);
+    }
+    // 8 玩家 → 在 index 4 插入空占位
+    const center: player = this.makeEmptyPlayer();
+    return [
+      ...players.slice(0, 4),
+      center,
+      ...players.slice(4),
+    ];
+  },
+  makeEmptyPlayer(): player {
+    return {
+      userId: 0,
+      name: '',
+      avatar: '',
+      bet: 0,
+      pokers: [],
+      score: 0,
+      state: 1,
+      status: 1,
+      roomId: 0,
+      userType: 4,  // 4 = 空位
+      pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' },
+    };
   },
   // 头像加载失败 -> 切换为本地默认
   onAvatarError(e: any) {
     const { index } = e.currentTarget.dataset;
-    const key = `roomInfo.players[${index}].avatar`;
+    const key = `players[${index}].avatar`;
     this.setData({ [key]: this.data.defaultAvatar } as any);
   },
   showLoading(title?: string, mask?: boolean) {
