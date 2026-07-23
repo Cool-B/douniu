@@ -5,6 +5,9 @@
 
 import { getRoomInfo, getUserInfo, player, roomInfo, setRoomInfo } from "./localStorage";
 
+// CloudRun 真实后端地址 (供 login 走真实接口, 其他 API 继续走 mock)
+const REAL_BASE_URL = 'https://douniu-286232-10-1457346560.sh.run.tcloudbase.com';
+
 export interface MockUserInfo {
   id: number;
   name: string;
@@ -315,10 +318,47 @@ function simulateDelay(min: number = 200, max: number = 800): Promise<void> {
 
 // Mock API函数
 export const mockApi = {
-  // 用户登录
-  async login(data: { code: string; name: string; avatar: string }) {
-    await simulateDelay();
-    return mockResponses.login(data);
+  // 用户登录 (走 CloudRun 真实后端)
+  login(data: { code: string; name?: string; avatar?: string; loginType?: string }) {
+    return new Promise((resolve) => {
+      wx.request({
+        url: REAL_BASE_URL + '/api/wx/user/login',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: {
+          code: data.code,
+          loginType: data.loginType || 'quick',
+          name: data.name || '',
+          avatar: data.avatar || '',
+        },
+        success: (res: any) => {
+          const body = res.data || {};
+          // 后端 code=0 表示成功
+          if (body.code === 0 && body.data) {
+            const info = body.data.userInfo || body.data;
+            // 后端可能返回 userId 也可能返回 id, 兼容
+            const userInfo = {
+              id: info.id || info.userId,
+              name: info.name,
+              avatar: info.avatar,
+              token: body.data.token || '',
+            };
+            resolve({
+              code: 200,
+              data: userInfo,
+              message: body.message || '登录成功',
+            });
+          } else {
+            // 失败 fallback 到 mock
+            resolve(mockResponses.login(data));
+          }
+        },
+        fail: () => {
+          // 网络失败 fallback 到 mock
+          resolve(mockResponses.login(data));
+        },
+      });
+    });
   },
 
   // 创建房间

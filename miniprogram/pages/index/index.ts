@@ -289,14 +289,11 @@ Component<any, any, any>({
         avatar: avatarUrl
       }).then(response => {
         if (response.code === 200 && response.data) {
-          // 后端返回 {userInfo, token} 包裹, 解包并映射 userId -> id
-          const userData = response.data.userInfo || response.data;
-          if (userData.userId && !userData.id) userData.id = userData.userId;
           // 保存用户信息到本地
-          setUserInfo(userData);
+          setUserInfo(response.data);
           this.setData({
             loginFlag: LoginStatus.LOGGED_IN,
-            currentUser: userData,
+            currentUser: response.data,
             hasUserInfo: true,
             loading: false
           });
@@ -360,15 +357,12 @@ Component<any, any, any>({
         });
 
         if (response.code === 200 && response.data) {
-          // 后端返回 {userInfo, token} 包裹, 解包并映射 userId -> id
-          const userData = response.data.userInfo || response.data;
-          if (userData.userId && !userData.id) userData.id = userData.userId;
           // 登录成功，保存用户信息
-          setUserInfo(userData);
+          setUserInfo(response.data);
 
           this.setData({
             loginFlag: LoginStatus.LOGGED_IN,
-            currentUser: userData,
+            currentUser: response.data,
             hasUserInfo: true,
             loading: false,
             authorizingQuickLogin: false
