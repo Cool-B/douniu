@@ -141,6 +141,66 @@ class RoomManager {
     return room.players.every(p => p.status === 2);
   }
 
+  // 添加机器人到房间
+  addBotToSeat(roomId: number, seatIndex: number, botInfo: { id: number; name: string; avatar: string; userType: number; status: number; score: number; bet: number }): Room {
+    const room = this.rooms.get(roomId);
+    if (!room) throw new Error('房间不存在');
+    if (room.players.length >= room.maxPlayers) throw new Error('房间已满');
+
+    const bot: Player = {
+      userId: botInfo.id,
+      name: botInfo.name,
+      avatar: botInfo.avatar,
+      userType: botInfo.userType as any,
+      status: botInfo.status as 1 | 2,
+      state: 1,
+      score: botInfo.score,
+      bet: botInfo.bet,
+      pokers: [],
+      lookHand: false,
+      show: false,
+    };
+
+    // 按 seatIndex 插入到对应位置, 如果超出则 push 到末尾
+    if (seatIndex < 0 || seatIndex > room.players.length) {
+      room.players.push(bot);
+    } else {
+      room.players.splice(seatIndex, 0, bot);
+    }
+    return room;
+  }
+
+  // 闲家换座位 (在 players 数组里调整顺序)
+  changeSeat(roomId: number, userId: number, targetIndex: number): Room {
+    const room = this.rooms.get(roomId);
+    if (!room) throw new Error('房间不存在');
+    const currentIndex = room.players.findIndex(p => p.userId === userId);
+    if (currentIndex < 0) throw new Error('你不在房间中');
+
+    const [player] = room.players.splice(currentIndex, 1);
+    const safeIndex = Math.max(0, Math.min(targetIndex, room.players.length));
+    room.players.splice(safeIndex, 0, player);
+    return room;
+  }
+
+  // 移除玩家 (踢人)
+  removePlayer(roomId: number, userId: number): Room {
+    const room = this.rooms.get(roomId);
+    if (!room) throw new Error('房间不存在');
+    room.players = room.players.filter(p => p.userId !== userId);
+    return room;
+  }
+
+  // 修改下注
+  changeBet(roomId: number, userId: number, bet: number): Room {
+    const room = this.rooms.get(roomId);
+    if (!room) throw new Error('房间不存在');
+    const player = room.players.find(p => p.userId === userId);
+    if (!player) throw new Error('你不在房间中');
+    player.bet = bet;
+    return room;
+  }
+
   // ========== 游戏 ==========
   startGame(roomId: number, userId: number): Game {
     const room = this.rooms.get(roomId);

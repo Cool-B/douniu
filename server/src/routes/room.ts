@@ -63,8 +63,8 @@ router.post('/getRoomInfo', (req: Request, res: Response) => {
   }
 });
 
-// POST /poker/ready
-router.post('/ready', (req: Request, res: Response) => {
+// POST /poker/playerReady
+router.post('/playerReady', (req: Request, res: Response) => {
   try {
     const { userId, roomId, status, bet } = req.body;
     const ready = status === 2;
@@ -89,6 +89,81 @@ router.post('/exitRoom', (req: Request, res: Response) => {
       code: 200,
       message: '退出房间成功',
       data: { roomInfo: room, userInfo: user },
+    } as ApiResponse);
+  } catch (error: any) {
+    res.json({ code: 500, message: error.message, data: null } as ApiResponse);
+  }
+});
+
+// POST /poker/addAssistantOrChangeSeat
+// 庄家: 添加机器人到空位; 闲家: 换座位
+router.post('/addAssistantOrChangeSeat', (req: Request, res: Response) => {
+  try {
+    const { roomId, userId, seatIndex, isBanker } = req.body;
+    const room = roomManager.getRoom(roomId);
+    if (!room) {
+      return res.json({ code: 404, message: '房间不存在', data: null } as ApiResponse);
+    }
+
+    if (isBanker) {
+      // 添加机器人
+      const botId = 90000 + Math.floor(Math.random() * 1000);
+      const botNames = ['智能小将', 'AI玩家', '机器人小明', '智能玩家', 'AI打手', '陪练小助手'];
+      const bot = roomManager.addBotToSeat(roomId, seatIndex, {
+        id: botId,
+        name: botNames[Math.floor(Math.random() * botNames.length)],
+        avatar: 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
+        userType: 3,
+        status: 2, // 机器人默认已准备
+        score: 1000,
+        bet: 1,
+      });
+      return res.json({
+        code: 200,
+        message: '添加机器人成功',
+        data: { roomInfo: bot },
+      } as ApiResponse);
+    } else {
+      // 闲家换座位
+      const updated = roomManager.changeSeat(roomId, userId, seatIndex);
+      return res.json({
+        code: 200,
+        message: '换座成功',
+        data: { roomInfo: updated },
+      } as ApiResponse);
+    }
+  } catch (error: any) {
+    res.json({ code: 500, message: error.message, data: null } as ApiResponse);
+  }
+});
+
+// POST /poker/kickPlayer
+router.post('/kickPlayer', (req: Request, res: Response) => {
+  try {
+    const { roomId, userId, player } = req.body;
+    if (!player || !player.userId) {
+      return res.json({ code: 400, message: '缺少玩家信息', data: null } as ApiResponse);
+    }
+    const room = roomManager.removePlayer(roomId, player.userId);
+    return res.json({
+      code: 200,
+      message: '踢出成功',
+      data: { roomInfo: room },
+    } as ApiResponse);
+  } catch (error: any) {
+    res.json({ code: 500, message: error.message, data: null } as ApiResponse);
+  }
+});
+
+// POST /poker/changeBet
+router.post('/changeBet', (req: Request, res: Response) => {
+  try {
+    const { roomId, userId, bet } = req.body;
+    const room = roomManager.changeBet(roomId, userId, bet);
+    return res.json({
+      code: 200,
+      message: '下注成功',
+      data: { roomInfo: room },
     } as ApiResponse);
   } catch (error: any) {
     res.json({ code: 500, message: error.message, data: null } as ApiResponse);
