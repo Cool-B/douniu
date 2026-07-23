@@ -225,5 +225,5 @@
   <!-- 房间号弹窗 -->
   <room-modal visible="{{modalShow}}" title="加入房间" showQuickStart="{{false}}" bind:close="onCloseModal" bind:cancel="onCancel" bind:confirm="onConfirm">
   </room-modal>
-  <fireworks-canvas enabled="{{true}}" frequency="{{2500}}"></fireworks-canvas>
+  <!-- <fireworks-canvas enabled="{{true}}" frequency="{{2500}}"></fireworks-canvas> -->
 </view>

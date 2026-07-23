@@ -82,6 +82,14 @@ Page<data, Record<string, any>>({
     scoreboardTab: 'summary',
     roundColumns: [],
     roundTableData: [],
+    // 本地默认头像 (外网头像URL加载失败时兜底)
+    defaultAvatar: '/assets/avatars/default.png',
+  },
+  // 头像加载失败 -> 切换为本地默认
+  onAvatarError(e: any) {
+    const { index } = e.currentTarget.dataset;
+    const key = `roomInfo.players[${index}].avatar`;
+    this.setData({ [key]: this.data.defaultAvatar } as any);
   },
   showLoading(title?: string, mask?: boolean) {
     wx.showLoading({

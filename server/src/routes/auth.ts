@@ -25,12 +25,14 @@ router.post('/user/login', (req: Request, res: Response) => {
     const openid = `wx_${code.slice(0, 16)}`;
 
     // 快速登录: 正式环境应该用 session_key + encryptedData + iv 解密手机号/昵称
-    // 开发期用 code 后 4 位当昵称标识, 用户可在个人资料页改名
+    // 开发期用本地头像 + 4位随机数生成友好昵称, 用户可在个人资料页改名
     let finalName = name;
     let finalAvatar = avatar;
     if (loginType === 'quick' || (!finalName && !finalAvatar)) {
-      finalName = finalName || `玩家${code.slice(-6)}`;
-      finalAvatar = finalAvatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+      const random4 = String(Math.floor(1000 + Math.random() * 9000));
+      finalName = finalName || `斗牛玩家${random4}`;
+      // 用空字符串让前端用本地默认头像兜底, 避免外网白名单问题
+      finalAvatar = finalAvatar || '';
     }
 
     if (!finalName) {
@@ -41,7 +43,12 @@ router.post('/user/login', (req: Request, res: Response) => {
       } as ApiResponse);
     }
 
-    const result = roomManager.registerUser(finalName, finalAvatar || '', openid);
+    // 空头像也用本地默认
+    if (!finalAvatar) {
+      finalAvatar = '';
+    }
+
+    const result = roomManager.registerUser(finalName, finalAvatar, openid);
 
     res.json({
       code: 200,

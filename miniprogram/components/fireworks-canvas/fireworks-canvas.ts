@@ -37,6 +37,9 @@ interface ComponentInstance {
   particles: Particle[];
   animationFrame: number | null;
   lastLaunchTime: number;
+  data: { enabled: boolean; frequency: number; canvasWidth: number; canvasHeight: number };
+  setData: (data: any) => void;
+  createSelectorQuery: () => any;
 }
 
 Component<any, any, any>({
@@ -68,7 +71,7 @@ Component<any, any, any>({
   },
 
   pageLifetimes: {
-    show(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
+    show(this: ComponentInstance) {
       if (this.data.enabled) {
         this.startAnimation();
       }
@@ -82,7 +85,7 @@ Component<any, any, any>({
     /**
      * 初始化Canvas
      */
-    async initCanvas(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
+    async initCanvas(this: ComponentInstance) {
       try {
         // 获取系统信息
         const systemInfo = wx.getSystemInfoSync();
@@ -168,7 +171,7 @@ Component<any, any, any>({
     /**
      * 动画循环
      */
-    animate(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
+    animate(this: ComponentInstance) {
       if (!this.canvas || !this.ctx) return;
 
       const now = Date.now();
