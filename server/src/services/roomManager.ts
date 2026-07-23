@@ -41,12 +41,29 @@ class RoomManager {
       userType: 1,   // 创建者=庄家
       status: 2,      // 已准备
       state: 1,
-      score: 1000,
+      score: 0,
       bet: 0,
       pokers: [],
       lookHand: false,
       show: false,
+      roomId,
     };
+
+    // 补充4个空位（userType=4），让前端 5 个位置都有内容
+    const emptySeat = (i: number): Player => ({
+      userId: -(i + 1),
+      name: '',
+      avatar: '',
+      userType: 4,   // 空位
+      status: 1,
+      state: 1,
+      score: 0,
+      bet: 0,
+      pokers: [],
+      lookHand: false,
+      show: false,
+      roomId,
+    });
 
     const room: Room = {
       roomId,
@@ -56,7 +73,13 @@ class RoomManager {
       status: 0,
       maxPlayers: 8,
       currentRound: 0,
-      players: [player],
+      players: [player, emptySeat(0), emptySeat(1), emptySeat(2), emptySeat(3)],
+      isGaming: false,
+      isStart: false,
+      isStartDeal: false,
+      isDealComplete: false,
+      scoreBoard: [{ userId, name: user.name, avatar: user.avatar, userType: 1, state: 1, totalScore: 0 }],
+      roundHistory: [],
     };
 
     this.rooms.set(roomId, room);
@@ -80,11 +103,12 @@ class RoomManager {
       userType: 2,   // 闲家
       status: 1,      // 待准备
       state: 1,
-      score: 1000,
+      score: 0,
       bet: 0,
       pokers: [],
       lookHand: false,
       show: false,
+      roomId: room.roomId,
     };
 
     room.players.push(player);
@@ -154,7 +178,7 @@ class RoomManager {
       userType: botInfo.userType as any,
       status: botInfo.status as 1 | 2,
       state: 1,
-      score: botInfo.score,
+      score: 0,
       bet: botInfo.bet,
       pokers: [],
       lookHand: false,

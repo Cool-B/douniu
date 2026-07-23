@@ -63,20 +63,58 @@ export interface HandResult {
   isBoom: boolean;     // 炸弹(4张相同)
 }
 
+// ========== 玩家牌型数据 ==========
+export interface PokeData {
+  isBoom: boolean;
+  hasNiu: boolean;
+  isDoubleTen: boolean;
+  pointNumber: number;
+  maxNumber: number;
+  suit: Suit | '';
+}
+
+// ========== 结算结果 ==========
+export interface SettlementResult {
+  change: number;
+}
+
 // ========== 玩家 ==========
 export interface Player {
   userId: number;
   name: string;
   avatar: string;
-  userType: 1 | 2;    // 1=庄家, 2=闲家
-  status: 1 | 2;       // 1=待准备, 2=已准备
-  state: 1 | 2 | 3;    // 1=正常, 2=退出, 3=离线
+  userType: 1 | 2 | 3 | 4;  // 1=庄家, 2=闲家, 3=机器人, 4=空位
+  status: 1 | 2;        // 1=待准备, 2=已准备
+  state: 1 | 2 | 3;     // 1=正常, 2=退出, 3=离线
   score: number;
   bet: number;
   pokers: Card[];
-  lookHand: boolean;   // 是否看牌
-  show: boolean;       // 是否亮牌
+  lookHand: boolean;    // 是否看牌
+  show: boolean;        // 是否亮牌
   handResult?: HandResult;
+  pokeData?: PokeData;
+  settlementResult?: SettlementResult;
+  roomId?: number;
+}
+
+// ========== 计分板条目 ==========
+export interface ScoreBoardEntry {
+  userId: number;
+  name: string;
+  avatar: string;
+  userType: number;
+  state: number;
+  totalScore: number;
+}
+
+// ========== 每局记录 ==========
+export interface RoundRecord {
+  round: number;
+  results: Array<{
+    userId: number;
+    name: string;
+    change: number;
+  }>;
 }
 
 // ========== 房间 ==========
@@ -90,6 +128,13 @@ export interface Room {
   currentRound: number;
   players: Player[];
   gameId?: string;
+  // 前端需要的额外字段
+  isGaming?: boolean;
+  isStart?: boolean;
+  isStartDeal?: boolean;
+  isDealComplete?: boolean;
+  scoreBoard?: ScoreBoardEntry[];
+  roundHistory?: RoundRecord[];
 }
 
 // ========== 游戏 ==========

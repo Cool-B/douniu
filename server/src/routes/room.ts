@@ -115,7 +115,7 @@ router.post('/addAssistantOrChangeSeat', (req: Request, res: Response) => {
         avatar: 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
         userType: 3,
         status: 2, // 机器人默认已准备
-        score: 1000,
+        score: 0,
         bet: 1,
       });
       return res.json({

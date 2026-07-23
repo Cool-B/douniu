@@ -25,11 +25,11 @@ router.post('/user/login', (req: Request, res: Response) => {
     const openid = `wx_${code.slice(0, 16)}`;
 
     // 快速登录: 正式环境应该用 session_key + encryptedData + iv 解密手机号/昵称
-    // 开发期直接给个默认昵称 + 默认头像, 让流程跑通
+    // 开发期用 code 后 4 位当昵称标识, 用户可在个人资料页改名
     let finalName = name;
     let finalAvatar = avatar;
     if (loginType === 'quick' || (!finalName && !finalAvatar)) {
-      finalName = finalName || `微信用户${code.slice(-4)}`;
+      finalName = finalName || `玩家${code.slice(-6)}`;
       finalAvatar = finalAvatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
     }
 
