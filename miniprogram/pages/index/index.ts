@@ -510,13 +510,15 @@ Component<any, any, any>({
 
     // 快速开始 - 创建房间
     quickStart(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
-      if (!this.data.currentUser) {
-        this.showError('请先登录', 2000);
+      const uid = this.data.currentUser?.id;
+      if (!uid) {
+        console.error('[quickStart] currentUser.id missing, currentUser =', this.data.currentUser);
+        this.showError('用户信息丢失，请重新登录', 2000);
         return;
       }
       this.setData({ loading: true, errorMsg: '' });
       createRoom({
-        userId: this.data.currentUser.id,
+        userId: uid,
         roomType: 2
       }).then(response => {
         if (response.code === 200 && response.data) {
