@@ -8,7 +8,7 @@
   <!-- 5 个玩家/空位 (斗牛五角形布局, 全部走 player/empty 逻辑) -->
   <view class="players">
     <block wx:for="{{roomInfo.players}}" wx:key="userId">
-      <view class="player-slot player-slot-{{index}} {{item.userType===1?'is-banker':(item.userType===4?'is-empty':(item.userType===3?'is-bot':'is-player'))}}">
+      <view class="player-slot player-slot-{{index}} {{item.userType===1 ? 'is-banker' : ''}} {{item.userType===4 ? 'is-empty' : ''}} {{item.userType===3 ? 'is-bot' : (item.userType===2 ? 'is-player' : '')}}">
         <!-- 庄家标签 -->
         <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
 
@@ -17,7 +17,7 @@
           <!-- 牌区 -->
           <view class="player-pokes_box">
             <view class="{{['player-pokes',(item.status===2||item.userType===1) ? 'is-gaming' : '']}}" bindtap="checkPokes" data-index="{{index}}">
-              <image wx:for="{{item.pokers}}" wx:key="id" class="player-poke" src="{{item.suit ? ('../../assets/poke/'+item.suit+'/'+item.number+'.png') : ''}}" mode=""></image>
+              <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item.suit ? ('../../assets/poke/'+item.suit+'/'+item.number+'.png') : ''}}" mode=""></image>
             </view>
           </view>
 
