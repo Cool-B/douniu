@@ -109,14 +109,28 @@ Page<data, Record<string, any>>({
   // WXML 中 index 4 是控制区 (房间号/计分板/按钮 绝对定位覆盖), 不显示玩家
   padPlayersTo9(players: player[] | undefined | null): player[] {
     if (!players || players.length === 0) {
-      // 没玩家时也返回 9 个空位, 保证 3x3 布局
-      return Array.from({ length: 9 }, () => this.makeEmptyPlayer());
+      // 没玩家时返回 9 个空位, index 4 userType=0 = 中心占位 (不显示)
+      const empty = (ut: number, name: string) => ({
+        userId: 0, name, avatar: '', bet: 0, pokers: [], score: 0,
+        state: 1, status: 1, roomId: 0, userType: ut,
+        pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' },
+      });
+      return [
+        empty(2, '空位置'), empty(2, '空位置'), empty(2, '空位置'),
+        empty(2, '空位置'), empty(0, ''),  // index 4 = 中心
+        empty(2, '空位置'), empty(2, '空位置'),
+        empty(2, '空位置'), empty(2, '空位置'),
+      ];
     }
     if (players.length >= 9) {
       return players.slice(0, 9);
     }
-    // 8 玩家 → 在 index 4 插入空占位
-    const center: player = this.makeEmptyPlayer();
+    // 8 玩家 → 在 index 4 插入 userType=0 中心占位 (不显示, 透明)
+    const center: player = {
+      userId: 0, name: '', avatar: '', bet: 0, pokers: [], score: 0,
+      state: 1, status: 1, roomId: 0, userType: 0,
+      pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' },
+    };
     return [
       ...players.slice(0, 4),
       center,
@@ -126,7 +140,7 @@ Page<data, Record<string, any>>({
   makeEmptyPlayer(): player {
     return {
       userId: 0,
-      name: '',
+      name: '空位置',
       avatar: '',
       bet: 0,
       pokers: [],
@@ -134,7 +148,7 @@ Page<data, Record<string, any>>({
       state: 1,
       status: 1,
       roomId: 0,
-      userType: 4,  // 4 = 空位
+      userType: 2,  // 2 = 空闲家
       pokeData: { isBoom: false, hasNiu: false, isDoubleTen: false, pointNumber: 0, maxNumber: 0, suit: '' },
     };
   },
@@ -181,7 +195,9 @@ Page<data, Record<string, any>>({
     }
     this.setData({
       currentUserInfo,
-      scoreBoardSorted: this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard)
+      scoreBoardSorted: this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard),
+      // 兜底: 即使第一个 setData 没执行 (flag=false), 也要保证 9 元素渲染
+      players: this.padPlayersTo9(this.data.roomInfo.players),
     }, () => {
       wx.hideLoading();
       // 1.创建房间进来的时候，当前用户就是房主，并且只有当前用户
