@@ -289,14 +289,14 @@ Component<any, any, any>({
         avatar: avatarUrl
       }).then(response => {
         if (response.code === 200 && response.data) {
-          // 后端返回 { userInfo, token }, 原版 mock 直接返回 userInfo
-          // 兼容两种结构, 提取真正的用户对象
-          const userInfo = response.data.userInfo || response.data;
+          // 后端返回 {userInfo, token} 包裹, 解包并映射 userId -> id
+          const userData = response.data.userInfo || response.data;
+          if (userData.userId && !userData.id) userData.id = userData.userId;
           // 保存用户信息到本地
-          setUserInfo(userInfo);
+          setUserInfo(userData);
           this.setData({
             loginFlag: LoginStatus.LOGGED_IN,
-            currentUser: userInfo,
+            currentUser: userData,
             hasUserInfo: true,
             loading: false
           });
@@ -360,15 +360,15 @@ Component<any, any, any>({
         });
 
         if (response.code === 200 && response.data) {
-          // 后端返回 { userInfo, token }, 原版 mock 直接返回 userInfo
-          // 兼容两种结构, 提取真正的用户对象
-          const userInfo = response.data.userInfo || response.data;
+          // 后端返回 {userInfo, token} 包裹, 解包并映射 userId -> id
+          const userData = response.data.userInfo || response.data;
+          if (userData.userId && !userData.id) userData.id = userData.userId;
           // 登录成功，保存用户信息
-          setUserInfo(userInfo);
+          setUserInfo(userData);
 
           this.setData({
             loginFlag: LoginStatus.LOGGED_IN,
-            currentUser: userInfo,
+            currentUser: userData,
             hasUserInfo: true,
             loading: false,
             authorizingQuickLogin: false
@@ -510,15 +510,13 @@ Component<any, any, any>({
 
     // 快速开始 - 创建房间
     quickStart(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
-      const uid = this.data.currentUser?.id;
-      if (!uid) {
-        console.error('[quickStart] currentUser.id missing, currentUser =', this.data.currentUser);
-        this.showError('用户信息丢失，请重新登录', 2000);
+      if (!this.data.currentUser) {
+        this.showError('请先登录', 2000);
         return;
       }
       this.setData({ loading: true, errorMsg: '' });
       createRoom({
-        userId: uid,
+        userId: this.data.currentUser.id,
         roomType: 2
       }).then(response => {
         if (response.code === 200 && response.data) {
