@@ -1,90 +1,76 @@
 <view class="room-container">
-  <!-- 顶部: 房间号 + 退出 -->
-  <view class="top-bar">
-    <view class="go-out" bindtap="goToHome"></view>
-    <view class="room-num">房间号：{{roomInfo.roomNumber}}</view>
-  </view>
-
-  <!-- 5 个玩家/空位 (斗牛五角形布局, 全部走 player/empty 逻辑) -->
   <view class="players">
-    <block wx:for="{{roomInfo.players}}" wx:key="userId">
-      <view class="player-slot player-slot-{{index}} {{item.userType===1 ? 'is-banker' : ''}} {{item.userType===4 ? 'is-empty' : ''}} {{item.userType===3 ? 'is-bot' : (item.userType===2 ? 'is-player' : '')}}">
-        <!-- 庄家标签 -->
-        <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
-
-        <!-- 真人 / 机器人 -->
-        <block wx:if="{{item.userType !== 4}}">
-          <!-- 牌区 -->
-          <view class="player-pokes_box">
-            <view class="{{['player-pokes',(item.status===2||item.userType===1) ? 'is-gaming' : '']}}" bindtap="checkPokes" data-index="{{index}}">
-              <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item.suit ? ('../../assets/poke/'+item.suit+'/'+item.number+'.png') : ''}}" mode=""></image>
-            </view>
-          </view>
-
-          <!-- 准备/踢人状态 -->
-          <view wx:if="{{item.userType!==1&&!roomInfo.isStart}}" class="player-status-bar">
-            <view class="player-status {{item.status===2?'is-ready':''}}">
-              {{item.status===1?'未准备':'已准备'}}
-            </view>
-            <view wx:if="{{currentUser==='banker'&&item.userType!==1}}" class="delete-players" bindtap="kickPlayer" data-index="{{index}}">移除</view>
-          </view>
-
-          <!-- 玩家信息 (头像+名+下注+积分) -->
-          <view class="player-info">
-            <image class="player-avatar" src="{{item.avatar || defaultAvatar}}" mode="cover" binderror="onAvatarError" data-index="{{index}}"></image>
-            <view class="player-text">
-              <text class="player-name">{{item.name}}</text>
-              <view class="player-meta">
-                <text wx:if="{{item.userType===3}}" class="player-tag robot-tag">机器人</text>
-                <text wx:if="{{item.userType!==1}}" class="player-bet">下注:{{item.bet||0}}</text>
-                <text class="player-score">积分:{{item.score||0}}</text>
+    <block wx:for="{{roomInfo.players}}" wx:key="index">
+      <view class="player{{index}} {{item.userType===1?'banker':'player'}}">
+        <block wx:if="{{index!==4}}">
+          <view class="banker-tip" wx:if="{{item.userType===1}}">庄家</view>
+          <block wx:if="{{item.userType !== 4 }}">
+            <view class="player-pokes_box">
+              <view class="{{['player-pokes',(item.status===2||item.userType===1) ? 'is-gaming' : '']}}" bindtap="checkPokes" data-index="{{index}}">
+                <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{'../../assets/poke/'+item.suit+'/'+item.number+'.png'}}" mode="" />
+                <!-- <image wx:for="{{item.pokers}}" wx:key="index" class="player-poke" src="{{item}}" mode="" /> -->
               </view>
             </view>
-            <view wx:if="{{item.settlementResult}}" class="settlement-result {{item.settlementResult.change > 0 ? 'win' : 'lose'}}">
-              <view class="settlement-change">{{item.settlementResult.change > 0 ? '+' : ''}}{{item.settlementResult.change}}</view>
+            <view wx:if="{{item.userType!==1&&!roomInfo.isStart}}" style="display: flex;flex-direction: row-reverse;gap: 10rpx;position: absolute;top: 10rpx;">
+              <view class="player-status">
+                {{item.status===1?'未准备':'已准备'}}
+              </view>
+              <view wx:if="{{currentUser==='banker'}}" class="delete-players" bindtap="kickPlayer" data-index="{{index}}">
+                移除
+              </view>
             </view>
-          </view>
+            <view class="player-info">
+              <image class="player-avatar" src="{{item.avatar || '/assets/avatars/default.png'}}" mode="cover" binderror="onAvatarError" data-idx="{{index}}"></image>
+              <view class="player-text">{{item.name}}</view>
+              <view class="player-bet" wx:if="{{item.userType!==1}}">下注:{{item.bet}}</view>
+              <view class="player-score">积分:{{item.score}}</view>
+              <!-- 结算结果显示 -->
+              <view wx:if="{{item.settlementResult}}" class="settlement-result {{item.settlementResult.change > 0 ? 'win' : 'lose'}}">
+                <view class="settlement-change">{{item.settlementResult.change > 0 ? '+' : ''}}{{item.settlementResult.change}}</view>
+              </view>
+            </view>
+          </block>
+          <block wx:else>
+            <view wx:if="{{!roomInfo.isStart}}" class="add-assistant" bindtap="addAssistantOrChangeSeat" data-index="{{index}}"></view>
+          </block>
         </block>
-
-        <!-- 空位 -->
         <block wx:else>
-          <view class="add-assistant" bindtap="addAssistantOrChangeSeat" data-index="{{index}}"></view>
+          <view class="room-num">
+            房间号：{{roomInfo.roomNumber}}
+          </view>
+          <block wx:if="{{currentUser==='banker'}}">
+            <button class="scoreboard-btn btn" bindtap="openScoreBoard">计分板</button>
+            <block wx:if="{{roomInfo.isStart&&!roomInfo.isDealComplete&&!isStartDeal}}">
+              <button class="deal-cards btn" bindtap="dealCards">发牌</button>
+              <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
+            </block>
+            <block wx:if="{{roomInfo.isStart&&roomInfo.isDealComplete}}">
+              <!-- disabled='{{!isAllShow}}' -->
+              <button wx:if="{{currentUser==='banker'}}" class="settlement-game btn" bindtap="settlementCurrent">结算</button>
+              <button class="show-cards btn" bindtap="showCards">亮牌</button>
+            </block>
+            <block wx:if="{{!roomInfo.isStart}}">
+              <button class="start-game btn" bindtap="startGame" disabled="{{!canStartGame}}">开始游戏</button>
+            </block>
+          </block>
+          <block wx:else class="player-operate">
+            <!-- 准备按钮 -->
+            <button class="deal-cards btn" bindtap="changeReady">{{currentPlayerStatus===2?'取消准备':'准备'}}</button>
+            <!-- 下注按钮（仅在未准备状态显示），点击后弹出选择器 -->
+            <button class="bet-btn btn" wx:if="{{currentPlayerStatus===1}}">
+              <picker mode="selector" range="{{range}}" value="{{selectedValue}}" bindchange="onBetChange">
+                下注
+              </picker>
+            </button>
+          </block>
         </block>
       </view>
     </block>
   </view>
-
-  <!-- 中心控制区 (独立于玩家循环, 始终居中显示) -->
-  <view class="center-controls">
-    <block wx:if="{{currentUser==='banker'}}">
-      <button class="scoreboard-btn btn" bindtap="openScoreBoard">计分板</button>
-      <block wx:if="{{roomInfo.isStart&&!roomInfo.isDealComplete&&!isStartDeal}}">
-        <button class="deal-cards btn" bindtap="dealCards">发牌</button>
-        <button class="shuffle-poke btn" bindtap="shufflePoke">洗牌</button>
-      </block>
-      <block wx:if="{{roomInfo.isStart&&roomInfo.isDealComplete}}">
-        <button class="settlement-game btn" bindtap="settlementCurrent">结算</button>
-        <button class="show-cards btn" bindtap="showCards">亮牌</button>
-      </block>
-      <block wx:if="{{!roomInfo.isStart}}">
-        <button class="start-game btn" bindtap="startGame" disabled="{{!canStartGame}}">开始游戏</button>
-      </block>
-    </block>
-    <block wx:else>
-      <button class="deal-cards btn" bindtap="changeReady">{{currentPlayerStatus===2?'取消准备':'准备'}}</button>
-      <button class="bet-btn btn" wx:if="{{currentPlayerStatus===1}}">
-        <picker mode="selector" range="{{range}}" value="{{selectedValue}}" bindchange="onBetChange">
-          下注:{{selectedValue+1}}
-        </picker>
-      </button>
-    </block>
-  </view>
-
   <modal wx:if="{{modalVisible}}" title="弹窗标题" show="{{modalVisible}}" bindcancel="cancelModal" bindconfirm="confirmModal">
-    <view>弹窗内容：{{modalData}}</view>
+    <view>弹窗内容：{{modalData}}1111111</view>
   </modal>
-
-  <!-- 计分板弹窗 -->
+  <view class="go-out" bindtap="goToHome"></view>
   <view wx:if="{{scoreboardVisible}}" class="scoreboard-overlay" catchtouchmove="true">
     <view class="scoreboard-mask" bindtap="closeScoreBoard"></view>
     <view class="scoreboard-panel" catchtap="true">
@@ -104,11 +90,11 @@
           <text class="col-score">积分总数</text>
         </view>
         <scroll-view scroll-y="true" class="tbody">
-          <block wx:for="{{scoreBoardSorted}}" wx:key="userId">
+          <block wx:for="{{scoreBoardSorted}}" wx:key="index">
             <view class="row">
               <text class="col-rank">{{index + 1}}</text>
               <view class="col-player">
-                <image class="player-avatar" src="{{item.avatar || defaultAvatar}}" mode="cover" />
+                <image class="player-avatar" src="{{item.avatar || '/assets/avatars/default.png'}}" mode="cover" binderror="onAvatarError" data-idx="{{index}}" />
                 <text class="name" number-of-lines="1">{{item.name}}</text>
               </view>
               <text class="col-status status {{item.statusClass}}">{{item.statusText}}</text>
@@ -119,16 +105,18 @@
       </view>
 
       <view wx:if="{{scoreboardTab==='rounds'}}" class="scoreboard-table rounds">
+        <!-- 表头：玩家名称 -->
         <view class="rounds-header">
           <view class="header-label">玩家</view>
           <block wx:for="{{roundsPlayers}}" wx:key="userId" wx:for-item="player">
             <view class="header-player">
-              <image class="player-avatar" src="{{player.avatar || defaultAvatar}}" mode="cover" />
+              <image class="player-avatar" src="{{player.avatar || '/assets/avatars/default.png'}}" mode="cover" binderror="onAvatarError" data-idx="{{index}}" />
               <text class="player-name">{{player.name}}</text>
             </view>
           </block>
         </view>
 
+        <!-- 中间可滚动区域：每局数据 -->
         <scroll-view scroll-y="true" class="rounds-body">
           <block wx:for="{{roundsRows}}" wx:key="round" wx:for-item="row">
             <view class="rounds-row">
@@ -140,6 +128,7 @@
           </block>
         </scroll-view>
 
+        <!-- 表尾：总分 -->
         <view class="rounds-footer">
           <view class="footer-label">总分</view>
           <block wx:for="{{roundsPlayers}}" wx:key="userId" wx:for-item="player">
