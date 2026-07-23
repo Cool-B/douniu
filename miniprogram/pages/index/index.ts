@@ -289,11 +289,14 @@ Component<any, any, any>({
         avatar: avatarUrl
       }).then(response => {
         if (response.code === 200 && response.data) {
+          // 后端返回 { userInfo, token }, 原版 mock 直接返回 userInfo
+          // 兼容两种结构, 提取真正的用户对象
+          const userInfo = response.data.userInfo || response.data;
           // 保存用户信息到本地
-          setUserInfo(response.data);
+          setUserInfo(userInfo);
           this.setData({
             loginFlag: LoginStatus.LOGGED_IN,
-            currentUser: response.data,
+            currentUser: userInfo,
             hasUserInfo: true,
             loading: false
           });
@@ -357,12 +360,15 @@ Component<any, any, any>({
         });
 
         if (response.code === 200 && response.data) {
+          // 后端返回 { userInfo, token }, 原版 mock 直接返回 userInfo
+          // 兼容两种结构, 提取真正的用户对象
+          const userInfo = response.data.userInfo || response.data;
           // 登录成功，保存用户信息
-          setUserInfo(response.data);
+          setUserInfo(userInfo);
 
           this.setData({
             loginFlag: LoginStatus.LOGGED_IN,
-            currentUser: response.data,
+            currentUser: userInfo,
             hasUserInfo: true,
             loading: false,
             authorizingQuickLogin: false
