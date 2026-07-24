@@ -81,8 +81,10 @@ Component<any, any, any>({
   methods: {
     /**
      * 初始化Canvas
+     * 注意: 不能用 async/await, WeChat babel 会给整个 Component 加 _getData/getData helper
+     * 而 Component 实例没这俩方法, 会在 startAnimation/stopAnimation 调用时炸
      */
-    async initCanvas(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
+    initCanvas(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
       try {
         // 获取系统信息
         const systemInfo = wx.getSystemInfoSync();
@@ -95,49 +97,49 @@ Component<any, any, any>({
           canvasHeight: screenHeight
         });
 
-        // 等待Canvas元素准备好
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // 等待Canvas元素准备好 (用 setTimeout 替代 await, 避免 babel async 包装)
+        setTimeout(() => {
+          // 获取Canvas实例
+          const query = this.createSelectorQuery();
+          query.select('#fireworks-canvas')
+            .fields({ node: true, size: true })
+            .exec((res) => {
+              if (res && res[0]) {
+                const canvas = res[0].node;
+                const ctx = canvas.getContext('2d');
 
-        // 获取Canvas实例
-        const query = this.createSelectorQuery();
-        query.select('#fireworks-canvas')
-          .fields({ node: true, size: true })
-          .exec((res) => {
-            if (res && res[0]) {
-              const canvas = res[0].node;
-              const ctx = canvas.getContext('2d');
+                // 设置Canvas实际尺寸（物理像素）
+                canvas.width = screenWidth * pixelRatio;
+                canvas.height = screenHeight * pixelRatio;
 
-              // 设置Canvas实际尺寸（物理像素）
-              canvas.width = screenWidth * pixelRatio;
-              canvas.height = screenHeight * pixelRatio;
+                // 缩放上下文以匹配设备像素比
+                ctx.scale(pixelRatio, pixelRatio);
 
-              // 缩放上下文以匹配设备像素比
-              ctx.scale(pixelRatio, pixelRatio);
+                // 保存到组件实例
+                this.canvas = canvas;
+                this.ctx = ctx;
+                this.width = screenWidth;
+                this.height = screenHeight;
 
-              // 保存到组件实例
-              this.canvas = canvas;
-              this.ctx = ctx;
-              this.width = screenWidth;
-              this.height = screenHeight;
+                // 初始化动画数据
+                this.rockets = [];
+                this.particles = [];
+                this.animationFrame = null;
+                this.lastLaunchTime = 0;
 
-              // 初始化动画数据
-              this.rockets = [];
-              this.particles = [];
-              this.animationFrame = null;
-              this.lastLaunchTime = 0;
+                // 启动动画
+                if (this.data.enabled) {
+                  this.startAnimation();
+                }
 
-              // 启动动画
-              if (this.data.enabled) {
-                this.startAnimation();
+                console.log('✅ Canvas烟花组件初始化成功', {
+                  width: screenWidth,
+                  height: screenHeight,
+                  pixelRatio
+                });
               }
-
-              console.log('✅ Canvas烟花组件初始化成功', {
-                width: screenWidth,
-                height: screenHeight,
-                pixelRatio
-              });
-            }
-          });
+            });
+        }, 100);
       } catch (error) {
         console.error('❌ Canvas初始化失败:', error);
       }
