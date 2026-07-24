@@ -16,11 +16,13 @@ export enum HandRank {
   Bull5 = 5,
   Bull6 = 6,
   Bull7 = 7,
-  Bull8 = 8,
-  Bull9 = 9,
-  BullBull = 10,   // 牛牛 (x5)
-  FullFlower = 11, // 五花牛 (x6)
-  FiveSmall = 12,  // 五小牛 (x7)
+  Bull8 = 8,       // 牛八 (2x)
+  Bull9 = 9,       // 牛九 (3x)
+  BullBull = 10,   // 牛牛 (4x)
+  DoubleTen = 11,  // 牛双十 (5x, 剩下两张都是10)
+  FullFlower = 12, // 五花牛 (5x, A-10牌组暂不出现)
+  FiveSmall = 13,  // 五小牛 (5x)
+  Bomb = 14,       // 炸弹 (6x, 四张相同)
 }
 
 export const HandRankNames: Record<number, string> = {
@@ -35,8 +37,10 @@ export const HandRankNames: Record<number, string> = {
   [HandRank.Bull8]: '牛八',
   [HandRank.Bull9]: '牛九',
   [HandRank.BullBull]: '牛牛',
+  [HandRank.DoubleTen]: '牛双十',
   [HandRank.FullFlower]: '五花牛',
   [HandRank.FiveSmall]: '五小牛',
+  [HandRank.Bomb]: '炸弹',
 };
 
 export const HandRankMultipliers: Record<number, number> = {
@@ -46,13 +50,15 @@ export const HandRankMultipliers: Record<number, number> = {
   [HandRank.Bull3]: 1,
   [HandRank.Bull4]: 1,
   [HandRank.Bull5]: 1,
-  [HandRank.Bull6]: 2,
-  [HandRank.Bull7]: 2,
-  [HandRank.Bull8]: 3,
-  [HandRank.Bull9]: 4,
-  [HandRank.BullBull]: 5,
-  [HandRank.FullFlower]: 6,
-  [HandRank.FiveSmall]: 7,
+  [HandRank.Bull6]: 1,
+  [HandRank.Bull7]: 1,
+  [HandRank.Bull8]: 2,
+  [HandRank.Bull9]: 3,
+  [HandRank.BullBull]: 4,
+  [HandRank.DoubleTen]: 5,
+  [HandRank.FullFlower]: 5,
+  [HandRank.FiveSmall]: 5,
+  [HandRank.Bomb]: 6,
 };
 
 export interface HandResult {

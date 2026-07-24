@@ -59,21 +59,21 @@ Component<any, any, any>({
   },
 
   lifetimes: {
-    attached(this: ComponentInstance) {
+    attached() {
       this.initCanvas();
     },
-    detached(this: ComponentInstance) {
+    detached() {
       this.stopAnimation();
     }
   },
 
   pageLifetimes: {
-    show(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
+    show() {
       if (this.data.enabled) {
         this.startAnimation();
       }
     },
-    hide(this: ComponentInstance) {
+    hide() {
       this.stopAnimation();
     }
   },
@@ -84,7 +84,7 @@ Component<any, any, any>({
      * 注意: 不能用 async/await, WeChat babel 会给整个 Component 加 _getData/getData helper
      * 而 Component 实例没这俩方法, 会在 startAnimation/stopAnimation 调用时炸
      */
-    initCanvas(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
+    initCanvas() {
       try {
         // 获取系统信息
         const systemInfo = wx.getSystemInfoSync();
@@ -148,7 +148,7 @@ Component<any, any, any>({
     /**
      * 启动动画循环
      */
-    startAnimation(this: ComponentInstance) {
+    startAnimation() {
       if (!this.canvas || !this.ctx) return;
       if (this.animationFrame) return; // 已经在运行
 
@@ -159,9 +159,9 @@ Component<any, any, any>({
     /**
      * 停止动画循环
      */
-    stopAnimation(this: ComponentInstance) {
-      if (this.animationFrame) {
-        this.canvas?.cancelAnimationFrame(this.animationFrame);
+    stopAnimation() {
+      if (this.animationFrame && this.canvas) {
+        this.canvas.cancelAnimationFrame(this.animationFrame);
         this.animationFrame = null;
       }
       console.log('⏸️ 停止烟花动画');
@@ -170,7 +170,7 @@ Component<any, any, any>({
     /**
      * 动画循环
      */
-    animate(this: ComponentInstance & WechatMiniprogram.Component.TrivialInstance) {
+    animate() {
       if (!this.canvas || !this.ctx) return;
 
       const now = Date.now();
@@ -199,7 +199,7 @@ Component<any, any, any>({
     /**
      * 发射火箭
      */
-    launchRocket(this: ComponentInstance) {
+    launchRocket() {
       const x = Math.random() * this.width * 0.6 + this.width * 0.2; // 20-80% 位置
       const targetY = this.height * 0.2 + Math.random() * this.height * 0.3; // 20-50% 高度
       const color = this.getRandomColor();
@@ -220,7 +220,7 @@ Component<any, any, any>({
     /**
      * 更新火箭
      */
-    updateRockets(this: ComponentInstance) {
+    updateRockets() {
       for (let i = this.rockets.length - 1; i >= 0; i--) {
         const rocket = this.rockets[i];
 
@@ -278,7 +278,7 @@ Component<any, any, any>({
     /**
      * 爆炸效果
      */
-    explode(this: ComponentInstance, x: number, y: number, baseColor: string) {
+    explode(x: number, y: number, baseColor: string) {
       const particleCount = 80 + Math.floor(Math.random() * 40); // 80-120个粒子
       const colors = this.getExplosionColors(baseColor);
 
@@ -331,7 +331,7 @@ Component<any, any, any>({
     /**
      * 更新粒子
      */
-    updateParticles(this: ComponentInstance) {
+    updateParticles() {
       for (let i = this.particles.length - 1; i >= 0; i--) {
         const p = this.particles[i];
 
@@ -439,7 +439,7 @@ Component<any, any, any>({
     /**
      * 获取随机颜色
      */
-    getRandomColor(this: ComponentInstance): string {
+    getRandomColor(): string {
       const colors = [
         '#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#B24BF3',
         '#FF6348', '#FFA502', '#2ED573', '#5F27CD', '#48DBFB',
@@ -451,7 +451,7 @@ Component<any, any, any>({
     /**
      * 获取爆炸颜色组合
      */
-    getExplosionColors(this: ComponentInstance, baseColor: string): string[] {
+    getExplosionColors(baseColor: string): string[] {
       // 预定义的颜色组合
       const colorCombos = [
         ['#FF6B6B', '#FFD93D', '#FFFFFF'], // 红黄白

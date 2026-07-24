@@ -22,7 +22,7 @@
     "compileHotReLoad": false,
     "skylineRenderEnable": true,
     "condition": false,
-    "es6": true,
+    "es6": false,
     "postcss": true,
     "minified": true,
     "newFeature": true

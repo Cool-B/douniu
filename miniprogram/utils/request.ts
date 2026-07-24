@@ -1,4 +1,4 @@
-import mockApi from "./mockData";
+import { API_BASE_URL } from "../config";
 
 interface RequestOptions {
   url: string;
@@ -7,129 +7,54 @@ interface RequestOptions {
   responseType?: "text" | "arraybuffer" | undefined;
 }
 
-interface defaultConfig {
+interface DefaultConfig {
   method?: "GET" | "OPTIONS" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "CONNECT" | undefined;
   header?: { [key: string]: string };
 }
 
-interface ResponseResult<T> {
+export interface ResponseResult<T = any> {
   code: number;
   data: T;
   msg: string;
 }
-export const baseUrl = 'http://b89669be.natappfree.cc'
 
-const request = async (options: RequestOptions & defaultConfig): Promise<ResponseResult<any>> => {
-  const { url, data, method = 'POST' } = options;
+/**
+ * 统一请求入口 — 纯真后端，不走 mock
+ */
+const request = async (options: RequestOptions & DefaultConfig): Promise<ResponseResult<any>> => {
+  const { url, data, method = 'POST', header } = options;
 
-  // 模拟网络延迟
-  // await simulateDelay();
+  return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync('token') || '';
 
-  try {
-    // 根据URL路由到对应的Mock API
-    switch (url) {
-      case '/api/wx/user/login':
-        const loginResult = await mockApi.login(data);
-        return {
-          code: loginResult.code,
-          data: loginResult.data,
-          msg: loginResult.message
-        };
-
-      case '/poker/createRoom':
-        const createRoomResult = await mockApi.createRoom(data);
-        return {
-          code: createRoomResult.code,
-          data: createRoomResult.data,
-          msg: createRoomResult.message
-        };
-
-      case '/poker/joinRoom':
-        const joinRoomResult = await mockApi.joinRoom(data);
-        return {
-          code: joinRoomResult.code,
-          data: joinRoomResult.data,
-          msg: joinRoomResult.message
-        };
-
-      case '/poker/getRoomInfo':
-        const getRoomInfoResult = await mockApi.getRoomInfo(data);
-        return {
-          code: getRoomInfoResult.code,
-          data: getRoomInfoResult.data,
-          msg: getRoomInfoResult.message
-        };
-      case '/poker/addAssistantOrChangeSeat':
-        const assAssistantResult = await mockApi.addAssistantOrChangeSeat(data);
-        return {
-          code: assAssistantResult.code,
-          data: assAssistantResult.data,
-          msg: assAssistantResult.message
-        };
-
-      case '/poker/startGame':
-        const startGameResult = await mockApi.startGame(data);
-        return {
-          code: startGameResult.code,
-          data: startGameResult.data,
-          msg: startGameResult.message
-        };
-
-      case '/poker/gameAction':
-        const gameActionResult = await mockApi.gameAction(data);
-        return {
-          code: gameActionResult.code,
-          data: gameActionResult.data,
-          msg: gameActionResult.message
-        };
-
-      case '/poker/exitRoom':
-        const exitRoomResult = await mockApi.exitRoom(data);
-        return {
-          code: exitRoomResult.code,
-          data: exitRoomResult.data,
-          msg: exitRoomResult.message
-        };
-      case '/poker/kickPlayer':
-        const kickPlayerResult = await mockApi.kickPlayer(data);
-        return {
-          code: kickPlayerResult.code,
-          data: kickPlayerResult.data,
-          msg: kickPlayerResult.message
-        };
-
-      case '/poker/playerReady':
-        const playerReadyResult = await mockApi.playerReady(data);
-        return {
-          code: playerReadyResult.code,
-          data: playerReadyResult.data,
-          msg: playerReadyResult.message
-        };
-      // changeBet   /poker/changeBet
-
-      case '/poker/changeBet':
-        const playerBetResult = await mockApi.changeBet(data);
-        return {
-          code: playerBetResult.code,
-          data: playerBetResult.data,
-          msg: playerBetResult.message
-        };
-      default:
-        // 默认返回成功响应
-        return {
-          code: 200,
-          data: null,
-          msg: '操作成功'
-        };
-    }
-  } catch (error) {
-    console.error('Mock API调用失败:', error);
-    return {
-      code: 500,
-      data: null,
-      msg: '服务器内部错误'
-    };
-  }
+    wx.request({
+      url: API_BASE_URL + url,
+      method: method as any,
+      header: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...header,
+      },
+      data,
+      success: (res: any) => {
+        const body = res.data || {};
+        if (res.statusCode >= 200 && res.statusCode < 300 && body.code === 200) {
+          resolve({
+            code: body.code,
+            data: body.data,
+            msg: body.message || '操作成功',
+          });
+        } else {
+          reject(new Error(body.message || `请求失败 (HTTP ${res.statusCode})`));
+        }
+      },
+      fail: (err: any) => {
+        console.error(`[request] ${url} 请求失败:`, err.errMsg);
+        reject(new Error(err.errMsg || '网络请求失败'));
+      },
+    });
+  });
 };
 
+export const baseUrl = API_BASE_URL;
 export default request;

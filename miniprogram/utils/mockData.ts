@@ -168,8 +168,9 @@ function generateDeck(): MockCard[] {
   const suits = ['Spade', 'Heart', 'Club', 'Diamond'];
   const deck: MockCard[] = [];
 
-  for (const suit of suits) {
-    for (let number = 1; number <= 13; number++) {
+  for (let s = 0; s < suits.length; s++) {
+    const suit = suits[s];
+    for (let number = 1; number <= 10; number++) {
       deck.push({ suit, number });
     }
   }
@@ -202,7 +203,7 @@ const mockResponses = {
         ...mockUsers[0],
         token: "mock_token_quick_" + Date.now(),
         username: "微信用户" + mockPhoneNumber.slice(-4),
-        avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/mock_avatar_" + Date.now() + ".png",
+        avatar: BOT_AVATARS[Math.floor(Math.random() * BOT_AVATARS.length)],
         phone: mockPhoneNumber,
         userId: "wx_user_" + Date.now()
       };

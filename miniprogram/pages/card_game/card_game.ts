@@ -430,7 +430,8 @@ Page<data, Record<string, any>>({
     const cards = [];
     // 生成牌
     for (let number = 1; number <= 10; number++) {
-      for (let suit of suits) {
+      for (let s = 0; s < suits.length; s++) {
+        const suit = suits[s];
         cards.push({
           id: `${number}${suit}`,
           number,
@@ -444,7 +445,9 @@ Page<data, Record<string, any>>({
     // 洗牌算法 (Fisher-Yates shuffle)
     for (let i = cards.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
+      const tmp = cards[i];
+      cards[i] = cards[j];
+      cards[j] = tmp;
     }
     return cards;
   },
@@ -541,17 +544,34 @@ Page<data, Record<string, any>>({
     }
     const maxBoomPlayer = this.data.roomInfo.players.filter(player => player.pokeData.isBoom).sort((playerX, playerY) => playerY.pokeData.maxNumber - playerX.pokeData.maxNumber)[0]
     if (maxBoomPlayer) {
+      // 初始化结算结果
+      this.data.roomInfo.players.forEach((player: player) => {
+        player.settlementResult = undefined;
+      });
+      const boomBet = (maxBoomPlayer.bet || 1);
       if (maxBoomPlayer.userType === 1) {
-        this.data.roomInfo.players.map(item => {
-          if (maxBoomPlayer.userId !== item.userId) {
-            maxBoomPlayer.score += maxBoomPlayer.score + item.bet * 6
-            item.score -= item.score + item.bet
+        // 庄家有炸弹：每个闲家赔 bet*6 给庄家
+        gamePlayers.forEach((item: player) => {
+          if (item.userId !== maxBoomPlayer.userId && (item.userType === 2 || item.userType === 3)) {
+            const amount = (item.bet || 1) * 6;
+            maxBoomPlayer.score += amount;
+            item.score -= amount;
+            item.settlementResult = { change: -amount };
           }
-        })
+        });
+        maxBoomPlayer.settlementResult = { change: 0 }; // 庄家赢的总额通过闲家累加
       } else {
-        maxBoomPlayer.score += maxBoomPlayer.score + maxBoomPlayer.bet * 6 * (gamePlayers.length - 1)
+        // 闲家有炸弹：庄家赔 bet*6 给该闲家
+        const amount = boomBet * 6;
+        banker.score -= amount;
+        maxBoomPlayer.score += amount;
+        banker.settlementResult = { change: -amount };
+        maxBoomPlayer.settlementResult = { change: amount };
       }
-      return
+      this.updateScoreBoard();
+      this.appendRoundHistory(gamePlayers);
+      this.finishSettlement();
+      return;
     }
     // 找到所有闲家（包括机器人）
     const normalPlayers = gamePlayers.filter((player: player) => player.userType === 2 || player.userType === 3);
@@ -647,17 +667,19 @@ Page<data, Record<string, any>>({
         map.set(uid, keep);
       }
     });
-    roomInfo.scoreBoard = Array.from(map.values());
+    const scoreArr: any[] = [];
+    map.forEach((v: any) => scoreArr.push(v));
+    roomInfo.scoreBoard = scoreArr;
     this.data.roomInfo = roomInfo;
     setRoomInfo(roomInfo);
   },
   appendRoundHistory(gamePlayers: player[]) {
     const roomInfo = this.data.roomInfo;
-    const round = (roomInfo.roundHistory?.length || 0) + 1;
+    const round = (roomInfo.roundHistory && roomInfo.roundHistory.length || 0) + 1;
     const results = gamePlayers.map(p => ({
       userId: p.userId || 0,
       name: p.name,
-      change: p.settlementResult?.change ?? 0,
+      change: p.settlementResult && p.settlementResult.change || 0,
     }));
     const history: RoundRecord[] = roomInfo.roundHistory ? [...roomInfo.roundHistory] : [];
     history.push({ round, results });
@@ -1145,10 +1167,14 @@ Page<data, Record<string, any>>({
       scoreBoardSorted: this.buildSortedScoreBoard(this.data.roomInfo.scoreBoard)
     })
   },
-  // 是不是炸弹
+  // 检查手牌是否有4张相同点数 (炸弹)
   isBoom(cards: poke[]) {
-    const poke = uniqueObjectArray<poke>(cards, 'number')
-    return poke.length === 2
+    const count: Record<number, number> = {};
+    for (let i = 0; i < cards.length; i++) {
+      const c = cards[i];
+      count[c.number] = (count[c.number] || 0) + 1;
+    }
+    return Object.values(count).some(c => c >= 4);
   },
   compareCards(card1: poke, card2: poke): number {
     if (card1.number !== card2.number) {
@@ -1192,6 +1218,7 @@ Page<data, Record<string, any>>({
       pointNumber: number;
       maxCardNumber: number;
       suit: string;
+      isDoubleTen: boolean;
     } | null = null;
     // 查找所有三张牌和为10的组合
     for (let i = 0; i < sortedCards.length - 2; i++) {
@@ -1209,6 +1236,8 @@ Page<data, Record<string, any>>({
             // 找出剩余两张牌中最大的(已排序，第一张就是最大的)
             const maxCardNumber = remainingCards[0].number;
             const suit = remainingCards[0].suit;
+            // 牛双十：剩余两张都是10
+            const isDoubleTen = remainingCards[0].number === 10 && remainingCards[1].number === 10;
             // 选择最优结果：优先比较remainingSum，再比较maxCardNumber
             if (!bestResult ||
               pointNumber > bestResult.pointNumber ||
@@ -1217,7 +1246,8 @@ Page<data, Record<string, any>>({
               bestResult = {
                 pointNumber,
                 maxCardNumber,
-                suit
+                suit,
+                isDoubleTen,
               };
             }
           }
@@ -1227,7 +1257,7 @@ Page<data, Record<string, any>>({
     if (bestResult) {
       return {
         hasNiu: true,
-        isDoubleTen: bestResult.pointNumber === 10 && bestResult.pointNumber === 10,
+        isDoubleTen: bestResult.isDoubleTen,
         pointNumber: bestResult.pointNumber,
         maxNumber: bestResult.maxCardNumber,
         suit: bestResult.suit

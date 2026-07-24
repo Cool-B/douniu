@@ -15,7 +15,7 @@ function pointValue(number: number): number {
 export function createDeck(): Card[] {
   const deck: Card[] = [];
   for (const suit of suitOrder) {
-    for (let number = 1; number <= 13; number++) {
+    for (let number = 1; number <= 10; number++) {
       deck.push({ suit, number });
     }
   }
@@ -64,12 +64,16 @@ function findBullPair(cards: Card[]): [number[], number[]] | null {
 }
 
 /**
- * 判定手牌牌型
- * 规则:
- * - 五小牛: 5张牌点数都 <= 5 且总和 <= 10
- * - 五花牛: 5张牌全是 J/Q/K (>= 11)
- * - 牛牛~无牛: 任意3张凑10的倍数，剩余2张之和的个位数
- * - 炸弹: 4张相同点数
+ * 判定手牌牌型 (A-10 牌组, 40张)
+ * 倍率规则:
+ * - 炸弹:     6x (4张相同点数, 优先级最高)
+ * - 五小牛:   5x (5张点数都 <= 5 且总和 <= 10)
+ * - 牛双十:   5x (剩余两张都是10的牛牛)
+ * - 牛牛:     4x (任意3张凑10的倍数, 剩余2张也是10的倍数)
+ * - 牛九:     3x
+ * - 牛八:     2x
+ * - 牛1~牛7:  1x
+ * - 无牛:     1x
  */
 export function evaluateHand(cards: Card[]): HandResult {
   if (cards.length !== 5) {
@@ -78,36 +82,31 @@ export function evaluateHand(cards: Card[]): HandResult {
 
   const sorted = sortCards(cards);
 
-  // 检查炸弹 (4张相同点数 — 用原始 number 判定)
-  const isBoom = checkBoom(sorted.map(c => c.number));
+  // ====== 1. 炸弹优先 (4张相同点数, 6倍) ======
+  if (checkBoom(sorted.map(c => c.number))) {
+    return {
+      rank: HandRank.Bomb,
+      rankName: '炸弹',
+      multiplier: 6,
+      maxCard: sorted[0],
+      isBoom: true,
+    };
+  }
 
-  // 五小牛: 5张牌每张点数 <= 5 且总点数 <= 10 (用斗牛点数)
+  // ====== 2. 五小牛: 5张牌每张斗牛点数 <= 5 且总和 <= 10 ======
   const points = sorted.map(c => pointValue(c.number));
   const totalSum = points.reduce((a, b) => a + b, 0);
-  const isFiveSmall = points.every(n => n <= 5) && totalSum <= 10;
-  if (isFiveSmall) {
+  if (points.every(n => n <= 5) && totalSum <= 10) {
     return {
       rank: HandRank.FiveSmall,
       rankName: '五小牛',
       multiplier: 5,
       maxCard: sorted[0],
-      isBoom,
+      isBoom: false,
     };
   }
 
-  // 五花牛: 5张牌全是 J/Q/K (用原始 number >= 11)
-  const isFullFlower = sorted.every(c => c.number >= 11);
-  if (isFullFlower) {
-    return {
-      rank: HandRank.FullFlower,
-      rankName: '五花牛',
-      multiplier: 5,
-      maxCard: sorted[0],
-      isBoom,
-    };
-  }
-
-  // 寻找牛 (用斗牛点数)
+  // ====== 3. 寻找牛 ======
   const pair = findBullPair(sorted);
   if (!pair) {
     return {
@@ -115,32 +114,49 @@ export function evaluateHand(cards: Card[]): HandResult {
       rankName: '无牛',
       multiplier: 1,
       maxCard: sorted[0],
-      isBoom,
+      isBoom: false,
     };
   }
 
   const [, remaining] = pair;
+  const remainingNums = remaining.map(i => sorted[i].number);
   const remainingSum = pointValue(sorted[remaining[0]].number) + pointValue(sorted[remaining[1]].number);
   const bullPoint = remainingSum >= 10 ? remainingSum % 10 : remainingSum;
 
-  // 牛牛 (剩余2张也是10的倍数)
+  // ====== 4. 牛双十: 剩余两张都是10 (5倍) ======
+  if (remainingNums.every(n => n === 10)) {
+    return {
+      rank: HandRank.DoubleTen,
+      rankName: '牛双十',
+      multiplier: 5,
+      maxCard: sorted[0],
+      isBoom: false,
+    };
+  }
+
+  // ====== 5. 牛牛: 剩余2张也是10的倍数 (4倍) ======
   if (bullPoint === 0) {
     return {
       rank: HandRank.BullBull,
       rankName: '牛牛',
-      multiplier: 3,
+      multiplier: 4,
       maxCard: sorted[0],
-      isBoom,
+      isBoom: false,
     };
   }
 
-  // 牛1~牛9: 牛8开始翻倍
+  // ====== 6. 牛1~牛9 ======
+  const multiplier =
+    bullPoint === 9 ? 3 :
+    bullPoint === 8 ? 2 :
+    1;
+
   return {
     rank: bullPoint,
     rankName: `牛${bullPoint}`,
-    multiplier: bullPoint >= 8 ? 2 : 1,
+    multiplier,
     maxCard: sorted[0],
-    isBoom,
+    isBoom: false,
   };
 }
 

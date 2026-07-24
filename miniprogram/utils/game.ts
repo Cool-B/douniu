@@ -21,7 +21,9 @@ import { Card, CardSuit, GameState, Player } from "./interface";
 export function initializeGame(players: Player[]): GameState {
   // 创建一副完整的扑克牌
   const deck: Card[] = [];
-  for (const suit of Object.values(CardSuit)) {
+  const suits = Object.values(CardSuit);
+  for (let i = 0; i < suits.length; i++) {
+    const suit = suits[i];
     for (let value = 1; value <= 13; value++) {
       deck.push({ suit, value });
     }
@@ -30,7 +32,9 @@ export function initializeGame(players: Player[]): GameState {
   // 洗牌
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+    const tmp = deck[i];
+    deck[i] = deck[j];
+    deck[j] = tmp;
   }
   // 分配手牌
   const initialState: GameState = { players, deck, currentPlayerId: players[0].id };

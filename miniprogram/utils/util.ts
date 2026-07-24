@@ -21,7 +21,8 @@ const formatNumber = (n: number) => {
 export function uniqueObjectArray<T>(arr: T[], key: keyof T): T[] {
   const uniqueValues = new Set();
   const uniqueArr: T[] = [];
-  for (const item of arr) {
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i];
     const keyValue = item[key];
     if (!uniqueValues.has(keyValue)) {
       uniqueValues.add(keyValue);

@@ -185,11 +185,17 @@ class RoomManager {
       show: false,
     };
 
-    // 按 seatIndex 插入到对应位置, 如果超出则 push 到末尾
-    if (seatIndex < 0 || seatIndex > room.players.length) {
-      room.players.push(bot);
+    // 替换空位（userType===4）为机器人，不改变数组长度
+    if (seatIndex >= 0 && seatIndex < room.players.length) {
+      const target = room.players[seatIndex];
+      if (!target || target.userType === 4) {
+        room.players[seatIndex] = bot;
+      } else {
+        // 该位置已被占用，追加到末尾
+        room.players.push(bot);
+      }
     } else {
-      room.players.splice(seatIndex, 0, bot);
+      room.players.push(bot);
     }
     return room;
   }

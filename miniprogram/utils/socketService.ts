@@ -128,7 +128,10 @@ class SocketService {
       }
     });
     // 通用 handler
-    this.handlers.get(0)?.forEach(h => h(msg));
+    const allHandlers = this.handlers.get(0);
+    if (allHandlers) {
+      allHandlers.forEach((h: any) => h(msg));
+    }
   }
 
   private startHeartbeat() {
