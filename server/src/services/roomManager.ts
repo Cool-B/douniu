@@ -49,7 +49,11 @@ class RoomManager {
       roomId,
     };
 
-    // 补充4个空位（userType=4），让前端 5 个位置都有内容
+    // 补充 7 个外圈空位（userType=4），配合 index=4 的控制中心，形成 3x3 九宫格
+    // 索引布局：
+    //   0(左上)  1(上中)  2(右上)
+    //   3(左中)  4(中控)  5(右中)
+    //   6(左下)  7(下中)  8(右下)
     const emptySeat = (i: number): Player => ({
       userId: -(i + 1),
       name: '',
@@ -65,6 +69,22 @@ class RoomManager {
       roomId,
     });
 
+    // 中间控制中心 (userType=5)，前端 WXML 按 index===4 渲染房间号/按钮
+    const controlCenter: Player = {
+      userId: 0,
+      name: '控制中心',
+      avatar: '',
+      userType: 5,   // 控制中心 (中间格)
+      status: 1,
+      state: 1,
+      score: 0,
+      bet: 0,
+      pokers: [],
+      lookHand: false,
+      show: false,
+      roomId,
+    };
+
     const room: Room = {
       roomId,
       roomNumber,
@@ -73,7 +93,17 @@ class RoomManager {
       status: 0,
       maxPlayers: 8,
       currentRound: 0,
-      players: [player, emptySeat(0), emptySeat(1), emptySeat(2), emptySeat(3)],
+      players: [
+        player,         // 0 庄家 (左上)
+        emptySeat(0),   // 1 (上中)
+        emptySeat(1),   // 2 (右上)
+        emptySeat(2),   // 3 (左中)
+        controlCenter,  // 4 (正中 = 控制中心)
+        emptySeat(3),   // 5 (右中)
+        emptySeat(4),   // 6 (左下)
+        emptySeat(5),   // 7 (下中)
+        emptySeat(6),   // 8 (右下)
+      ],
       isGaming: false,
       isStart: false,
       isStartDeal: false,
@@ -93,7 +123,7 @@ class RoomManager {
     const room = this.findRoomByNumber(roomNumber);
     if (!room) throw new Error('房间不存在');
     if (room.status === 1) throw new Error('游戏已开始，无法加入');
-    if (room.players.length >= room.maxPlayers) throw new Error('房间已满');
+    if (room.players.filter(p => p.userType !== 4 && p.userType !== 5).length >= room.maxPlayers) throw new Error('房间已满');
     if (room.players.find(p => p.userId === userId)) throw new Error('你已在房间中');
 
     const player: Player = {
@@ -111,7 +141,13 @@ class RoomManager {
       roomId: room.roomId,
     };
 
-    room.players.push(player);
+    // 找到第一个空位 (userType===4) 填入新玩家, 保持九宫格结构
+    const emptyIdx = room.players.findIndex(p => p.userType === 4);
+    if (emptyIdx >= 0) {
+      room.players[emptyIdx] = player;
+    } else {
+      room.players.push(player);
+    }
     return room;
   }
 
@@ -169,7 +205,8 @@ class RoomManager {
   addBotToSeat(roomId: number, seatIndex: number, botInfo: { id: number; name: string; avatar: string; userType: number; status: number; score: number; bet: number }): Room {
     const room = this.rooms.get(roomId);
     if (!room) throw new Error('房间不存在');
-    if (room.players.length >= room.maxPlayers) throw new Error('房间已满');
+    const playerCount = room.players.filter(p => p.userType !== 4 && p.userType !== 5).length;
+    if (playerCount >= room.maxPlayers) throw new Error('房间已满');
 
     const bot: Player = {
       userId: botInfo.id,
@@ -185,15 +222,18 @@ class RoomManager {
       show: false,
     };
 
-    // 替换空位（userType===4）为机器人，不改变数组长度
+    // 替换空位（userType===4），不改变数组长度，保持九宫格结构
     if (seatIndex >= 0 && seatIndex < room.players.length) {
       const target = room.players[seatIndex];
-      if (!target || target.userType === 4) {
+      if (target && target.userType === 4) {
         room.players[seatIndex] = bot;
-      } else {
-        // 该位置已被占用，追加到末尾
-        room.players.push(bot);
+        return room;
       }
+    }
+    // 指定的 seatIndex 无效，找第一个空位填入
+    const emptyIdx = room.players.findIndex(p => p.userType === 4);
+    if (emptyIdx >= 0) {
+      room.players[emptyIdx] = bot;
     } else {
       room.players.push(bot);
     }

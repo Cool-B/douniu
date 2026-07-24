@@ -1,3 +1,4 @@
+// utils/request.ts - 微信小程序统一请求入口（无 async/await，避开 babel runtime）
 import { API_BASE_URL } from "../config";
 
 interface RequestOptions {
@@ -19,12 +20,16 @@ export interface ResponseResult<T = any> {
 }
 
 /**
- * 统一请求入口 — 纯真后端，不走 mock
+ * 统一请求入口 - 纯真后端，不走 mock
+ * 不用 async/await，避免 tsc+babel 生成 @babel/runtime/helpers 调用
  */
-const request = async (options: RequestOptions & DefaultConfig): Promise<ResponseResult<any>> => {
-  const { url, data, method = 'POST', header } = options;
+function request(options: RequestOptions & DefaultConfig): Promise<ResponseResult<any>> {
+  const url = options.url;
+  const data = options.data;
+  const method = options.method || 'POST';
+  const header = options.header;
 
-  return new Promise((resolve, reject) => {
+  return new Promise<ResponseResult<any>>((resolve, reject) => {
     const token = wx.getStorageSync('token') || '';
 
     wx.request({
@@ -32,11 +37,11 @@ const request = async (options: RequestOptions & DefaultConfig): Promise<Respons
       method: method as any,
       header: {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...header,
+        ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+        ...(header || {}),
       },
-      data,
-      success: (res: any) => {
+      data: data,
+      success: function (res: any) {
         const body = res.data || {};
         if (res.statusCode >= 200 && res.statusCode < 300 && body.code === 200) {
           resolve({
@@ -45,16 +50,16 @@ const request = async (options: RequestOptions & DefaultConfig): Promise<Respons
             msg: body.message || '操作成功',
           });
         } else {
-          reject(new Error(body.message || `请求失败 (HTTP ${res.statusCode})`));
+          reject(new Error(body.message || ('请求失败 (HTTP ' + res.statusCode + ')')));
         }
       },
-      fail: (err: any) => {
-        console.error(`[request] ${url} 请求失败:`, err.errMsg);
+      fail: function (err: any) {
+        console.error('[request] ' + url + ' 请求失败:', err.errMsg);
         reject(new Error(err.errMsg || '网络请求失败'));
       },
     });
   });
-};
+}
 
 export const baseUrl = API_BASE_URL;
 export default request;

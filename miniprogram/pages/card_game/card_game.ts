@@ -946,7 +946,7 @@ Page<data, Record<string, any>>({
     })
   },
   // 修改准备状态
-  async changeReady() {
+  changeReady() {
     // 检查游戏是否已开始
     if (this.data.roomInfo.isGaming) {
       wx.showToast({
@@ -958,7 +958,7 @@ Page<data, Record<string, any>>({
     }
     // 获取当前玩家信息
     const currentPlayer = this.data.roomInfo.players.find(
-      p => p.userId === this.data.currentUserInfo.id
+      (p: { userId: number }) => p.userId === this.data.currentUserInfo.id
     );
     if (!currentPlayer) {
       wx.showToast({
@@ -976,13 +976,12 @@ Page<data, Record<string, any>>({
       title: newStatus === 2 ? '准备中...' : '取消中...',
       mask: true
     });
-    try {
-      // 调用API改变状态
-      const response = await playerReady({
-        roomId: this.data.roomInfo.roomId,
-        userId: this.data.currentUserInfo.id,
-        status: newStatus as 1 | 2
-      });
+    const self = this;
+    playerReady({
+      roomId: this.data.roomInfo.roomId,
+      userId: this.data.currentUserInfo.id,
+      status: newStatus as 1 | 2
+    }).then(function (response: any) {
       wx.hideLoading();
       if (response.code === 200 && response.data) {
         // 更新本地房间信息
@@ -990,9 +989,9 @@ Page<data, Record<string, any>>({
         // 保存到本地存储
         setRoomInfo(updatedRoomInfo);
         // 更新页面数据
-        this.setData({
+        self.setData({
           roomInfo: updatedRoomInfo,
-          currentPlayerStatus: newStatus  // 同步更新当前玩家的准备状态
+          currentPlayerStatus: newStatus
         });
         // 显示成功提示
         wx.showToast({
@@ -1000,14 +999,6 @@ Page<data, Record<string, any>>({
           icon: 'success',
           duration: 1500
         });
-        // TODO: 通过WebSocket通知其他玩家状态变化
-        // this.sendMessage({
-        //   type: 'playerReady',
-        //   roomId: this.data.roomInfo.roomId,
-        //   userId: this.data.currentUserInfo.id,
-        //   status: newStatus,
-        //   betAmount: betAmount
-        // });
       } else {
         wx.showToast({
           title: '操作失败',
@@ -1015,7 +1006,7 @@ Page<data, Record<string, any>>({
           duration: 2000
         });
       }
-    } catch (error) {
+    }).catch(function (error: any) {
       wx.hideLoading();
       console.error('changeReady error:', error);
       wx.showToast({
@@ -1023,10 +1014,10 @@ Page<data, Record<string, any>>({
         icon: 'none',
         duration: 2000
       });
-    }
+    });
   },
   // 修改下注（选择器变化后立即确认）
-  async onBetChange(e: { detail: { value: number } }) {
+  onBetChange(e: { detail: { value: number } }) {
     const newBetAmount = this.data.range[e.detail.value];
     // 检查游戏是否已开始
     if (this.data.roomInfo.isGaming) {
@@ -1039,7 +1030,7 @@ Page<data, Record<string, any>>({
     }
     // 获取当前玩家信息
     const currentPlayer = this.data.roomInfo.players.find(
-      p => p.userId === this.data.currentUserInfo.id
+      (p: { userId: number }) => p.userId === this.data.currentUserInfo.id
     );
     if (!currentPlayer) {
       wx.showToast({
@@ -1081,13 +1072,12 @@ Page<data, Record<string, any>>({
       title: '修改中...',
       mask: true
     });
-    try {
-      // 调用API改变下注
-      const response = await changeBet({
-        roomId: this.data.roomInfo.roomId,
-        userId: this.data.currentUserInfo.id,
-        bet: newBetAmount
-      });
+    const self = this;
+    changeBet({
+      roomId: this.data.roomInfo.roomId,
+      userId: this.data.currentUserInfo.id,
+      bet: newBetAmount
+    }).then(function (response: any) {
       wx.hideLoading();
 
       if (response.code === 200 && response.data) {
@@ -1098,15 +1088,15 @@ Page<data, Record<string, any>>({
         setRoomInfo(updatedRoomInfo);
 
         // 更新页面数据
-        this.setData({
+        self.setData({
           roomInfo: updatedRoomInfo,
-          currentPlayerBet: newBetAmount,  // 同步更新当前玩家的下注倍数
-          selectedValue: newBetAmount  // 同步选择器
+          currentPlayerBet: newBetAmount,
+          selectedValue: newBetAmount
         });
 
         // 显示成功提示
         wx.showToast({
-          title: `下注已改为${newBetAmount}倍`,
+          title: '下注已改为' + newBetAmount + '倍',
           icon: 'success',
           duration: 1500
         });
@@ -1118,7 +1108,7 @@ Page<data, Record<string, any>>({
           duration: 2000
         });
       }
-    } catch (error) {
+    }).catch(function (error: any) {
       wx.hideLoading();
       console.error('onBetChange error:', error);
       wx.showToast({
@@ -1126,9 +1116,9 @@ Page<data, Record<string, any>>({
         icon: 'none',
         duration: 2000
       });
-    }
+    });
   },
-  async clearPokes() {
+  clearPokes() {
     this.data.roomInfo.players = this.data.roomInfo.players.map(item => {
       if (item.pokers) {
         item.pokers = []
@@ -1273,21 +1263,26 @@ Page<data, Record<string, any>>({
     };
   },
   // 退出房间
-  async goToHome() {
+  goToHome() {
     this.showLoading('正在退出')
-    await exitRoom({ roomId: this.data.roomInfo.roomId, userId: this.data.currentUserInfo.id }).then(res => {
-      const { roomInfo } = res.data
+    const roomId = this.data.roomInfo.roomId
+    const userId = this.data.currentUserInfo.id
+    exitRoom({ roomId: roomId, userId: userId }).then(function (res: any) {
+      const roomInfo = res.data && res.data.roomInfo
       if (res.code === 200) {
         // API已经处理了房主转让和房间解散的逻辑
         // roomInfo为null表示房间已解散
         if (!roomInfo) {
           // 房间已解散，清除本地存储
-          removeAll(this.data.roomInfo.roomId)
+          removeAll(roomId)
         }
       }
-    })
-    wx.redirectTo({
-      url: '../index/index'
+    }).catch(function (err: any) {
+      console.error('exitRoom error:', err)
+    }).finally(function () {
+      wx.redirectTo({
+        url: '../index/index'
+      });
     });
   },
   isCanReady() {

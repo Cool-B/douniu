@@ -1,0 +1,6 @@
+{
+  "name": "miniprogram-babel-runtime",
+  "version": "1.0.0",
+  "description": "Babel runtime helpers for WeChat Mini Program",
+  "main": "index.js"
+}

@@ -68,8 +68,6 @@
   height: 100%;
   width: 100%;
   position: relative;
-  display: flex;
-  flex-wrap: wrap;
 
   .player-card {
     position: relative;
@@ -147,12 +145,17 @@
     border: 2rpx solid rgba(0, 198, 255, 0.8);
     box-shadow: 0 0 10rpx rgba(0, 198, 255, 0.4);
   }
+
+  // ===== 九宫格绝对定位 =====
+  // 索引布局：
+  //   0(左上)  1(上中)  2(右上)
+  //   3(左中)  4(中控)  5(右中)
+  //   6(左下)  7(下中)  8(右下)
   .banker,
   .player {
-    width: 33%;
-    height: 33%;
-    position: relative;
-    word-break: keep-all;
+    position: absolute;
+    width: 33.333%;
+    height: 33.333%;
     display: flex;
     flex-direction: column;
     text-align: center;
@@ -160,7 +163,46 @@
     align-items: center;
     border-radius: 10rpx;
     box-shadow: 0 0 10rpx rgba(0, 0, 0, 0.1);
+    word-break: keep-all;
+    box-sizing: border-box;
+    padding: 4rpx;
+  }
+  .player0 { left: 0;          top: 0; }        // 左上
+  .player1 { left: 33.333%;    top: 0; }        // 上中
+  .player2 { left: 66.666%;    top: 0; }        // 右上
+  .player3 { left: 0;          top: 33.333%; }  // 左中
+  .player4 { left: 33.333%;    top: 33.333%; }  // 正中 (控制中心)
+  .player5 { left: 66.666%;    top: 33.333%; }  // 右中
+  .player6 { left: 0;          top: 66.666%; }  // 左下
+  .player7 { left: 33.333%;    top: 66.666%; }  // 下中
+  .player8 { left: 66.666%;    top: 66.666%; }  // 右下
 
+  // 中间控制中心 - 垂直堆叠按钮
+  .player4 {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1rpx dashed rgba(255, 255, 255, 0.15);
+    flex-direction: column;
+    gap: 12rpx;
+    padding: 10rpx;
+    .room-num {
+      position: relative;
+      left: auto;
+      top: auto;
+      z-index: 100;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14rpx;
+      margin-bottom: 4rpx;
+    }
+    .scoreboard-btn {
+      position: relative;
+      right: auto;
+      top: auto;
+      z-index: 100;
+    }
+  }
+
+  .banker,
+  .player {
     .player-info {
       display: flex;
       justify-content: space-between;
@@ -281,12 +323,6 @@
     .player-status {
       background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
     }
-  }
-  .player4 {
-    display: flex;
-    position: relative;
-    flex-direction: row;
-    gap: 10rpx;
   }
 
   .banker {
